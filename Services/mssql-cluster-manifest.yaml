@@ -1,0 +1,46 @@
+version: 0.1
+service_display_name: MS SQL Server Cluster
+
+description: >-
+   <strong> The MS SQL Failover Cluster </strong> installs
+     Microsoft SQL Failover Cluster Server
+
+full_service_name: msSqlClusterServer
+author: Mirantis Inc.
+service_version: 1.0
+enabled: True
+
+ui_forms:
+  - MsSqlClusterServer.yaml
+
+workflows:
+  - MsSqlCluster.xml
+  - Common.xml
+
+heat_templates:
+  - Windows.template
+  - SQLCluster.template
+
+agent_templates:
+  - SetPassword.template
+  - SqlServerCluster/FailoverClusterPrerequisites.template
+  - SqlServerCluster/FailoverCluster.template
+  - SqlServerCluster/ConfigureEnvironmentForAOAG.template
+  - SqlServerCluster/InstallSqlServerForAOAG.template
+  - SqlServerCluster/InitializeAlwaysOn.template
+  - SqlServerCluster/InitializeAOAGPrimaryReplica.template
+  - SqlServerCluster/InitializeAOAGSecondaryReplica.template
+
+
+scripts:
+ - ImportCoreFunctions.ps1
+ - Set-LocalUserPassword.ps1
+ - Update-ServiceConfig.ps1
+ - SQLServerForAOAG.ps1
+ - Failover-Cluster.ps1
+ - Start-PowerShellProcess.ps1
+ - Failover-Cluster.ps1
+ - OptionParser.ps1
+ - SQLServerOptionParsers.ps1
+ - SQLServerInstaller.ps1
+ - Export-Function.ps1

@@ -1,0 +1,35 @@
+version: 0.1
+service_display_name: Internet Information Services
+
+description: >-
+   <strong> The  Internet Information Service </strong>
+     sets up an IIS server and joins it into an existing domain
+
+full_service_name: webServerFarm
+author: Mirantis Inc.
+service_version: 1.0
+enabled: True
+
+ui_forms:
+  - WebServer.yaml
+
+workflows:
+  - WebApps.xml
+  - Common.xml
+
+heat_templates:
+  - Windows.template
+
+agent_templates:
+  - SetPassword.template
+  - InstallIIS.template
+  - DeployWebApp.template
+
+scripts:
+ - ImportCoreFunctions.ps1
+ - Set-LocalUserPassword.ps1
+ - CopyPrerequisites.ps1
+ - InstallIIS.ps1
+ - DeployWebApp.ps1
+
+

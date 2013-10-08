@@ -1,0 +1,34 @@
+version: 0.1
+service_display_name: Internet Information Services Web Farm
+
+description: >-
+   <strong> The IIS Farm Service </strong> sets up a load-balanced set of IIS servers
+
+full_service_name: webServer
+author: Mirantis Inc.
+service_version: 1.0
+enabled: True
+
+ui_forms:
+  - WebServerFarm.yaml
+
+workflows:
+  - WebApps.xml
+  - Common.xml
+
+heat_templates:
+  - Windows.template
+  - LoadBalancer.template
+
+agent_templates:
+  - SetPassword.template
+  - InstallIIS.template
+  - DeployWebApp.template
+
+scripts:
+ - ImportCoreFunctions.ps1
+ - Set-LocalUserPassword.ps1
+ - CopyPrerequisites.ps1
+ - InstallIIS.ps1
+ - DeployWebApp.ps1
+

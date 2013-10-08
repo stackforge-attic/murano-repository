@@ -1,0 +1,35 @@
+version: 0.1
+service_display_name: MS SQL Server
+
+description: >-
+   <strong> The MS SQL Service </strong> installs an instance of
+     Microsoft SQL Server
+
+full_service_name: msSqlServer
+author: Mirantis Inc.
+service_version: 1.0
+enabled: True
+
+ui_forms:
+  - MsSqlServer.yaml
+
+workflows:
+  - MsSqlServer.xml
+  - Common.xml
+
+heat_templates:
+  - Windows.template
+  - SQL-security.template
+
+agent_templates:
+  - SetPassword.template
+  - InstallMsSqlServer.template
+
+scripts:
+ - ImportCoreFunctions.ps1
+ - Set-LocalUserPassword.ps1
+ - OptionParser.ps1
+ - SQLServerOptionParsers.ps1
+ - SQLServerInstaller.ps1
+ - Install-SQLServer.ps1
+ - Alter-FirewallRulesForSQL.ps1
