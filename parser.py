@@ -1,7 +1,20 @@
+#    Copyright (c) 2013 Mirantis, Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 import os
 import yaml
 import logging as log
-
 from manifest import Manifest
 
 
@@ -17,9 +30,11 @@ class ManifestParser(object):
         """
         manifest_directory -- absolute path to the directory with manifests
         ui_forms_directory -- absolute or relative path to ui forms definitions
-        workflows_directory -- absolute or relative path to workflow definitions
+        workflows_directory -- absolute or relative path to workflow
+                                                                    definitions
         heat_templates_directory -- absolute or relative path to heat templates
-        agent_templates_directory --absolute or relative path to agent templates
+        agent_templates_directory --absolute or relative path to agent
+                                                                      templates
         scripts_directory -- absolute or relative path to scripts
         """
         if not os.path.isabs(ui_forms_directory):
@@ -41,7 +56,7 @@ class ManifestParser(object):
         self.manifest_directory = manifest_directory
         self.directory_mapping = {"ui_forms": ui_forms_directory,
                                   "workflows": workflows_directory,
-                                  "heat_templates_directory":
+                                  "heat_templates":
                                   heat_templates_directory,
                                   "agent_templates": agent_templates_directory,
                                   "scripts": scripts_directory
@@ -60,21 +75,29 @@ class ManifestParser(object):
 
                 try:
                     with open(manifest_file) as stream:
-                        service_manifest_descr = yaml.load(stream)
+                        service_manifest_data = yaml.load(stream)
                 except yaml.YAMLError, exc:
                         log.warn("Failed to load manifest file. {0}. "
                                  "The reason: {1!s}".format(manifest_file,
                                                             exc))
                         continue
 
-                for key, value in service_manifest_descr.iteritems():
-                    valid_file_info = True
+                valid_file_info = True
+                for key, value in service_manifest_data.iteritems():
                     directory_location = self.directory_mapping.get(key)
                     if directory_location:
+                        if not isinstance(value, list):
+                            log.error("{0} section should represent a file"
+                                      " listing in manifest {1}"
+                                      "".format(directory_location, file))
+                            valid_file_info = False
+                            continue
                         for i, filename in enumerate(value):
                             absolute_path = os.path.join(directory_location,
                                                          filename)
-                            service_manifest_descr[key][i] = absolute_path
+
+                            service_manifest_data[key][i] = absolute_path
+
                             if not os.path.exists(absolute_path):
                                 valid_file_info = False
                                 log.warning(
@@ -83,15 +106,7 @@ class ManifestParser(object):
                                                                   file,
                                                                   absolute_path
                                                                   ))
-                service_manifest_descr["valid"] = valid_file_info
+                service_manifest_data["valid"] = valid_file_info
 
-                manifests.append(Manifest(service_manifest_descr))
+                manifests.append(Manifest(service_manifest_data))
         return manifests
-
-
-def main():
-    ManifestParser(os.path.join(os.path.dirname(__file__), 'Services')).parse()
-
-
-if __name__ == "__main__":
-   main()

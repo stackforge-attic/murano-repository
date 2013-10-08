@@ -12,8 +12,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
+from parser import ManifestParser
+from archiver import Archiver
 
-class Manifest(object):
-    def __init__(self, initial_data):
-        for key in initial_data:
-            setattr(self, key, initial_data[key])
+
+def main():
+    parser = ManifestParser(os.path.join(os.path.dirname(__file__), os.pardir,
+                            'Services'))
+    manifests = parser.parse()
+    Archiver().create(manifests, "ui_forms", "heat_templates", "agent_templates")
+
+
+if __name__ == "__main__":
+   main()

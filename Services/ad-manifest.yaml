@@ -19,7 +19,7 @@ workflows:
   - Common.xml
 
 heat_templates:
-    Windows.template
+  - Windows.template
 
 agent_templates:
   - SetPassword.template
