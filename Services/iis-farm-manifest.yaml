@@ -4,7 +4,7 @@ service_display_name: Internet Information Services Web Farm
 description: >-
    <strong> The IIS Farm Service </strong> sets up a load-balanced set of IIS servers
 
-full_service_name: webServer
+full_service_name: webServerFarm
 author: Mirantis Inc.
 service_version: 1.0
 enabled: True

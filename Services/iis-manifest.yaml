@@ -5,7 +5,7 @@ description: >-
    <strong> The  Internet Information Service </strong>
      sets up an IIS server and joins it into an existing domain
 
-full_service_name: webServerFarm
+full_service_name: webServer
 author: Mirantis Inc.
 service_version: 1.0
 enabled: True
