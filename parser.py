@@ -16,51 +16,12 @@ import os
 import yaml
 import logging as log
 from manifest import Manifest
+from consts import DIRECTORIES_BY_TYPE, DATA_TYPES
 
 
 class ManifestParser(object):
-    def __init__(self,
-                 manifest_directory,
-                 ui_forms_directory="ui_forms",
-                 workflows_directory="workflows",
-                 heat_templates_directory="heat_templates",
-                 agent_templates_directory="agent_templates",
-                 scripts_directory="scripts"
-                 ):
-        """
-        manifest_directory -- absolute path to the directory with manifests
-        ui_forms_directory -- absolute or relative path to ui forms definitions
-        workflows_directory -- absolute or relative path to workflow
-                                                                    definitions
-        heat_templates_directory -- absolute or relative path to heat templates
-        agent_templates_directory --absolute or relative path to agent
-                                                                      templates
-        scripts_directory -- absolute or relative path to scripts
-        """
-        if not os.path.isabs(ui_forms_directory):
-            ui_forms_directory = os.path.join(manifest_directory,
-                                              ui_forms_directory)
-        if not os.path.isabs(workflows_directory):
-            workflows_directory = os.path.join(manifest_directory,
-                                               workflows_directory)
-        if not os.path.isabs(heat_templates_directory):
-            heat_templates_directory = os.path.join(manifest_directory,
-                                                    heat_templates_directory)
-        if not os.path.isabs(agent_templates_directory):
-            agent_templates_directory = os.path.join(manifest_directory,
-                                                     agent_templates_directory)
-        if not os.path.isabs(scripts_directory):
-            scripts_directory = os.path.join(manifest_directory, 
-                                             scripts_directory)
-
+    def __init__(self, manifest_directory):
         self.manifest_directory = manifest_directory
-        self.directory_mapping = {"ui_forms": ui_forms_directory,
-                                  "workflows": workflows_directory,
-                                  "heat_templates":
-                                  heat_templates_directory,
-                                  "agent_templates": agent_templates_directory,
-                                  "scripts": scripts_directory
-                                  }
 
     def parse(self):
         manifests = []
@@ -84,16 +45,16 @@ class ManifestParser(object):
 
                 for key, value in service_manifest_data.iteritems():
                     valid_file_info = True
-                    directory_location = self.directory_mapping.get(key)
-                    if directory_location:
+                    if key in DATA_TYPES:
+                        root_directory = DIRECTORIES_BY_TYPE.get(key)
                         if not isinstance(value, list):
                             log.error("{0} section should represent a file"
                                       " listing in manifest {1}"
-                                      "".format(directory_location, file))
+                                      "".format(root_directory, file))
                             valid_file_info = False
                             continue
                         for i, filename in enumerate(value):
-                            absolute_path = os.path.join(directory_location,
+                            absolute_path = os.path.join(root_directory,
                                                          filename)
 
                             service_manifest_data[key][i] = absolute_path
