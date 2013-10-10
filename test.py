@@ -11,16 +11,18 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-from flask import Flask, make_response, send_from_directory, send_file, \
-                jsonify, request, abort
-from werkzeug import secure_filename
 import os
+from flask import Flask, make_response, send_from_directory, send_file, \
+    jsonify, request, abort
+from flask.ext.restful import Api, Resource
+from werkzeug import secure_filename
+
 from parser import ManifestParser
 from archiver import Archiver
 
 app = Flask(__name__)
 app.config.from_pyfile('consts.py')
+api = Api(app)
 
 @app.route('/client/ui')
 def get_ui_data():
@@ -48,9 +50,8 @@ def get_data_type_locations(data_type):
     ####### validation ########
     if data_type not in app.config['DATA_TYPES']:
         abort(404)
-    result_path = os.path.join(app.config["ROOT_DIRECTORY"],
-                               app.config["DIRECTORIES_BY_TYPE"][
-                                   data_type])
+    result_path = os.path.join(app.config["DIRECTORIES_BY_TYPE"][
+                               data_type])
     ####### end validation ########
     if request.method == 'GET':
         locations = []
@@ -76,9 +77,8 @@ def get_data_type_locations_by_path_or_get_file(data_type, path):
     ####### validation ########
     if data_type not in app.config['DATA_TYPES']:
         abort(404)
-    result_path = os.path.join(app.config["ROOT_DIRECTORY"],
-                               app.config["DIRECTORIES_BY_TYPE"][
-                                   data_type],
+    result_path = os.path.join(app.config["DIRECTORIES_BY_TYPE"][
+                               data_type],
                                path)
     if not os.path.exists(result_path):
         abort(404)
@@ -108,9 +108,8 @@ def get_data_type_locations_by_path_or_get_file(data_type, path):
 def create_dirs(data_type, path):
     if data_type not in app.config['DATA_TYPES']:
         abort(404)
-    result_path = os.path.join(app.config["ROOT_DIRECTORY"],
-                               app.config["DIRECTORIES_BY_TYPE"][
-                                   data_type],
+    result_path = os.path.join(app.config["DIRECTORIES_BY_TYPE"][
+                               data_type],
                                path)
     if request.method == 'PUT':
         resp = make_response()

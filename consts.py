@@ -20,7 +20,8 @@ AGENT_TEMPLATES = u"agent_templates"
 SCRIPTS = u"scripts"
 MANIFESTS = u"manifests"
 
-DATA_TYPES = [UI_FORMS, WORKFLOWS, HEAT_TEMPLATES, AGENT_TEMPLATES, SCRIPTS, MANIFESTS]
+DATA_TYPES = [UI_FORMS, WORKFLOWS, HEAT_TEMPLATES,
+              AGENT_TEMPLATES, SCRIPTS, MANIFESTS]
 
 
 #---main directory - parent for manifests files and data types directories
@@ -35,11 +36,15 @@ AGENT_TEMPLATES_ROOT_DIR = u"agent_templates"
 SCRIPTS_ROOT_DIR = u"scripts"
 #root directory should contain manifests files
 
-DIRECTORIES_BY_TYPE = {UI_FORMS: UI_FORMS_ROOT_DIR,
-                       WORKFLOWS: WORKFLOWS_ROOT_DIR,
-                       HEAT_TEMPLATES: HEAT_TEMPLATES_ROOT_DIR,
-                       AGENT_TEMPLATES_ROOT_DIR: AGENT_TEMPLATES_ROOT_DIR,
-                       SCRIPTS: SCRIPTS_ROOT_DIR,
-                       MANIFESTS: ROOT_DIRECTORY
+DIRECTORIES_BY_TYPE = {UI_FORMS:
+                       os.path.join(ROOT_DIRECTORY, UI_FORMS_ROOT_DIR),
+                       WORKFLOWS:
+                       os.path.join(ROOT_DIRECTORY, WORKFLOWS_ROOT_DIR),
+                       HEAT_TEMPLATES:
+                       os.path.join(ROOT_DIRECTORY, HEAT_TEMPLATES_ROOT_DIR),
+                       AGENT_TEMPLATES_ROOT_DIR:
+                       os.path.join(ROOT_DIRECTORY, AGENT_TEMPLATES_ROOT_DIR),
+                       SCRIPTS: os.path.join(ROOT_DIRECTORY, SCRIPTS_ROOT_DIR),
+                       MANIFESTS: os.path.join(ROOT_DIRECTORY, ROOT_DIRECTORY)
                        }
 
