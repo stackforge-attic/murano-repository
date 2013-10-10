@@ -79,13 +79,15 @@ class Archiver(object):
                         "Manifest for {0} service has no file definitions for "
                         "{1}").format(manifest.service_display_name, data_type)
 
-        with tarfile.open("service_metadata.tar", "w") as tar:
+        target_archeve = "service_metadata.tar"
+        with tarfile.open(target_archeve, "w") as tar:
             for item in os.listdir(temp_dir):
                 tar.add(os.path.join(temp_dir, item), item)
         try:
             shutil.rmtree(temp_dir, ignore_errors=True)
         except Exception as e:
             log.error("Unable to delete temp directory: {0}".format(e))
+        return target_archeve
 
 
 

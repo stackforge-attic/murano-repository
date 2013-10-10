@@ -11,9 +11,28 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-UI_FORMS = "ui_forms"
-WORKFLOWS = "workflows"
-HEAT_TEMPLATES = "heat_templates"
-AGENT_TEMPLATES = "agent_templates"
-SCRIPTS = "scripts"
+import os
+UI_FORMS = u"ui_forms"
+WORKFLOWS = u"workflows"
+HEAT_TEMPLATES = u"heat_templates"
+AGENT_TEMPLATES = u"agent_templates"
+SCRIPTS = u"scripts"
+
 DATA_TYPES = [UI_FORMS, WORKFLOWS, HEAT_TEMPLATES, AGENT_TEMPLATES, SCRIPTS]
+
+UI_FORMS_ROOT_DIR = u"ui_forms"
+WORKFLOWS_ROOT_DIR = u"workflows"
+HEAT_TEMPLATES_ROOT_DIR = u"heat_templates"
+AGENT_TEMPLATES_ROOT_DIR = u"agent_templates"
+SCRIPTS_ROOT_DIR = u"scripts"
+#root directory should contain manifests files
+ROOT_DIRECTORY = os.path.join(os.path.dirname(__file__),
+                              u'Services')
+
+DIRECTORIES_BY_TYPE = {UI_FORMS: UI_FORMS_ROOT_DIR,
+                       WORKFLOWS: WORKFLOWS_ROOT_DIR,
+                       HEAT_TEMPLATES: HEAT_TEMPLATES_ROOT_DIR,
+                       AGENT_TEMPLATES_ROOT_DIR: AGENT_TEMPLATES_ROOT_DIR,
+                       SCRIPTS: SCRIPTS_ROOT_DIR
+                       }
+

@@ -82,8 +82,8 @@ class ManifestParser(object):
                                                             exc))
                         continue
 
-                valid_file_info = True
                 for key, value in service_manifest_data.iteritems():
+                    valid_file_info = True
                     directory_location = self.directory_mapping.get(key)
                     if directory_location:
                         if not isinstance(value, list):
