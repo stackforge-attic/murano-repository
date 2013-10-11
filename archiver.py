@@ -87,7 +87,7 @@ class Archiver(object):
             shutil.rmtree(temp_dir, ignore_errors=True)
         except Exception as e:
             log.error("Unable to delete temp directory: {0}".format(e))
-        return target_archeve
+        return os.path.abspath(target_archeve)
 
 
 

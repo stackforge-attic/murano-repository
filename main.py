@@ -11,18 +11,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-import os
-from parser import ManifestParser
-from archiver import Archiver
-
-
-def main():
-    parser = ManifestParser(os.path.join(os.path.dirname(__file__), os.pardir,
-                            'Services'))
-    manifests = parser.parse()
-    Archiver().create(manifests, "ui_forms", "heat_templates", "agent_templates")
+import flask
+from keystoneclient.middleware import auth_token
+from api.v1 import v1_api
 
 
-if __name__ == "__main__":
-   main()
+
+app = flask.Flask(__name__)
+
+app.register_blueprint(v1_api, url_prefix='/v1')
+app.config.from_pyfile('consts.py')
+
+if __name__ == '__main__':
+    app.run(debug=True)
