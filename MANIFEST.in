@@ -1,4 +1,4 @@
-nclude AUTHORS
+include AUTHORS
 include README.rst
 include ChangeLog
 include LICENSE
