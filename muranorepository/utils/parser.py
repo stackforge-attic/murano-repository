@@ -16,7 +16,7 @@ import os
 import yaml
 from oslo.config import cfg
 import logging as log
-from muranorepository.utils.manifest import Manifest
+from muranorepository.manifest import Manifest
 from muranorepository.consts import DATA_TYPES, MANIFEST
 CONF = cfg.CONF
 
