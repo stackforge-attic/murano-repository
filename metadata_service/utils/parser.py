@@ -17,7 +17,7 @@ import yaml
 from oslo.config import cfg
 import logging as log
 from metadata_service.manifest import Manifest
-from metadata_service.consts import DATA_TYPES
+from metadata_service.consts import DATA_TYPES, MANIFEST
 CONF = cfg.CONF
 
 
@@ -45,21 +45,25 @@ class ManifestParser(object):
                                                             exc))
                         continue
 
+                #check for existence files specified in manifests
                 for key, value in service_manifest_data.iteritems():
                     valid_file_info = True
                     if key in DATA_TYPES:
-                        root_directory = getattr(CONF, key)
+                        if key != MANIFEST:
+                            root_directory = os.path.join(CONF.manifests,
+                                                          getattr(CONF, key))
+                        else:
+                            root_directory = CONF.manifests
+
                         if not isinstance(value, list):
                             log.error("{0} section should represent a file"
                                       " listing in manifest {1}"
                                       "".format(root_directory, file))
                             valid_file_info = False
                             continue
-                        for i, filename in enumerate(value):
+                        for filename in value:
                             absolute_path = os.path.join(root_directory,
                                                          filename)
-
-                            service_manifest_data[key][i] = absolute_path
 
                             if not os.path.exists(absolute_path):
                                 valid_file_info = False

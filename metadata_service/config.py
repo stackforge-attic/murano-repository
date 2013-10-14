@@ -21,16 +21,7 @@ server_opts = [
     cfg.IntOpt('port', default='5000'),
 ]
 
-# type_dirs_opts = [cfg.StrOpt(x) for x in DATA_TYPES]
-
-type_dirs_opts = [
-    cfg.StrOpt(MANIFEST),
-    cfg.StrOpt(UI),
-    cfg.StrOpt(WORKFLOW),
-    cfg.StrOpt(HEAT),
-    cfg.StrOpt(AGENT),
-    cfg.StrOpt(SCRIPTS)
-]
+type_dirs_opts = [cfg.StrOpt(x) for x in DATA_TYPES]
 
 cfg.set_defaults(log.log_opts,
                  default_log_levels=['qpid.messaging=INFO',
@@ -39,7 +30,7 @@ cfg.set_defaults(log.log_opts,
 CONF = cfg.CONF
 CONF.register_cli_opts(server_opts)
 CONF.register_opts(type_dirs_opts)
-
+CONF.register_opts(type_dirs_opts, group='output')
 
 ARGV = []
 

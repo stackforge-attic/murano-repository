@@ -16,33 +16,13 @@ import tarfile
 import tempfile
 import shutil
 import logging as log
-
+from oslo.config import cfg
 from metadata_service.consts import DATA_TYPES
+OUTPUT_CONF = cfg.CONF.output
+CONF = cfg.CONF
 
 
 class Archiver(object):
-    def __init__(self,
-                 ui_forms_target="service_forms",
-                 workflows_target="workflows",
-                 heat_templates_target="templates/cf",
-                 agent_templates_target="templates/agent",
-                 scripts_target="templates/agent/scripts"):
-        """
-        ui_forms_target -- relative path for a ui_forms location in
-                                                            resulted archive
-        workflows_target -- relative path for a desired workflow location in
-                                                            resulted archive
-        heat_templates_target -- relative path for a desired heat templates
-                                                location in resulted archive
-        agent_templates_target -- relative path for a heat templates location
-        scripts_target -- relative path for a agent script location
-        """
-        self.archive_structure = {"ui_forms": ui_forms_target,
-                                     "workflows": workflows_target,
-                                     "heat_templates": heat_templates_target,
-                                     "agent_templates": agent_templates_target,
-                                     "scripts": scripts_target
-                                  }
 
     def create(self, manifests, *types):
         """
@@ -60,34 +40,41 @@ class Archiver(object):
                     continue
                 if hasattr(manifest, data_type):
                     dst_directory = os.path.join(temp_dir,
-                                                 self.archive_structure[
-                                                     data_type])
+                                                 getattr(OUTPUT_CONF,
+                                                         data_type))
+                    scr_directory = os.path.join(CONF.manifests,
+                                                 getattr(CONF, data_type))
+
                     if not os.path.exists(dst_directory):
                         os.makedirs(dst_directory)
 
-                    for file_path in getattr(manifest, data_type):
-                        basedir, filename = os.path.split(file_path)
-                        destination = os.path.join(dst_directory,
-                                                   filename)
+                    for path in getattr(manifest, data_type):
+                        source = os.path.join(scr_directory, path)
+                        destination = os.path.join(dst_directory, path)
+                        base_dir = os.path.dirname(destination)
+
+                        if (base_dir != dst_directory) \
+                           and (not os.path.exists(base_dir)):
+                            os.makedirs(os.path.dirname(destination))
                         try:
-                            shutil.copyfile(file_path, destination)
+                            shutil.copyfile(source, destination)
                         except IOError:
                             log.error("Unable to copy file "
                                       "{0}".format(file))
                 else:
                     log.info(
                         "Manifest for {0} service has no file definitions for "
-                        "{1}").format(manifest.service_display_name, data_type)
+                        "{1}".format(manifest.service_display_name, data_type))
 
-        target_archeve = "service_metadata.tar"
-        with tarfile.open(target_archeve, "w") as tar:
+        target_archive = "service_metadata.tar"
+        with tarfile.open(target_archive, "w") as tar:
             for item in os.listdir(temp_dir):
                 tar.add(os.path.join(temp_dir, item), item)
         try:
             shutil.rmtree(temp_dir, ignore_errors=True)
         except Exception as e:
             log.error("Unable to delete temp directory: {0}".format(e))
-        return os.path.abspath(target_archeve)
+        return os.path.abspath(target_archive)
 
 
 
