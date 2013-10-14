@@ -12,15 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import flask
-from keystoneclient.middleware import auth_token
 from api.v1 import v1_api
 
 
+def make_app():
+    """
+    App builder (wsgi)
+    Entry point
+    """
 
-app = flask.Flask(__name__)
-
-app.register_blueprint(v1_api, url_prefix='/v1')
-app.config.from_pyfile('consts.py')
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    app = flask.Flask(__name__)
+    app.register_blueprint(v1_api, url_prefix='/v1')
+    return app

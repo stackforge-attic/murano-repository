@@ -11,17 +11,17 @@ author: Mirantis Inc.
 service_version: 1.0
 enabled: True
 
-ui_forms:
+ui:
   - ActiveDirectory.yaml
 
 workflows:
   - AD.xml
   - Common.xml
 
-heat_templates:
+heat:
   - Windows.template
 
-agent_templates:
+agents:
   - SetPassword.template
   - CreatePrimaryDC.template
   - AskDnsIp.template

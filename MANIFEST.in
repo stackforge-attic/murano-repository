@@ -1,0 +1,11 @@
+nclude AUTHORS
+include README.rst
+include ChangeLog
+include LICENSE
+
+recursive-include Services *
+
+exclude .gitignore
+exclude .gitreview
+
+global-exclude *.pyc

@@ -10,18 +10,18 @@ author: Mirantis Inc.
 service_version: 1.0
 enabled: True
 
-ui_forms:
+ui:
   - MsSqlClusterServer.yaml
 
 workflows:
   - MsSqlCluster.xml
   - Common.xml
 
-heat_templates:
+heat:
   - Windows.template
   - SQLCluster.template
 
-agent_templates:
+agent:
   - SetPassword.template
   - SqlServerCluster/FailoverClusterPrerequisites.template
   - SqlServerCluster/FailoverCluster.template

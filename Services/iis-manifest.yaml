@@ -10,17 +10,17 @@ author: Mirantis Inc.
 service_version: 1.0
 enabled: True
 
-ui_forms:
+ui:
   - WebServer.yaml
 
 workflows:
   - WebApps.xml
   - Common.xml
 
-heat_templates:
+heat:
   - Windows.template
 
-agent_templates:
+agent:
   - SetPassword.template
   - InstallIIS.template
   - DeployWebApp.template

@@ -17,7 +17,7 @@ import tempfile
 import shutil
 import logging as log
 
-from consts import DATA_TYPES
+from metadata_service.consts import DATA_TYPES
 
 
 class Archiver(object):

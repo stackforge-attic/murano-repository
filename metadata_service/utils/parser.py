@@ -14,9 +14,11 @@
 
 import os
 import yaml
+from oslo.config import cfg
 import logging as log
-from manifest import Manifest
-from consts import DIRECTORIES_BY_TYPE, DATA_TYPES
+from metadata_service.manifest import Manifest
+from metadata_service.consts import DATA_TYPES
+CONF = cfg.CONF
 
 
 class ManifestParser(object):
@@ -29,7 +31,7 @@ class ManifestParser(object):
             manifest_file = os.path.join(self.manifest_directory, file)
             if os.path.isfile(manifest_file):
                 if not file.endswith(".yaml"):
-                    log.warning("Extention of {0} file is not yaml. "
+                    log.warning("Extension of {0} file is not yaml. "
                                 "Only yaml file supported for "
                                 "service manifest files.".format(file))
                     continue
@@ -46,7 +48,7 @@ class ManifestParser(object):
                 for key, value in service_manifest_data.iteritems():
                     valid_file_info = True
                     if key in DATA_TYPES:
-                        root_directory = DIRECTORIES_BY_TYPE.get(key)
+                        root_directory = getattr(CONF, key)
                         if not isinstance(value, list):
                             log.error("{0} section should represent a file"
                                       " listing in manifest {1}"
