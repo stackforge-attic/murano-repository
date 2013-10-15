@@ -55,16 +55,20 @@ def get_data_type_locations(data_type):
     ####### end validation ########
     if request.method == 'GET':
         locations = []
-
-        for path, subdirs, files in os.walk(result_path):
-            for name in files:
-                locations.append(name)
+        if data_type == MANIFEST:
+            for item in os.listdir(result_path):
+                if '-manifest' in item:
+                    locations.append(item)
+        else:
+            for path, subdirs, files in os.walk(result_path):
+                for name in files:
+                    locations.append(name)
         result = {data_type: locations}
         return jsonify(result)
 
     if request.method == 'POST':
         try:
-            file_to_upload = request.files['files']
+            file_to_upload = request.files.get('files')
             if file_to_upload:
                 filename = secure_filename(file_to_upload.filename)
                 file_to_upload.save(os.path.join(result_path, filename))
