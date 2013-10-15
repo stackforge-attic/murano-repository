@@ -34,3 +34,4 @@ nosetests.xml
 .project
 .pydevproject
 .idea
+etc/murano-repository.conf
