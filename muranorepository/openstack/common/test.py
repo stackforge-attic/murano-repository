@@ -29,7 +29,8 @@ class BaseTestCase(testtools.TestCase):
         super(BaseTestCase, self).setUp()
         self._set_timeout()
         self._fake_output()
-        self.useFixture(fixtures.FakeLogger('muranorepository.openstack.common'))
+        self.useFixture(
+            fixtures.FakeLogger('muranorepository.openstack.common'))
         self.useFixture(fixtures.NestedTempfile())
 
     def _set_timeout(self):

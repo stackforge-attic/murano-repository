@@ -28,8 +28,8 @@ possible_topdir = os.path.normpath(os.path.join(os.path.abspath(__file__),
                                                 os.pardir,
                                                 os.pardir))
 if os.path.exists(os.path.join(possible_topdir,
-                                'muranorepository',
-                                '__init__.py')):
+                               'muranorepository',
+                               '__init__.py')):
     sys.path.insert(0, possible_topdir)
 
 from muranorepository import config
@@ -43,7 +43,7 @@ LOG = log.getLogger(__name__)
 def main():
     dev_conf = os.path.join(possible_topdir,
                             'etc',
-                            'muranorepository.conf')
+                            'murano-repository.conf')
     config_files = None
     if os.path.exists(dev_conf):
         config_files = [dev_conf]
