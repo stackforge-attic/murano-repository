@@ -1,3 +1,41 @@
+commit d259b6c33a4379c12dd673cb8cabc769545739d0
+Author: efedorova <efedorova@mirantis.com>
+Date:   Thu Oct 17 19:18:08 2013 +0400
+
+    Refactoring API and Archiver module
+    
+    * Set uo manifest.in and tox.ini
+    * Add test module
+    
+    Change-Id: I265401658922c75b50db4d1232af17215ee1b6fc
+
+commit e4b9fe765e912a13ff02a394b329ecd117a0edb7
+Author: efedorova <efedorova@mirantis.com>
+Date:   Tue Oct 15 19:03:09 2013 +0400
+
+    Fix buf with manifests listing
+
+commit b24d260524d16dce96a682fd32629951e2ac17ee
+Author: efedorova <efedorova@mirantis.com>
+Date:   Tue Oct 15 18:47:27 2013 +0400
+
+    Update api
+
+commit ecb0c93b3077755192929fa8ddf045ef43d43112
+Author: efedorova <efedorova@mirantis.com>
+Date:   Mon Oct 14 16:54:00 2013 +0400
+
+    Fix typos
+
+commit c46bfbde86728d689677a2d7d484b2db04893186
+Author: efedorova <efedorova@mirantis.com>
+Date:   Mon Oct 14 16:34:33 2013 +0400
+
+    Remove service to muranorepository
+    
+    Add venv support
+    Update requirements
+
 commit 28cbd261871038cf1fc4fa67d36c26ae9e9a4747
 Author: efedorova <efedorova@mirantis.com>
 Date:   Mon Oct 14 13:27:09 2013 +0400
