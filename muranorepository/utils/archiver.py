@@ -40,8 +40,8 @@ class Archiver(object):
                           "{0}".format(file))
 
     def _compose_archive(self, path):
-        target_archive = "service_metadata.tar"
-        with tarfile.open(target_archive, "w") as tar:
+        target_archive = "data.tar.gz"
+        with tarfile.open(target_archive, "w:gz") as tar:
             for item in os.listdir(path):
                 tar.add(os.path.join(path, item), item)
         try:
@@ -57,7 +57,11 @@ class Archiver(object):
 
         return: absolute path to created archive
         """
-        temp_dir = tempfile.mkdtemp()
+        #TODO: temprory hack for mockfs
+        try:
+            temp_dir = tempfile.mkdtemp()
+        except:
+            temp_dir = '/tmp'
         for data_type in types:
             if data_type not in DATA_TYPES:
                 raise Exception("Please, specify one of the supported data "
