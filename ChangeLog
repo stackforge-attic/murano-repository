@@ -1,4 +1,12 @@
-commit d259b6c33a4379c12dd673cb8cabc769545739d0
+commit 5fbab4294125e6258e7e5c961522170214d5558d
+Author: Ekaterina Fedorova <efedorova@mirantis.com>
+Date:   Mon Oct 21 11:45:08 2013 +0400
+
+    Add some unit tests
+    
+    Change-Id: I193023dd8eca4f8cc665a29a6b86698bb38edc83
+
+commit de388f5e64d887ff6b20790fb540c05ab43dacf7
 Author: efedorova <efedorova@mirantis.com>
 Date:   Thu Oct 17 19:18:08 2013 +0400
 

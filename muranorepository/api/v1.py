@@ -27,7 +27,7 @@ CONF = cfg.CONF
 v1_api = Blueprint('v1', __name__)
 
 
-def get_archive(client):
+def _get_archive(client):
     parser = ManifestParser(CONF.manifests)
     manifests = parser.parse()
     if client == 'conductor':
@@ -35,11 +35,13 @@ def get_archive(client):
                                  'heat',
                                  'agent',
                                  'scripts')
-    else:
+    elif client == 'ui':
         return Archiver().create(manifests, client)
+    else:
+        abort(404)
 
 
-def get_locations(data_type, result_path):
+def _get_locations(data_type, result_path):
     locations = []
     if data_type == MANIFEST:
         for item in os.listdir(result_path):
@@ -57,7 +59,7 @@ def get_locations(data_type, result_path):
     return jsonify({data_type: locations})
 
 
-def save_file(request, result_path):
+def _save_file(request, result_path):
     file_to_upload = request.files.get('file')
     if file_to_upload:
         filename = secure_filename(file_to_upload.filename)
@@ -67,66 +69,67 @@ def save_file(request, result_path):
         abort(400)
 
 
-def compose_path(data_type, path=None):
+def _compose_path(data_type, path=None):
     if path:
         return os.path.join(CONF.manifests, getattr(CONF, data_type), path)
     else:
         return os.path.join(CONF.manifests, getattr(CONF, data_type))
 
 
-def check_data_type(data_type):
+def _check_data_type(data_type):
     if data_type not in DATA_TYPES:
         abort(404)
 
 
-@v1_api.route('/client/ui')
-def get_ui_data():
-    return send_file(get_archive('ui'))
-
-
-@v1_api.route('/client/conductor')
-def get_conductor_data():
-    return send_file(get_archive('conductor'))
+@v1_api.route('/client/<path:type>')
+def get_archive_data(type):
+    return send_file(_get_archive(type),
+                     mimetype='application/octet-stream')
 
 
 @v1_api.route('/admin/<data_type>')
 def get_data_type_locations(data_type):
-    check_data_type(data_type)
-    result_path = compose_path(data_type)
-    return get_locations(data_type, result_path)
+    _check_data_type(data_type)
+    result_path = _compose_path(data_type)
+    return _get_locations(data_type, result_path)
 
 
 @v1_api.route('/admin/<data_type>', methods=['POST'])
 def upload_file(data_type):
-    check_data_type(data_type)
-    result_path = compose_path(data_type)
+    _check_data_type(data_type)
+    result_path = _compose_path(data_type)
     try:
-        return save_file(request, result_path)
+        return _save_file(request, result_path)
     except:
         abort(403)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>')
-def get_locations_in_nested_path_or_get_file(data_type, path):
-    check_data_type(data_type)
-    result_path = compose_path(data_type, path)
+def _get_locations_in_nested_path_or_get_file(data_type, path):
+    _check_data_type(data_type)
+    result_path = _compose_path(data_type, path)
     if os.path.isfile(result_path):
-        return send_file(result_path)
+        return send_file(result_path, mimetype='application/octet-stream')
     else:
-        return get_locations(data_type, result_path)
+        return _get_locations(data_type, result_path)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['POST'])
 def upload_file_in_nested_path(data_type, path):
-    check_data_type(data_type)
-    result_path = compose_path(data_type, path)
-    return save_file(request, result_path)
+    _check_data_type(data_type)
+    result_path = _compose_path(data_type, path)
+    # it's forbidden to upload manifests to subfolder
+    if data_type == MANIFEST:
+        abort(403)
+    if not os.path.exists(result_path):
+        abort(404)
+    return _save_file(request, result_path)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['PUT'])
 def create_dirs(data_type, path):
-    check_data_type(data_type)
-    result_path = compose_path(data_type, path)
+    _check_data_type(data_type)
+    result_path = _compose_path(data_type, path)
     resp = jsonify(result='success')
     if os.path.exists(result_path):
         return resp
@@ -141,8 +144,8 @@ def create_dirs(data_type, path):
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['DELETE'])
 def delete_dirictory_or_file(data_type, path):
-    check_data_type(data_type)
-    result_path = compose_path(data_type, path)
+    _check_data_type(data_type)
+    result_path = _compose_path(data_type, path)
     if not os.path.exists(result_path):
         abort(404)
     if os.path.isfile(result_path):
