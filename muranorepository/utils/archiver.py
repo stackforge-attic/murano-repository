@@ -15,10 +15,14 @@ import os
 import tarfile
 import tempfile
 import shutil
+import hashlib
 import logging as log
 from oslo.config import cfg
 from muranorepository.consts import DATA_TYPES
 CONF = cfg.CONF
+
+ARCHIVE_PKG_NAME = 'data.tar.gz'
+CHUNK_SIZE = 1 << 20  # 1MB
 
 
 class Archiver(object):
@@ -39,18 +43,70 @@ class Archiver(object):
                 log.error("Unable to copy file "
                           "{0}".format(file))
 
-    def _compose_archive(self, path):
-        target_archive = "data.tar.gz"
-        with tarfile.open(target_archive, "w:gz") as tar:
+    def _get_hash(self, archive_path):
+        """Calculate SHA1-hash of archive file.
+
+        SHA-1 take a bit more time than MD5
+        (see http://tinyurl.com/kpj5jy7), but is more secure.
+        """
+        # Copy-pasted from muranodashboard/panel/services/metadata.py
+        if os.path.exists(archive_path):
+            sha1 = hashlib.sha1()
+            with open(archive_path) as f:
+                buf = f.read(CHUNK_SIZE)
+                while buf:
+                    sha1.update(buf)
+                    buf = f.read(CHUNK_SIZE)
+            hsum = sha1.hexdigest()
+            log.debug("Archive '{0}' has hash-sum {1}".format(
+                archive_path, hsum))
+            return hsum
+        else:
+            log.info(
+                "Archive '{0}' doesn't exist, no hash to calculate".format(
+                    archive_path))
+            return None
+
+    def _compose_archive(self, path, cache_dir):
+        with tarfile.open(ARCHIVE_PKG_NAME, "w:gz") as tar:
             for item in os.listdir(path):
                 tar.add(os.path.join(path, item), item)
         try:
             shutil.rmtree(path, ignore_errors=True)
         except Exception as e:
             log.error("Unable to delete temp directory: {0}".format(e))
-        return os.path.abspath(target_archive)
+        hash_sum = self._get_hash(ARCHIVE_PKG_NAME)
+        pkg_dir = os.path.join(cache_dir, hash_sum)
+        os.mkdir(pkg_dir)
+        shutil.move(ARCHIVE_PKG_NAME, os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
+        return os.path.abspath(os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
 
-    def create(self, manifests, *types):
+    def _is_data_cached(self, cache_dir, hash_sum):
+        existing_caches = os.listdir(cache_dir)
+        if len(existing_caches) == 1:
+            if existing_caches[0] == hash_sum:
+                path = os.path.join(cache_dir, hash_sum, ARCHIVE_PKG_NAME)
+                if not os.path.exists(path):
+                    raise RuntimeError(
+                        'Archive package is missing at dir {0}'.format(
+                            os.path.join(cache_dir, hash_sum)))
+                log.debug('Archive package already exists at {0} and it ' +
+                          'matches hash-sum {1}.'.format(path, hash_sum))
+                return True
+            else:
+                path = os.path.join(cache_dir, hash_sum)
+                log.info('Archive package already exists at {0}, but it '
+                         "doesn't match requested hash-sum {1}. "
+                         'Deleting it.'.format(path))
+                shutil.rmtree(path)
+                return False
+        elif len(existing_caches) == 0:
+            return False
+        else:
+            raise RuntimeError('Too many cached archives at {0}'.format(
+                cache_dir))
+
+    def create(self, client_type, cache_root, manifests, hash_sum, types):
         """
         manifests -- list of Manifest objects
         *types - desired data types to be added to archive
@@ -62,6 +118,14 @@ class Archiver(object):
             temp_dir = tempfile.mkdtemp()
         except:
             temp_dir = '/tmp'
+
+        cache_dir = os.path.join(cache_root, client_type)
+        if not os.path.exists(cache_dir):
+            os.mkdir(cache_dir)
+
+        if self._is_data_cached(cache_dir, hash_sum):
+            return None
+
         for data_type in types:
             if data_type not in DATA_TYPES:
                 raise Exception("Please, specify one of the supported data "
@@ -84,4 +148,4 @@ class Archiver(object):
                         "Manifest for {0} service has no file definitions for "
                         "{1}".format(manifest.service_display_name, data_type))
 
-        return self._compose_archive(temp_dir)
+        return self._compose_archive(temp_dir, cache_dir)

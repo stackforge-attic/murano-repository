@@ -16,6 +16,7 @@ import os
 
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
+from flask import make_response
 from werkzeug import secure_filename
 
 from muranorepository.utils.parser import ManifestParser
@@ -25,20 +26,23 @@ from oslo.config import cfg
 CONF = cfg.CONF
 
 v1_api = Blueprint('v1', __name__)
+CACHE_DIR = os.path.join(v1_api.root_path, 'cache')
+
+if not os.path.exists(CACHE_DIR):
+    os.mkdir(CACHE_DIR)
 
 
-def _get_archive(client):
+def _get_archive(client, hash_sum):
     parser = ManifestParser(CONF.manifests)
     manifests = parser.parse()
+    types = None
     if client == 'conductor':
-        return Archiver().create(manifests,
-                                 'heat',
-                                 'agent',
-                                 'scripts')
+        types = ('heat', 'agent', 'scripts')
     elif client == 'ui':
-        return Archiver().create(manifests, client)
+        types = ('ui',)
     else:
         abort(404)
+    return Archiver().create(client, CACHE_DIR, manifests, hash_sum, types)
 
 
 def _get_locations(data_type, result_path):
@@ -83,8 +87,11 @@ def _check_data_type(data_type):
 
 @v1_api.route('/client/<path:type>')
 def get_archive_data(type):
-    return send_file(_get_archive(type),
-                     mimetype='application/octet-stream')
+    path = _get_archive(type, request.args.get('hash'))
+    if path:
+        return send_file(path, mimetype='application/octet-stream')
+    else:
+        return make_response(('Not modified', 304))
 
 
 @v1_api.route('/admin/<data_type>')
