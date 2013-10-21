@@ -13,9 +13,10 @@
 # under the License.
 import flask
 from api.v1 import v1_api
+from keystoneclient.middleware import auth_token
 
 
-def make_app():
+def make_app(kwargs):
     """
     App builder (wsgi)
     Entry point
@@ -23,4 +24,6 @@ def make_app():
 
     app = flask.Flask(__name__)
     app.register_blueprint(v1_api, url_prefix='/v1')
+    app.wsgi_app = auth_token.filter_factory(
+        app.config, **kwargs)(app.wsgi_app)
     return app

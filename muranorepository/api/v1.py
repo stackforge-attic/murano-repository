@@ -143,7 +143,7 @@ def create_dirs(data_type, path):
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['DELETE'])
-def delete_dirictory_or_file(data_type, path):
+def delete_directory_or_file(data_type, path):
     _check_data_type(data_type)
     result_path = _compose_path(data_type, path)
     if not os.path.exists(result_path):
