@@ -82,6 +82,10 @@ class Archiver(object):
         return os.path.abspath(os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
 
     def _is_data_cached(self, cache_dir, hash_sum):
+         #ToDo: optimize archive creation: use existing cached version of archive package when no hash sum is provided by client
+        if not hash_sum:
+            log.warning('Hash parameter was not found in request')
+            return False
         existing_caches = os.listdir(cache_dir)
         if len(existing_caches) == 1:
             if existing_caches[0] == hash_sum:
