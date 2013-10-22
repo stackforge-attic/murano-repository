@@ -37,7 +37,7 @@ def _get_archive(client, hash_sum):
     manifests = parser.parse()
     types = None
     if client == 'conductor':
-        types = ('heat', 'agent', 'scripts')
+        types = ('heat', 'agent', 'scripts', 'workflows')
     elif client == 'ui':
         types = ('ui',)
     else:
