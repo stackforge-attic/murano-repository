@@ -21,7 +21,7 @@ workflows:
 heat:
   - Windows.template
 
-agents:
+agent:
   - SetPassword.template
   - CreatePrimaryDC.template
   - AskDnsIp.template
