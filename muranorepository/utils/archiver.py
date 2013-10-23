@@ -77,7 +77,8 @@ class Archiver(object):
             log.error("Unable to delete temp directory: {0}".format(e))
         hash_sum = self._get_hash(ARCHIVE_PKG_NAME)
         pkg_dir = os.path.join(cache_dir, hash_sum)
-        os.mkdir(pkg_dir)
+        if not os.path.exists(pkg_dir):
+            os.mkdir(pkg_dir)
         shutil.move(ARCHIVE_PKG_NAME, os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
         return os.path.abspath(os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
 
