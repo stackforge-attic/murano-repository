@@ -49,7 +49,6 @@ def main():
         config_files = [dev_conf]
 
     config.parse_configs(sys.argv[1:], config_files)
-
     log.setup('muranorepository')
 
     app = server.make_app({
@@ -60,7 +59,10 @@ def main():
         'admin_password': cfg.CONF.admin_password,
         'admin_tenant_name': cfg.CONF.admin_tenant_name
     })
-
+    
+    if not os.path.isabs(config.CONF.manifests):
+        config.CONF.manifests = os.path.join(possible_topdir,
+                                             config.CONF.manifests)
     wsgi.server(eventlet.listen((cfg.CONF.host, cfg.CONF.port),
                                 backlog=500),
                 app)
