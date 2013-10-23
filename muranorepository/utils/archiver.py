@@ -77,7 +77,8 @@ class Archiver(object):
             log.error("Unable to delete temp directory: {0}".format(e))
         hash_sum = self._get_hash(ARCHIVE_PKG_NAME)
         pkg_dir = os.path.join(cache_dir, hash_sum)
-        os.mkdir(pkg_dir)
+        if not os.path.exists(pkg_dir):
+            os.mkdir(pkg_dir)
         shutil.move(ARCHIVE_PKG_NAME, os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
         return os.path.abspath(os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
 
@@ -113,9 +114,11 @@ class Archiver(object):
 
     def create(self, client_type, cache_root, manifests, hash_sum, types):
         """
+        client_type -- client asked for metadata
+        cache_root -- directory where cache is stored
         manifests -- list of Manifest objects
-        *types - desired data types to be added to archive
-
+        hash_sum -- hash to compare to
+        types -- desired data types to be added to archive
         return: absolute path to created archive
         """
         #TODO: temporary hack for mockfs

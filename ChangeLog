@@ -1,9 +1,51 @@
-commit 5fbab4294125e6258e7e5c961522170214d5558d
+commit 9cf280bdedc56a320ea60ca40b0bf54127aa0e4e
+Author: Ekaterina Fedorova <efedorova@mirantis.com>
+Date:   Wed Oct 23 19:58:40 2013 +0400
+
+    Enable relative path for service manifest
+    
+    Change-Id: I5fc5edd9abe0c4915d26282d5e71f6b80f437b28
+
+commit c6a3f103ffc84aecca13ff2cc47274cbfdd464c1
+Author: Ekaterina Fedorova <efedorova@mirantis.com>
+Date:   Tue Oct 22 15:40:46 2013 +0400
+
+    Fix bugs
+    
+    1) Handle hash_sum = None situation
+    2) Add workflows to horizon archive
+    
+    Change-Id: Ie44e43bdabab239fbdfdcaae90c533f663041dd3
+
+commit d121a4195342fe3d9517a6f8f6176372d2e62ee9
+Author: Timur Sufiev <tsufiev@mirantis.com>
+Date:   Mon Oct 21 20:48:28 2013 +0400
+
+    Implement server-side caching.
+    
+    For the beginning, let's place server package cache into
+    muranorepository/api dir (this path can be easily got with
+    v1_api.root_path).
+    
+    Change-Id: I7acbb174491f153eb340efb92ed3b0ce4c5f840f
+    Implements-feature: MRN-1149
+
+commit b6613f9ecb5b90baf070f5c581a218d503b47e19
+Author: Timur Sufiev <tsufiev@mirantis.com>
+Date:   Mon Oct 21 16:36:13 2013 +0400
+
+    Add authentication against Keystone.
+    
+    Change-Id: Ifb581cc809074354d7db1404c28561ec722cf0f0
+    Implements-feature: MRN-1146.
+
+commit 367d90f116d399754436060ddb221539911c2211
 Author: Ekaterina Fedorova <efedorova@mirantis.com>
 Date:   Mon Oct 21 11:45:08 2013 +0400
 
     Add some unit tests
     
+    Refactor v1 api and archiver
     Change-Id: I193023dd8eca4f8cc665a29a6b86698bb38edc83
 
 commit de388f5e64d887ff6b20790fb540c05ab43dacf7
