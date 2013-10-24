@@ -22,28 +22,55 @@ from werkzeug import secure_filename
 from muranorepository.utils.parser import ManifestParser
 from muranorepository.utils.archiver import Archiver
 from muranorepository.consts import DATA_TYPES, MANIFEST
-
+from muranorepository.consts import CLIENTS_DICT
+from muranorepository.consts import ARCHIVE_PKG_NAME
+import logging as log
 from oslo.config import cfg
 CONF = cfg.CONF
 
 v1_api = Blueprint('v1', __name__)
 CACHE_DIR = os.path.join(v1_api.root_path, 'cache')
 
-if not os.path.exists(CACHE_DIR):
-    os.mkdir(CACHE_DIR)
+
+def _update_hash(data_type):
+    if data_type in CLIENTS_DICT.value:
+        client = CLIENTS_DICT.key
+    else:
+        return None
+    archive = Archiver()
+    cache_dir = os.path.join(CACHE_DIR, client)
+    if not os.path.exists(cache_dir):
+        return None
+    existing_hash = archive._get_existing_hash(cache_dir)
+    if not existing_hash:
+        return None
+    else:
+        manifests = ManifestParser(CONF.manifests).parse()
+        archive_manager = Archiver()
+        archive_manager.remove_existing_hash(cache_dir, existing_hash)
+        archive_manager.create(cache_dir, manifests, CLIENTS_DICT[client])
 
 
 def _get_archive(client, hash_sum):
     parser = ManifestParser(CONF.manifests)
     manifests = parser.parse()
-    types = None
-    if client == 'conductor':
-        types = ('heat', 'agent', 'scripts', 'workflows')
-    elif client == 'ui':
-        types = ('ui',)
-    else:
+    types = CLIENTS_DICT.get(client)
+    if not types:
         abort(404)
-    return Archiver().create(client, CACHE_DIR, manifests, hash_sum, types)
+    archive_manager = Archiver()
+    cache_dir = os.path.join(CACHE_DIR, client)
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    existing_hash = archive_manager._get_existing_hash(cache_dir)
+
+    if existing_hash and hash_sum is None:
+        log.debug('Retiring existing archive')
+        return os.path.join(cache_dir, existing_hash, ARCHIVE_PKG_NAME)
+
+    if archive_manager._hashes_match(cache_dir, existing_hash, hash_sum):
+        return None
+
+    return archive_manager.create(cache_dir, manifests, types)
 
 
 def _get_locations(data_type, result_path):
@@ -130,6 +157,7 @@ def upload_file_in_nested_path(data_type, path):
     if data_type == MANIFEST:
         abort(403)
     if not os.path.exists(result_path):
+        _update_hash(data_type)
         abort(404)
     return _save_file(request, result_path)
 
@@ -167,14 +195,3 @@ def delete_directory_or_file(data_type, path):
         except Exception:
             abort(403)
     return jsonify(result='success')
-
-
-@v1_api.route('/admin/services', methods=['GET'])
-def get_services_list():
-    manifests = ManifestParser(CONF.manifests).parse()
-    excluded_fields = set(DATA_TYPES) - set(MANIFEST)
-    data = []
-    for manifest in manifests:
-        data.append(dict((k, v) for k, v in manifest.__dict__.iteritems()
-                         if not k in excluded_fields))
-    return jsonify(tuple(data))
