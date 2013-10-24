@@ -1,0 +1,24 @@
+version: 0.1
+service_display_name: Demo Service
+
+description: >-
+  <strong> Demo Service </strong>
+  shows how Murano is working.
+
+full_service_name: demoService
+author: Mirantis Inc.
+service_version: 1.0
+enabled: True
+
+ui:
+  - Demo.yaml
+
+workflows:
+  - Demo.xml
+
+heat:
+  - Demo.template
+  - Linux.template
+
+agent:
+  - Demo.template

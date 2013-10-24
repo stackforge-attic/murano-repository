@@ -21,3 +21,7 @@ AGENT = 'agent'
 SCRIPTS = 'scripts'
 
 DATA_TYPES = [UI, WORKFLOW, HEAT, AGENT, SCRIPTS, MANIFEST]
+CLIENTS_DICT = {'conductor': (WORKFLOW, HEAT, AGENT, SCRIPTS),
+                'ui': (UI,)}
+
+ARCHIVE_PKG_NAME = 'data.tar.gz'

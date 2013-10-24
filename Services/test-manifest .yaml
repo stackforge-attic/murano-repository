@@ -1,0 +1,23 @@
+version: 0.1
+service_display_name: Telnet
+
+description: >-
+   <strong> Telnet Service </strong>
+
+full_service_name: telnet
+author: Mirantis Inc.
+service_version: 1.0
+enabled: True
+
+ui:
+  - LinuxTelnet.yaml
+
+workflows:
+  - LinuxTelnet.xml
+
+heat:
+  - Linux.template
+
+scripts:
+ - TelnetDeploy.sh
+
