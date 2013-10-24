@@ -82,35 +82,36 @@ class Archiver(object):
         shutil.move(ARCHIVE_PKG_NAME, os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
         return os.path.abspath(os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
 
-    def _is_data_cached(self, cache_dir, hash_sum):
-         #ToDo: optimize archive creation: use existing cached version of
-         # archive package when no hash sum is provided by client
-        if not hash_sum:
-            log.warning('Hash parameter was not found in request')
-            return False
+    def _get_existing_hash(self, cache_dir):
         existing_caches = os.listdir(cache_dir)
-        if len(existing_caches) == 1:
-            if existing_caches[0] == hash_sum:
-                path = os.path.join(cache_dir, hash_sum, ARCHIVE_PKG_NAME)
-                if not os.path.exists(path):
-                    raise RuntimeError(
-                        'Archive package is missing at dir {0}'.format(
-                            os.path.join(cache_dir, hash_sum)))
-                log.debug('Archive package already exists at {0} and it ' +
-                          'matches hash-sum {1}.'.format(path, hash_sum))
-                return True
-            else:
-                path = os.path.join(cache_dir, hash_sum)
-                log.info('Archive package already exists at {0}, but it '
-                         "doesn't match requested hash-sum {1}. "
-                         'Deleting it.'.format(path))
-                shutil.rmtree(path)
-                return False
-        elif len(existing_caches) == 0:
-            return False
+        assert(existing_caches < 1, 'Too many cached archives at {0}'.format(
+            cache_dir))
+        if not len(existing_caches):
+             return None
         else:
-            raise RuntimeError('Too many cached archives at {0}'.format(
-                cache_dir))
+             path = os.path.join(cache_dir,
+                                 existing_caches[0],
+                                 ARCHIVE_PKG_NAME)
+             if not os.path.exists(path):
+                raise RuntimeError(
+                    'Archive package is missing at dir {0}'.format(
+                        os.path.join(cache_dir, existing_caches[0])))
+             return existing_caches[0]
+
+    def _hashes_match(self, cache_dir, existing_hash, hash_to_check):
+        if hash_to_check is None:
+                return False
+        if existing_hash == hash_to_check:
+            log.debug('Archive package matches hash-sum {0}.'.format(
+                hash_to_check))
+            return True
+        else:
+            path = os.path.join(cache_dir, existing_hash)
+            log.info('Archive package already exists at {0}, but it '
+                     "doesn't match requested hash-sum {1}. "
+                     'Deleting it.'.format(path))
+            shutil.rmtree(path, ignore_errors=True)
+            return False
 
     def create(self, client_type, cache_root, manifests, hash_sum, types):
         """
@@ -130,9 +131,14 @@ class Archiver(object):
         cache_dir = os.path.join(cache_root, client_type)
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
+        existing_hash = self._get_existing_hash(cache_dir)
+        
+        if existing_hash and hash_sum is None:
+            log.debug('Retiring existing archive')
+            return os.path.join(cache_dir, existing_hash, ARCHIVE_PKG_NAME)
 
-        if self._is_data_cached(cache_dir, hash_sum):
-            return None
+        if self._hashes_match(cache_dir, existing_hash, hash_sum):
+             return None
 
         for data_type in types:
             if data_type not in DATA_TYPES:
