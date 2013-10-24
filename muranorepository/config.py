@@ -18,16 +18,18 @@ from muranorepository.consts import *
 
 server_opts = [
     cfg.StrOpt('host', default='127.0.0.1'),
-    cfg.IntOpt('port', default=5000),
-    cfg.StrOpt('auth_host', default=None),
+    cfg.IntOpt('port', default=5000)]
+
+keystone_opts = [
+    cfg.StrOpt('auth_host', default='localhost'),
     cfg.IntOpt('auth_port', default=5000),
     cfg.StrOpt('auth_protocol', default='http'),
     cfg.StrOpt('admin_user', default='admin'),
     cfg.StrOpt('admin_password', default=None),
-    cfg.StrOpt('admin_tenant_name', default='admin')
-]
+    cfg.StrOpt('admin_tenant_name', default='admin')]
 
 type_dirs_opts = [cfg.StrOpt(x) for x in DATA_TYPES]
+
 
 cfg.set_defaults(log.log_opts,
                  default_log_levels=['qpid.messaging=INFO',
@@ -37,6 +39,8 @@ CONF = cfg.CONF
 CONF.register_cli_opts(server_opts)
 CONF.register_opts(type_dirs_opts)
 CONF.register_opts(type_dirs_opts, group='output')
+CONF.register_opts(keystone_opts, group='keystone')
+
 
 ARGV = []
 
