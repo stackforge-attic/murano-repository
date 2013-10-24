@@ -22,6 +22,7 @@ from werkzeug import secure_filename
 from muranorepository.utils.parser import ManifestParser
 from muranorepository.utils.archiver import Archiver
 from muranorepository.consts import DATA_TYPES, MANIFEST
+
 from oslo.config import cfg
 CONF = cfg.CONF
 
@@ -166,3 +167,14 @@ def delete_directory_or_file(data_type, path):
         except Exception:
             abort(403)
     return jsonify(result='success')
+
+
+@v1_api.route('/admin/services', methods=['GET'])
+def get_services_list():
+    manifests = ManifestParser(CONF.manifests).parse()
+    excluded_fields = set(DATA_TYPES) - set(MANIFEST)
+    data = []
+    for manifest in manifests:
+        data.append(dict((k, v) for k, v in manifest.__dict__.iteritems()
+                         if not k in excluded_fields))
+    return jsonify(tuple(data))
