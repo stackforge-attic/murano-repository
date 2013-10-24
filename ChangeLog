@@ -1,4 +1,28 @@
-commit 9cf280bdedc56a320ea60ca40b0bf54127aa0e4e
+commit 50c1e4478a05cae95484fe18525cc76a527b4620
+Author: Ekaterina Fedorova <efedorova@mirantis.com>
+Date:   Thu Oct 24 20:07:04 2013 +0400
+
+    Modify Archive to send existing tar.gz if exists
+    
+    Change-Id: Ifb67856965586c2c5a115303e11c7b9856162aaf
+
+commit d7405d80cb70fa946f6158ec0731cded5965fe3a
+Author: Ekaterina Fedorova <efedorova@mirantis.com>
+Date:   Thu Oct 24 16:28:49 2013 +0400
+
+    Update ui forms, setup.py and confing file
+    
+    Change-Id: I2fe17a7dcb58248ff1fb1d6a85c61b26e7394e76
+
+commit 2d01ea5d5035d5f888b98ada293373f13124a55b
+Author: Timur Sufiev <tsufiev@mirantis.com>
+Date:   Thu Oct 24 15:34:24 2013 +0400
+
+    Preliminary implementation of new Service Catalog spec.
+    
+    Change-Id: I712d2ecafa8af8467e19dfb29bf8ef7341ea2d80
+
+commit 76199dbcd11efd24e9e2d195d2e0e85365e4790e
 Author: Ekaterina Fedorova <efedorova@mirantis.com>
 Date:   Wed Oct 23 19:58:40 2013 +0400
 
