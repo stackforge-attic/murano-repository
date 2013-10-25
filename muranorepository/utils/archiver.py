@@ -18,10 +18,9 @@ import shutil
 import hashlib
 import logging as log
 from oslo.config import cfg
-from muranorepository.consts import DATA_TYPES
+from muranorepository.consts import DATA_TYPES, ARCHIVE_PKG_NAME
 CONF = cfg.CONF
 
-ARCHIVE_PKG_NAME = 'data.tar.gz'
 CHUNK_SIZE = 1 << 20  # 1MB
 
 
@@ -75,49 +74,48 @@ class Archiver(object):
             shutil.rmtree(path, ignore_errors=True)
         except Exception as e:
             log.error("Unable to delete temp directory: {0}".format(e))
-        hash_sum = self._get_hash(ARCHIVE_PKG_NAME)
-        pkg_dir = os.path.join(cache_dir, hash_sum)
-        if not os.path.exists(pkg_dir):
-            os.mkdir(pkg_dir)
-        shutil.move(ARCHIVE_PKG_NAME, os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
-        return os.path.abspath(os.path.join(pkg_dir, ARCHIVE_PKG_NAME))
+        hash_folder = self._create_hash_folder(ARCHIVE_PKG_NAME, cache_dir)
+        try:
+            shutil.move(ARCHIVE_PKG_NAME, os.path.join(hash_folder,
+                                                       ARCHIVE_PKG_NAME))
+        except Exception as e:
+            log.error('Unable to move created archive {0}'
+                      ' to hash folder {1} due to {2}'.format(ARCHIVE_PKG_NAME,
+                                                              hash_folder,
+                                                              e))
+        return os.path.abspath(os.path.join(hash_folder, ARCHIVE_PKG_NAME))
 
-    def _is_data_cached(self, cache_dir, hash_sum):
-         #ToDo: optimize archive creation: use existing cached version of
-         # archive package when no hash sum is provided by client
-        if not hash_sum:
-            log.warning('Hash parameter was not found in request')
-            return False
+    def get_existing_hash(self, cache_dir):
         existing_caches = os.listdir(cache_dir)
-        if len(existing_caches) == 1:
-            if existing_caches[0] == hash_sum:
-                path = os.path.join(cache_dir, hash_sum, ARCHIVE_PKG_NAME)
-                if not os.path.exists(path):
-                    raise RuntimeError(
-                        'Archive package is missing at dir {0}'.format(
-                            os.path.join(cache_dir, hash_sum)))
-                log.debug('Archive package already exists at {0} and it ' +
-                          'matches hash-sum {1}.'.format(path, hash_sum))
-                return True
-            else:
-                path = os.path.join(cache_dir, hash_sum)
-                log.info('Archive package already exists at {0}, but it '
-                         "doesn't match requested hash-sum {1}. "
-                         'Deleting it.'.format(path))
-                shutil.rmtree(path)
-                return False
-        elif len(existing_caches) == 0:
-            return False
+        log.debug('Asserting there is just one archive in cache folder. Clear '
+                  'folder {0} in case of Assertion Error'.format(cache_dir))
+        assert len(existing_caches) < 2
+        if not len(existing_caches):
+            return None
         else:
-            raise RuntimeError('Too many cached archives at {0}'.format(
-                cache_dir))
+            path = os.path.join(cache_dir,
+                                existing_caches[0],
+                                ARCHIVE_PKG_NAME)
+            if not os.path.exists(path):
+                raise RuntimeError(
+                    'Archive package is missing at dir {0}'.format(
+                        os.path.join(cache_dir)))
+            return existing_caches[0]
 
-    def create(self, client_type, cache_root, manifests, hash_sum, types):
+    def hashes_match(self, cache_dir, existing_hash, hash_to_check):
+        if hash_to_check is None or existing_hash is None:
+            return False
+        if existing_hash == hash_to_check:
+            log.debug('Archive package matches hash-sum {0}.'.format(
+                hash_to_check))
+            return True
+        else:
+            self.remove_existing_hash(cache_dir, existing_hash)
+            return False
+
+    def create(self, cache_dir, manifests, types):
         """
-        client_type -- client asked for metadata
-        cache_root -- directory where cache is stored
         manifests -- list of Manifest objects
-        hash_sum -- hash to compare to
         types -- desired data types to be added to archive
         return: absolute path to created archive
         """
@@ -126,14 +124,6 @@ class Archiver(object):
             temp_dir = tempfile.mkdtemp()
         except:
             temp_dir = '/tmp'
-
-        cache_dir = os.path.join(cache_root, client_type)
-        if not os.path.exists(cache_dir):
-            os.mkdir(cache_dir)
-
-        if self._is_data_cached(cache_dir, hash_sum):
-            return None
-
         for data_type in types:
             if data_type not in DATA_TYPES:
                 raise Exception("Please, specify one of the supported data "
@@ -157,3 +147,20 @@ class Archiver(object):
                         "{1}".format(manifest.service_display_name, data_type))
 
         return self._compose_archive(temp_dir, cache_dir)
+
+    def remove_existing_hash(self, cache_dir, hash):
+        path = os.path.join(cache_dir, hash)
+        log.info('Deleting archive package from {0}.'.format(path))
+        shutil.rmtree(path, ignore_errors=True)
+
+    def _create_hash_folder(self, archive_name, cache_dir):
+        """
+        Creates folder with data archive inside that has
+        name equals to hash calculated from archive
+        Return path to created hash folder
+        """
+        hash_sum = self._get_hash(archive_name)
+        pkg_dir = os.path.join(cache_dir, hash_sum)
+        if not os.path.exists(pkg_dir):
+            os.mkdir(pkg_dir)
+        return pkg_dir
