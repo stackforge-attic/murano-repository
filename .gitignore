@@ -26,6 +26,9 @@ pip-log.txt
 .tox
 nosetests.xml
 
+AUTHORS
+Changelog
+
 # Translations
 *.mo
 
@@ -34,4 +37,5 @@ nosetests.xml
 .project
 .pydevproject
 .idea
-etc/murano-repository.conf
+
+/etc/murano-repository.conf
