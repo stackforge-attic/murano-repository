@@ -13,7 +13,7 @@
 # under the License.
 
 import os
-
+import re
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
@@ -34,7 +34,7 @@ if not os.path.exists(CACHE_DIR):
     os.mkdir(CACHE_DIR)
 
 
-def _update_hash(data_type):
+def _update_cache(data_type):
     client = None
     for client_type, client_data_types in CLIENTS_DICT.iteritems():
         if data_type in client_data_types:
@@ -53,13 +53,10 @@ def _update_hash(data_type):
     archive_manager.create(cache_dir, manifests, CLIENTS_DICT[client])
 
 
-def _get_archive(client, hash_sum):
-    parser = ManifestParser(CONF.manifests)
-    manifests = parser.parse()
-    types = CLIENTS_DICT.get(client)
-    if not types:
-        abort(404)
-    archive_manager = Archiver()
+def _get_archive(manifests, client, hash_sum, dst_from_config=True):
+    #ToDo: Is it ok?
+    types = CLIENTS_DICT.get(client) or DATA_TYPES
+    archive_manager = Archiver(dst_from_config)
     cache_dir = os.path.join(CACHE_DIR, client)
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
@@ -105,7 +102,7 @@ def _save_file(request, data_type, path=None):
     if file_to_upload:
         filename = secure_filename(file_to_upload.filename)
         file_to_upload.save(os.path.join(result_path, filename))
-        _update_hash(data_type)
+        _update_cache(data_type)
         return jsonify(result='success')
     else:
         abort(400)
@@ -123,13 +120,37 @@ def _check_data_type(data_type):
         abort(404)
 
 
-@v1_api.route('/client/<path:type>')
-def get_archive_data(type):
-    path = _get_archive(type, request.args.get('hash'))
-    if path:
-        return send_file(path, mimetype='application/octet-stream')
+@v1_api.route('/client/<path:client_type>')
+def get_archive_data(client_type):
+    manifests = ManifestParser().parse()
+    if client_type not in CLIENTS_DICT.keys():
+        abort(404)
+    path_to_archive = _get_archive(manifests,
+                                   client_type,
+                                   request.args.get('hash'))
+    if path_to_archive:
+        return send_file(path_to_archive, mimetype='application/octet-stream')
     else:
-        return make_response(('Not modified', 304))
+        return make_response('Not modified', 304)
+
+
+@v1_api.route('/client/<service_name>')
+def download_service_archive(service_name):
+    # In the future service name may contains dots
+    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
+        abort(404)
+    manifests = ManifestParser().parse()
+    service_manifest = [manifest for manifest in manifests
+                        if manifest.full_service_name == service_name]
+    assert len(service_manifest) == 1
+    path_to_archive = _get_archive(service_manifest,
+                                   service_name,
+                                   request.args.get('hash'),
+                                   dst_from_config=False)
+    if path_to_archive:
+        return send_file(path_to_archive, mimetype='application/octet-stream')
+    else:
+        return make_response('Not modified', 304)
 
 
 @v1_api.route('/admin/<data_type>')
@@ -192,7 +213,7 @@ def delete_directory_or_file(data_type, path):
     if os.path.isfile(result_path):
         try:
             os.remove(result_path)
-            _update_hash(data_type)
+            _update_cache(data_type)
         except Exception:
             abort(404)
     else:
@@ -202,3 +223,29 @@ def delete_directory_or_file(data_type, path):
         except Exception:
             abort(403)
     return jsonify(result='success')
+
+
+@v1_api.route('/admin/services')
+def get_services_list():
+    # Do we need to check manifest is valid here
+    manifests = ManifestParser().parse()
+    excluded_fields = set(DATA_TYPES) - set(MANIFEST)
+    data = []
+    for manifest in manifests:
+        data.append(dict((k, v) for k, v in manifest.__dict__.iteritems()
+                         if not k in excluded_fields))
+    return jsonify(services=data)
+
+
+@v1_api.route('/admin/services/<service_name>')
+def get_files_for_service(service_name):
+    # In the future service name may contains dots
+    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
+        abort(404)
+    manifests = ManifestParser().parse()
+    data = []
+    for manifest in manifests:
+        if manifest.full_service_name == service_name:
+            data.append(dict((k, v) for k, v in manifest.__dict__.iteritems()
+                             if k in DATA_TYPES))
+    return jsonify(service_files=data)

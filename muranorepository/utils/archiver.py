@@ -25,6 +25,17 @@ CHUNK_SIZE = 1 << 20  # 1MB
 
 
 class Archiver(object):
+    def __init__(self, dst_from_config=True):
+        self.dst_directories = {}
+        if dst_from_config:
+            for data_type in DATA_TYPES:
+                self.dst_directories[data_type] = getattr(CONF.output,
+                                                          data_type)
+        else:
+            # Use data_type key as destination folder
+            for data_type in DATA_TYPES:
+                self.dst_directories[data_type] = data_type
+
     def _copy_data(self, file_lists, src, dst):
         if not os.path.exists(dst):
             os.makedirs(dst)
@@ -115,6 +126,7 @@ class Archiver(object):
 
     def create(self, cache_dir, manifests, types):
         """
+        cache_dir - full path to dir where cache contains
         manifests -- list of Manifest objects
         types -- desired data types to be added to archive
         return: absolute path to created archive
@@ -126,8 +138,9 @@ class Archiver(object):
             temp_dir = '/tmp'
         for data_type in types:
             if data_type not in DATA_TYPES:
-                raise Exception("Please, specify one of the supported data "
-                                "types: {0}".format(DATA_TYPES))
+                raise Exception(" {0} data type specified for archiving is not"
+                                " valid. Supported data types are: "
+                                "{1}".format(data_type, DATA_TYPES))
 
             for manifest in manifests:
                 if not manifest.enabled and not manifest.valid:
@@ -135,17 +148,15 @@ class Archiver(object):
 
                 if hasattr(manifest, data_type):
                     file_list = getattr(manifest, data_type)
-                    dst_directory = os.path.join(temp_dir,
-                                                 getattr(CONF.output,
-                                                         data_type))
                     scr_directory = os.path.join(CONF.manifests,
                                                  getattr(CONF, data_type))
+                    dst_directory = os.path.join(
+                        temp_dir, self.dst_directories[data_type])
                     self._copy_data(file_list, scr_directory, dst_directory)
                 else:
                     log.info(
                         "Manifest for {0} service has no file definitions for "
                         "{1}".format(manifest.service_display_name, data_type))
-
         return self._compose_archive(temp_dir, cache_dir)
 
     def remove_existing_hash(self, cache_dir, hash):

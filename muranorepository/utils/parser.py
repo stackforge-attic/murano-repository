@@ -22,8 +22,8 @@ CONF = cfg.CONF
 
 
 class ManifestParser(object):
-    def __init__(self, manifest_directory):
-        self.manifest_directory = manifest_directory
+    def __init__(self):
+        self.manifest_directory = CONF.manifests
 
     def parse(self):
         manifests = []
