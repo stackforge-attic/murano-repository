@@ -22,7 +22,9 @@ CONF = cfg.CONF
 
 
 class ManifestParser(object):
-    def __init__(self, manifest_directory):
+    def __init__(self, manifest_directory=None):
+        if not manifest_directory:
+            manifest_directory = CONF.manifests
         self.manifest_directory = manifest_directory
 
     def parse(self):
@@ -44,7 +46,7 @@ class ManifestParser(object):
                                  "The reason: {1!s}".format(manifest_file,
                                                             exc))
                         continue
-
+                service_manifest_data['manifest_file_name'] = file
                 #check files specified in manifests for existence
                 for key, value in service_manifest_data.iteritems():
                     valid_file_info = True
