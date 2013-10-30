@@ -18,7 +18,6 @@ workflows:
 
 heat:
   - Demo.template
-  - Linux.template
 
 agent:
   - Demo.template
