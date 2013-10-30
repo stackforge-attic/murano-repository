@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+import glob
 import tarfile
 import tempfile
 import shutil
@@ -82,46 +83,28 @@ class Archiver(object):
             return hsum
         else:
             log.info(
-                'Archive {0} does not exist, no hash to calculate'.format(
+                "Archive '{0}' doesn't exist, no hash to calculate".format(
                     archive_path))
             return None
 
-    def _compose_archive(self, arch_name, path, hash=False, cache_dir=None):
-        with tarfile.open(arch_name, 'w:gz') as tar:
+    def _compose_archive(self, path, cache_dir):
+        with tarfile.open(ARCHIVE_PKG_NAME, "w:gz") as tar:
             for item in os.listdir(path):
                 tar.add(os.path.join(path, item), item)
         try:
             shutil.rmtree(path, ignore_errors=True)
         except Exception as e:
-            log.error('Unable to delete temp directory: {0}'.format(e))
-        if not hash:
-            return arch_name
-        else:
-            if not cache_dir:
-                raise ValueError('cache_dir parameter should not be None. '
-                                 'It is needed to create hash directory')
-            hash_folder = self._create_hash_folder(arch_name, cache_dir)
-            try:
-                shutil.move(ARCHIVE_PKG_NAME, os.path.join(hash_folder,
-                                                           arch_name))
-            except Exception as e:
-                log.error('Unable to move created archive {0}'
-                          ' to hash folder {1} due to {2}'.format(arch_name,
-                                                                  hash_folder,
-                                                                  e))
-            return os.path.abspath(os.path.join(hash_folder, arch_name))
-
-    def _create_hash_folder(self, archive_name, cache_dir):
-        """
-        Creates folder with data archive inside that has
-        name equals to hash calculated from archive
-        Return path to created hash folder
-        """
-        hash_sum = self._get_hash(archive_name)
-        pkg_dir = os.path.join(cache_dir, hash_sum)
-        if not os.path.exists(pkg_dir):
-            os.mkdir(pkg_dir)
-        return pkg_dir
+            log.error("Unable to delete temp directory: {0}".format(e))
+        hash_folder = self._create_hash_folder(ARCHIVE_PKG_NAME, cache_dir)
+        try:
+            shutil.move(ARCHIVE_PKG_NAME, os.path.join(hash_folder,
+                                                       ARCHIVE_PKG_NAME))
+        except Exception as e:
+            log.error('Unable to move created archive {0}'
+                      ' to hash folder {1} due to {2}'.format(ARCHIVE_PKG_NAME,
+                                                              hash_folder,
+                                                              e))
+        return os.path.abspath(os.path.join(hash_folder, ARCHIVE_PKG_NAME))
 
     def get_existing_hash(self, cache_dir):
         existing_caches = os.listdir(cache_dir)
@@ -209,3 +192,53 @@ class Archiver(object):
         path = os.path.join(cache_dir, hash)
         log.info('Deleting archive package from {0}.'.format(path))
         shutil.rmtree(path, ignore_errors=True)
+
+    def extract(self, path_to_archive):
+        """
+        path_to_archive - path to archive to extract from
+        ---
+        return value - True if succeeded , False otherwise
+        """
+        try:
+            path_to_extract = tempfile.mkdtemp()
+            with tarfile.open(path_to_archive) as archive:
+                archive.extractall(path_to_extract)
+            # assert manifest file
+            manifest = glob.glob(os.path.join(path_to_extract,
+                                              '*-manifest.yaml'))
+            if len(manifest) != 1:
+                raise AssertionError('There should be one '
+                                     'manifest file in archive')
+
+            shutil.copy(manifest[0], CONF.manifests)
+            #Todo: Check manifest is valid
+            for item in os.listdir(path_to_extract):
+                item_path = os.path.join(path_to_extract, item)
+                if os.path.isdir(item_path):
+                    if item in DATA_TYPES:
+                        file_list = []
+                        for path, subdirs, files in os.walk(item_path):
+                            for name in files:
+                                if path != item_path:
+                                    # add directory names for nested files
+                                    base, diff = path.rsplit(item_path, 2)
+                                    name = os.path.join(diff[1:], name)
+                                file_list.append(name)
+                        self._copy_data(file_list,
+                                        item_path,
+                                        os.path.join(
+                                            CONF.manifests,
+                                            self.src_directories[item]),
+                                        overwrite=False)
+                    else:
+                        log.warning(
+                            'Uploading archive contents folder {0} that does '
+                            'not correspond to supported data types: {1}. '
+                            'It will be ignored'.format(item, DATA_TYPES))
+            return True
+        except Exception as e:
+            log.error('Unable to extract archive due to {0}'.format(e.message))
+            return False
+        finally:
+            os.remove(path_to_archive)
+            shutil.rmtree(path_to_extract, ignore_errors=True)
