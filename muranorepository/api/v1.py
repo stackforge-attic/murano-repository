@@ -66,7 +66,7 @@ def _get_archive(client, hash_sum):
     existing_hash = archive_manager.get_existing_hash(cache_dir)
 
     if existing_hash and hash_sum is None:
-        log.debug('transferring existing archive')
+        log.debug('Transferring existing archive')
         return os.path.join(cache_dir, existing_hash, ARCHIVE_PKG_NAME)
 
     if archive_manager.hashes_match(cache_dir, existing_hash, hash_sum):
@@ -287,3 +287,43 @@ def upload_new_service(service_name):
     else:
         #ToDo: Pass error msg there
         return make_response('Uploading file failed.', 400)
+
+
+@v1_api.route('/admin/services/<service_name>', methods=['DELETE'])
+def delete_service(service_name):
+    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
+        abort(404)
+    manifests = ManifestParser().parse()
+    manifest_for_deletion = None
+    # Search for manifest to delete
+    for manifest in manifests:
+        if manifest.full_service_name == service_name:
+            manifest_for_deletion = manifest
+            files_for_deletion = _get_manifest_files(manifest_for_deletion)
+            manifests.remove(manifest_for_deletion)
+            break
+    if not manifest_for_deletion:
+        abort(404)
+
+    files_for_deletion = _exclude_common_files(files_for_deletion, manifests)
+
+    path_to_manifest = os.path.join(CONF.manifests,
+                                    manifest_for_deletion.manifest_file_name)
+    log.debug('Deleting manifest file {0}'.format(path_to_manifest))
+    if os.path.exists(path_to_manifest):
+        os.remove(path_to_manifest)
+
+    for data_type, files in files_for_deletion.iteritems():
+        for file in files:
+            path_to_delete = os.path.join(CONF.manifests,
+                                          getattr(CONF, data_type),
+                                          file)
+            try:
+                log.debug('Removing file {0} corresponds to {1} '
+                          'service'.format(path_to_delete, service_name))
+                if os.path.exists(path_to_delete):
+                    os.remove(path_to_delete)
+            except Exception:
+                return make_response('Unable to delete file {0}'.format(file),
+                                     400)
+    return jsonify(result='success')
