@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+import glob
 import tarfile
 import tempfile
 import shutil
@@ -82,7 +83,7 @@ class Archiver(object):
             return hsum
         else:
             log.info(
-                'Archive {0} does not exist, no hash to calculate'.format(
+                "Archive '{0}' doesn't exist, no hash to calculate".format(
                     archive_path))
             return None
 
@@ -209,3 +210,57 @@ class Archiver(object):
         path = os.path.join(cache_dir, hash)
         log.info('Deleting archive package from {0}.'.format(path))
         shutil.rmtree(path, ignore_errors=True)
+
+    def extract(self, path_to_archive):
+        """
+        path_to_archive - path to archive to extract from
+        ---
+        return value - True if succeeded , False otherwise
+        """
+        try:
+            path_to_extract = tempfile.mkdtemp()
+            with tarfile.open(path_to_archive) as archive:
+                archive.extractall(path_to_extract)
+            # assert manifest file
+            manifests = glob.glob(os.path.join(path_to_extract,
+                                               '*-manifest.yaml'))
+            if len(manifests) != 1:
+                raise AssertionError('There should be one '
+                                     'manifest file in archive')
+
+            shutil.copy(manifests[0], CONF.manifests)
+            #Todo: Check manifest is valid
+            for item in os.listdir(path_to_extract):
+                item_path = os.path.join(path_to_extract, item)
+                if os.path.isdir(item_path):
+                    if item in DATA_TYPES:
+                        file_list = []
+                        for path, subdirs, files in os.walk(item_path):
+                            # ToDo: Extract to a separate
+                            # function and use in v1.py also
+                            nested = False
+                            if path != item_path:
+                                base, subfolder = path.rsplit(item_path, 2)
+                                nested = True
+                            for name in files:
+                                if nested:
+                                    name = os.path.join(subfolder[1:], name)
+                                file_list.append(name)
+                        self._copy_data(file_list,
+                                        item_path,
+                                        os.path.join(
+                                            CONF.manifests,
+                                            self.src_directories[item]),
+                                        overwrite=False)
+                    else:
+                        log.warning(
+                            'Uploading archive contents folder {0} that does '
+                            'not correspond to supported data types: {1}. '
+                            'It will be ignored'.format(item, DATA_TYPES))
+            return True
+        except Exception as e:
+            log.error('Unable to extract archive due to {0}'.format(e.message))
+            return False
+        finally:
+            os.remove(path_to_archive)
+            shutil.rmtree(path_to_extract, ignore_errors=True)
