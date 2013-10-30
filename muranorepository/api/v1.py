@@ -14,7 +14,7 @@
 
 import os
 import re
-import tempfile
+import tarfile
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
@@ -56,7 +56,7 @@ def _update_cache(data_type):
     archive_manager.create(cache_dir, manifests, CLIENTS_DICT[client])
 
 
-def _get_archive(manifests, client, hash_sum):
+def _get_archive(client, hash_sum):
     types = CLIENTS_DICT.get(client)
     archive_manager = Archiver()
     cache_dir = os.path.join(CACHE_DIR, client)
@@ -70,6 +70,7 @@ def _get_archive(manifests, client, hash_sum):
 
     if archive_manager.hashes_match(cache_dir, existing_hash, hash_sum):
         return None
+    manifests = ManifestParser().parse()
     return archive_manager.create(cache_dir, manifests, types)
 
 
@@ -124,44 +125,20 @@ def _check_data_type(data_type):
 
 
 def _get_manifest_files(manifest):
-    return dict((k, v)
-                for k, v in manifest.__dict__.iteritems() if k in DATA_TYPES)
+    return dict((k, v) for k, v in manifest.__dict__.iteritems()
+                if k in DATA_TYPES)
 
 
 @v1_api.route('/client/<path:client_type>')
 def get_archive_data(client_type):
-    manifests = ManifestParser().parse()
     if client_type not in CLIENTS_DICT.keys():
         abort(404)
-    path_to_archive = _get_archive(manifests,
-                                   client_type,
+    path_to_archive = _get_archive(client_type,
                                    request.args.get('hash'))
     if path_to_archive:
         return send_file(path_to_archive, mimetype='application/octet-stream')
     else:
         return make_response('Not modified', 304)
-
-
-@v1_api.route('/client/services/<service_name>')
-def download_service_archive(service_name):
-    # In the future service name may contains dots
-    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
-        abort(404)
-    manifests = ManifestParser().parse()
-    service_manifest = [manifest for manifest in manifests
-                        if manifest.full_service_name == service_name]
-    if not service_manifest:
-        abort(404)
-    assert len(service_manifest) == 1
-    archive_manager = Archiver(dst_by_data_type=True)
-    #ToDo: Create new class to prevent opening twice the same file for writing
-    with tempfile.NamedTemporaryFile() as tempf:
-        try:
-            file = archive_manager.create_service_archive(manifest, tempf.name)
-        except:
-            log.error('Unable to create service archive')
-            abort(500)
-        return send_file(file, mimetype='application/octet-stream')
 
 
 @v1_api.route('/admin/<data_type>')
@@ -193,6 +170,7 @@ def _get_locations_in_nested_path_or_get_file(data_type, path):
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['POST'])
 def upload_file_in_nested_path(data_type, path):
     _check_data_type(data_type)
+
     if data_type == MANIFEST:
         make_response('It is forbidden to upload manifests to subfolders', 403)
     return _save_file(request, data_type, path)
@@ -262,3 +240,27 @@ def get_files_for_service(service_name):
     if not data:
         abort(404)
     return jsonify(service_files=data)
+
+
+@v1_api.route('/admin/services/<service_name>', methods=['POST'])
+def upload_new_service(service_name):
+    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
+        abort(404)
+    file_to_upload = request.files.get('file')
+
+    if file_to_upload:
+        filename = secure_filename(file_to_upload.filename)
+    else:
+        return make_response('There is no file to upload', 403)
+    path_to_archive = os.path.join(CACHE_DIR, filename)
+    file_to_upload.save(path_to_archive)
+    if not tarfile.is_tarfile(path_to_archive):
+        return make_response('Uploading file should be a tar archive', 403)
+
+    archive_manager = Archiver()
+    result = archive_manager.extract(path_to_archive)
+    if result:
+        return jsonify(result='success')
+    else:
+        #ToDo: Pass error msg there
+        return make_response('Uploading file failed.', 400)
