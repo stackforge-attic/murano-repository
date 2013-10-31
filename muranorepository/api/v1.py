@@ -276,8 +276,9 @@ def get_files_for_service(service_name):
     return jsonify(service_files=data)
 
 
-@v1_api.route('/admin/services', methods=['POST'])
-def upload_new_service():
+@v1_api.route('/admin/services/<service_name>', methods=['POST'])
+def upload_new_service(service_name):
+    _check_service_name(service_name)
     file_to_upload = request.files.get('file')
 
     if file_to_upload:
