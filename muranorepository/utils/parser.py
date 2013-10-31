@@ -14,11 +14,13 @@
 
 import os
 import yaml
+from threading import Lock
 from oslo.config import cfg
 import logging as log
 from muranorepository.manifest import Manifest
 from muranorepository.consts import DATA_TYPES, MANIFEST
 CONF = cfg.CONF
+lock = Lock()
 
 
 class ManifestParser(object):
@@ -68,8 +70,9 @@ class ManifestParser(object):
                     continue
 
                 try:
-                    with open(manifest_file) as stream:
-                        manifest_data = yaml.load(stream)
+                    with lock:
+                        with open(manifest_file) as stream:
+                            manifest_data = yaml.load(stream)
                 except yaml.YAMLError, exc:
                         log.warn("Failed to load manifest file. {0}. "
                                  "The reason: {1!s}".format(manifest_file,
@@ -95,11 +98,12 @@ class ManifestParser(object):
             log.error('There is no manifest '
                       'file for {0} service'.format(service_name))
             return False
-        with open(path_to_manifest) as stream:
-            service_manifest_data = yaml.load(stream)
-        service_manifest_data['enabled'] = \
-            not service_manifest_data.get('enabled')
-        with open(path_to_manifest, 'w') as manifest_file:
-            manifest_file.write(yaml.dump(service_manifest_data,
-                                          default_flow_style=False))
+        with lock:
+            with open(path_to_manifest) as stream:
+                service_manifest_data = yaml.load(stream)
+            service_manifest_data['enabled'] = \
+                not service_manifest_data.get('enabled')
+            with open(path_to_manifest, 'w') as manifest_file:
+                manifest_file.write(yaml.dump(service_manifest_data,
+                                              default_flow_style=False))
         return True
