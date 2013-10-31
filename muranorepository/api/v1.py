@@ -28,11 +28,10 @@ from muranorepository.consts import CLIENTS_DICT
 from muranorepository.consts import ARCHIVE_PKG_NAME
 import logging as log
 from oslo.config import cfg
-CONF = cfg.CONF
-
 v1_api = Blueprint('v1', __name__)
-CACHE_DIR = os.path.join(v1_api.root_path, 'cache')
 
+CONF = cfg.CONF
+CACHE_DIR = os.path.join(v1_api.root_path, 'cache')
 
 if not os.path.exists(CACHE_DIR):
     os.mkdir(CACHE_DIR)
@@ -140,6 +139,11 @@ def _exclude_common_files(files_for_deletion, manifests):
     return files_for_deletion
 
 
+def _check_service_name(service_name):
+    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
+        abort(404)
+
+
 @v1_api.route('/client/<path:client_type>')
 def get_archive_data(client_type):
     if client_type not in CLIENTS_DICT.keys():
@@ -155,8 +159,7 @@ def get_archive_data(client_type):
 @v1_api.route('/client/services/<service_name>')
 def download_service_archive(service_name):
     # In the future service name may contains dots
-    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
-        abort(404)
+    _check_service_name(service_name)
     manifests = ManifestParser().parse()
     service_manifest = [manifest for manifest in manifests
                         if manifest.full_service_name == service_name]
@@ -261,9 +264,7 @@ def get_services_list():
 
 @v1_api.route('/admin/services/<service_name>')
 def get_files_for_service(service_name):
-    # In the future service name may contains dots
-    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
-        abort(404)
+    _check_service_name(service_name)
     manifests = ManifestParser().parse()
     data = []
     for manifest in manifests:
@@ -277,8 +278,7 @@ def get_files_for_service(service_name):
 
 @v1_api.route('/admin/services/<service_name>', methods=['POST'])
 def upload_new_service(service_name):
-    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
-        abort(404)
+    _check_service_name(service_name)
     file_to_upload = request.files.get('file')
 
     if file_to_upload:
@@ -303,8 +303,7 @@ def upload_new_service(service_name):
 def delete_service(service_name):
     #TODO: Handle situation when error occurred in the middle of deleting.
     # Need to repair already deleted files
-    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
-        abort(404)
+    _check_service_name(service_name)
     manifests = ManifestParser().parse()
     manifest_for_deletion = None
     # Search for manifest to delete
@@ -339,3 +338,15 @@ def delete_service(service_name):
                 return make_response('Unable to delete file {0}'.format(file),
                                      500)
     return jsonify(result='success')
+
+
+@v1_api.route('/admin/services/<service_name>/toggleEnabled',
+              methods=['POST'])
+def toggleEnabled(service_name):
+    _check_service_name(service_name)
+    parser = ManifestParser()
+    result = parser.toggle_enabled(service_name)
+    if result:
+        return jsonify(result='success')
+    else:
+        return make_response('Unable to toggle enable value', 500)
