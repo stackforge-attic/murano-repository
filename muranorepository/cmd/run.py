@@ -51,14 +51,7 @@ def main():
     config.parse_configs(sys.argv[1:], config_files)
     log.setup('muranorepository')
 
-    app = server.make_app({
-        'auth_host': cfg.CONF.keystone.auth_host,
-        'auth_port': cfg.CONF.keystone.auth_port,
-        'auth_protocol': cfg.CONF.keystone.auth_protocol,
-        'admin_user': cfg.CONF.keystone.admin_user,
-        'admin_password': cfg.CONF.keystone.admin_password,
-        'admin_tenant_name': cfg.CONF.keystone.admin_tenant_name
-    })
+    app = server.make_app()
     if not os.path.isabs(config.CONF.manifests):
         config.CONF.manifests = os.path.join(possible_topdir,
                                              config.CONF.manifests)
