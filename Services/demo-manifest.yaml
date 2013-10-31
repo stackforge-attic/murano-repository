@@ -1,23 +1,11 @@
-version: 0.1
-service_display_name: Demo Service
-
-description: >-
-  <strong> Demo Service </strong>
-  shows how Murano is working.
-
-full_service_name: demoService
+agent: [Demo.template]
 author: Mirantis Inc.
+description: <strong> Demo Service </strong> shows how Murano is working.
+enabled: false
+full_service_name: demoService
+heat: [Demo.template, Linux.template]
+service_display_name: Demo Service
 service_version: 1.0
-enabled: True
-
-ui:
-  - Demo.yaml
-
-workflows:
-  - Demo.xml
-
-heat:
-  - Demo.template
-
-agent:
-  - Demo.template
+ui: [Demo.yaml]
+version: 0.1
+workflows: [Demo.xml]
