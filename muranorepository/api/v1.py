@@ -105,6 +105,8 @@ def _save_file(request, data_type, path=None):
     file_to_upload = request.files.get('file')
     if file_to_upload:
         filename = secure_filename(file_to_upload.filename)
+        if os.path.exists(os.path.join(result_path, filename)):
+            abort(403)
         file_to_upload.save(os.path.join(result_path, filename))
         _update_cache(data_type)
         return jsonify(result='success')
@@ -349,4 +351,5 @@ def toggleEnabled(service_name):
     if result:
         return jsonify(result='success')
     else:
-        return make_response('Unable to toggle enable value', 500)
+        return make_response('Unable to toggle '
+                             'enable parameter for specified service', 500)
