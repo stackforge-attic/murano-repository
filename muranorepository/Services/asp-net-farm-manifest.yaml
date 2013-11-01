@@ -16,9 +16,16 @@ ui:
 workflows:
   - WebApps.xml
   - Common.xml
+  - Networking.xml
 
 heat:
   - Windows.template
+  - InstancePort.template
+  - InstancePortWSubnet.template
+  - Network.template
+  - Param.template
+  - RouterInterface.template
+  - Subnet.template
   - LoadBalancer.template
 
 agent:

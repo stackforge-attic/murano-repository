@@ -3,7 +3,7 @@ Version: 1.0.0
 Name: Deploy Apache
 
 Parameters:
-  enablePHP: $enablePHP
+  enablePHP: $deployApachePHP
 
 Body: |
   return apacheDeploy('{0}'.format(args.enablePHP)).stdout
@@ -14,8 +14,8 @@ Scripts:
     Version: 1.0.0
     EntryPoint: Linux/runApacheDeploy.sh
     Files:
-      - Linux/installer.sh
-      - Linux/common.sh
+      - <Linux/installer.sh>
+      - <Linux/common.sh>
     Options:
       captureStdout: true
-      captureStderr: true
+      captureStderr: false
