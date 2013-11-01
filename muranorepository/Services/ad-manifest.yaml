@@ -16,10 +16,17 @@ ui:
 
 workflows:
   - AD.xml
+  - Networking.xml
   - Common.xml
 
 heat:
   - Windows.template
+  - InstancePort.template
+  - InstancePortWSubnet.template
+  - Network.template
+  - Param.template
+  - RouterInterface.template
+  - Subnet.template
 
 agent:
   - SetPassword.template
