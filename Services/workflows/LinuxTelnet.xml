@@ -1,6 +1,6 @@
 <workflow>
 
-	<rule match="$.services[?(@.type == 'linuxTelnetService')].units[?(@.state.hostname and not @.temp.instanceName)]"
+	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'linuxTelnetService')].units[?(@.state.hostname and not @.temp.instanceName)]"
 		desc="Units of Linux Telnet service having hostname and image names assigned but without instances">
 		<report entity="unit">
 			<parameter name="id"><select path="id"/></parameter>
