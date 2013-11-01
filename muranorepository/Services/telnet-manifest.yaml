@@ -15,9 +15,16 @@ ui:
 
 workflows:
   - LinuxTelnet.xml
+  - Networking.xml
 
 heat:
   - Linux.template
+  - InstancePort.template
+  - InstancePortWSubnet.template
+  - Network.template
+  - Param.template
+  - RouterInterface.template
+  - Subnet.template
 
 agent:
   - DeployTelnet.template
