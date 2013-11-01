@@ -11,11 +11,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 import os
+import shutil
 import re
 import tarfile
 import tempfile
+import datetime
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
@@ -144,6 +145,57 @@ def _exclude_common_files(files_for_deletion, manifests):
 def _check_service_name(service_name):
     if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
         abort(404)
+
+
+def _perform_deletion(files_for_deletion, manifest_for_deletion):
+    def backup_data():
+        backup_dir = os.path.join(
+            os.path.dirname(CONF.manifests),
+            'Backup_{0}'.format(datetime.datetime.utcnow())
+        )
+        log.debug('Creating service data backup to {0}'.format(backup_dir))
+        shutil.copytree(CONF.manifests, backup_dir)
+        return backup_dir
+
+    def release_backup(backup):
+        try:
+            shutil.rmtree(backup, ignore_errors=True)
+        except Exception as e:
+            log.error(
+                'Release Backup: '
+                'Backup {0} deletion failed {1}'.format(backup, e.message)
+            )
+
+    def restore_backup(backup):
+        log.debug('Restore service data after unsuccessful deletion')
+        shutil.rmtree(CONF.manifests, ignore_errors=True)
+        os.rename(backup, CONF.manifests)
+
+    backup_dir = backup_data()
+    service_name = manifest_for_deletion.full_service_name
+    path_to_manifest = os.path.join(CONF.manifests,
+                                    manifest_for_deletion.manifest_file_name)
+    try:
+        log.debug('Deleting manifest file {0}'.format(path_to_manifest))
+        if os.path.exists(path_to_manifest):
+            os.remove(path_to_manifest)
+
+        for data_type, files in files_for_deletion.iteritems():
+            data_type_dir = os.path.join(CONF.manifests, getattr(CONF, data_type))
+            for file in files:
+                path_to_delete = os.path.join(data_type_dir, file)
+                log.debug('Delete {0}: Removing {1} file'.format(
+                    service_name, path_to_delete))
+                if os.path.exists(path_to_delete):
+                    os.remove(path_to_delete)
+    except Exception as e:
+        log.exception('Deleting operation failed '
+                      'due to {0}'.format(e.message))
+        restore_backup(backup_dir)
+        abort(500)
+    else:
+        release_backup(backup_dir)
+        return jsonify(result='success')
 
 
 @v1_api.route('/client/<path:client_type>')
@@ -303,8 +355,6 @@ def upload_new_service(service_name):
 
 @v1_api.route('/admin/services/<service_name>', methods=['DELETE'])
 def delete_service(service_name):
-    #TODO: Handle situation when error occurred in the middle of deleting.
-    # Need to repair already deleted files
     _check_service_name(service_name)
     manifests = ManifestParser().parse()
     manifest_for_deletion = None
@@ -320,26 +370,7 @@ def delete_service(service_name):
 
     files_for_deletion = _exclude_common_files(files_for_deletion, manifests)
 
-    path_to_manifest = os.path.join(CONF.manifests,
-                                    manifest_for_deletion.manifest_file_name)
-    log.debug('Deleting manifest file {0}'.format(path_to_manifest))
-    if os.path.exists(path_to_manifest):
-        os.remove(path_to_manifest)
-
-    for data_type, files in files_for_deletion.iteritems():
-        for file in files:
-            path_to_delete = os.path.join(CONF.manifests,
-                                          getattr(CONF, data_type),
-                                          file)
-            try:
-                log.debug('Removing file {0} corresponds to {1} '
-                          'service'.format(path_to_delete, service_name))
-                if os.path.exists(path_to_delete):
-                    os.remove(path_to_delete)
-            except Exception:
-                return make_response('Unable to delete file {0}'.format(file),
-                                     500)
-    return jsonify(result='success')
+    return _perform_deletion(files_for_deletion, manifest_for_deletion)
 
 
 @v1_api.route('/admin/services/<service_name>/toggleEnabled',
