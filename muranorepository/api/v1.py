@@ -341,7 +341,7 @@ def delete_service(service_name):
     return jsonify(result='success')
 
 
-@v1_api.route('/admin/services/<service_name>/toggleEnabled',
+@v1_api.route('/admin/services/<service_name>/toggle_enabled',
               methods=['POST'])
 def toggleEnabled(service_name):
     _check_service_name(service_name)
