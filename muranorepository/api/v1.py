@@ -199,6 +199,25 @@ def _perform_deletion(files_for_deletion, manifest_for_deletion):
         return jsonify(result='success')
 
 
+def _save_archive(request):
+    err_resp = make_response('There is no data to upload', 409)
+    if request.content_type == 'application/octet-stream':
+        data = request.environ['wsgi.input'].read()
+        if not data:
+            return err_resp
+        with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+                uploaded_file.write(data)
+        path_to_archive = uploaded_file.name
+    else:
+        file_to_upload = request.files.get('file')
+        if file_to_upload:
+            filename = secure_filename(file_to_upload.filename)
+        else:
+            return err_resp
+        path_to_archive = os.path.join(CACHE_DIR, filename)
+        file_to_upload.save(path_to_archive)
+    return path_to_archive
+
 @v1_api.route('/client/<path:client_type>')
 def get_archive_data(client_type):
     if client_type not in CLIENTS_DICT.keys():
@@ -333,23 +352,14 @@ def get_files_for_service(service_name):
 
 @v1_api.route('/admin/services', methods=['POST'])
 def upload_new_service():
-    file_to_upload = request.files.get('file')
-
-    if file_to_upload:
-        filename = secure_filename(file_to_upload.filename)
-    else:
-        return make_response('There is no file to upload', 403)
-    path_to_archive = os.path.join(CACHE_DIR, filename)
-    file_to_upload.save(path_to_archive)
+    path_to_archive = _save_archive(request)
     if not tarfile.is_tarfile(path_to_archive):
-        return make_response('Uploading file should be a tar archive', 403)
-
+        return make_response('Uploading file should be a tar.gz archive', 403)
     archive_manager = Archiver()
     result = archive_manager.extract(path_to_archive)
     if result:
         return jsonify(result='success')
     else:
-        #ToDo: Pass error msg there
         return make_response('Uploading file failed.', 400)
 
 
