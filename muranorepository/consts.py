@@ -13,6 +13,8 @@
 #    under the License.
 
 # List of data types should corresponds to sections in manifest files
+import os
+
 MANIFEST = 'manifests'
 UI = 'ui'
 WORKFLOW = 'workflows'
@@ -25,3 +27,10 @@ CLIENTS_DICT = {'conductor': (WORKFLOW, HEAT, AGENT, SCRIPTS),
                 'ui': (UI,)}
 
 ARCHIVE_PKG_NAME = 'data.tar.gz'
+
+CACHE_DIR = os.path.normpath(os.path.join(os.path.abspath(__file__),
+                                          os.pardir,
+                                          'cache'))
+
+if not os.path.exists(CACHE_DIR):
+    os.mkdir(CACHE_DIR)
