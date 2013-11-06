@@ -1,0 +1,199 @@
+import os
+import shutil
+import re
+import tempfile
+import datetime
+from flask import jsonify, abort
+from flask import make_response
+from werkzeug import secure_filename
+
+from muranorepository.utils.parser import ManifestParser
+from muranorepository.utils.archiver import Archiver
+from muranorepository.consts import DATA_TYPES, MANIFEST
+from muranorepository.consts import CLIENTS_DICT
+from muranorepository.consts import ARCHIVE_PKG_NAME
+from muranorepository.config import cfg
+from muranorepository.consts import CACHE_DIR
+import logging as log
+CONF = cfg.CONF
+
+
+def _update_cache(data_type):
+    client = None
+    for client_type, client_data_types in CLIENTS_DICT.iteritems():
+        if data_type in client_data_types:
+            client = client_type
+            break
+    if not client:
+        abort(404)
+    cache_dir = os.path.join(CACHE_DIR, client)
+    if not os.path.exists(cache_dir):
+        os.mkdir(cache_dir)
+    manifests = ManifestParser().parse()
+    archive_manager = Archiver()
+    existing_hash = archive_manager.get_existing_hash(cache_dir)
+    if existing_hash:
+        archive_manager.remove_existing_hash(cache_dir, existing_hash)
+    archive_manager.create(cache_dir, manifests, CLIENTS_DICT[client])
+
+
+def _get_archive(client, hash_sum):
+    types = CLIENTS_DICT.get(client)
+    archive_manager = Archiver()
+    cache_dir = os.path.join(CACHE_DIR, client)
+    if not os.path.exists(cache_dir):
+        os.mkdir(cache_dir)
+    existing_hash = archive_manager.get_existing_hash(cache_dir)
+
+    if existing_hash and hash_sum is None:
+        log.debug('Transferring existing archive')
+        return os.path.join(cache_dir, existing_hash, ARCHIVE_PKG_NAME)
+
+    if archive_manager.hashes_match(cache_dir, existing_hash, hash_sum):
+        return None
+    manifests = ManifestParser().parse()
+    return archive_manager.create(cache_dir, manifests, types)
+
+
+def _get_locations(data_type, result_path):
+    locations = []
+    if data_type == MANIFEST:
+        for item in os.listdir(result_path):
+            if '-manifest' in item and \
+                    os.path.isfile(os.path.join(result_path, item)):
+                locations.append(item)
+    else:
+        for path, subdirs, files in os.walk(result_path):
+            for name in files:
+                if path != result_path:
+                    # need to add directory names for nested files
+                    # add keep path relative to result_path
+                    base, diff = path.rsplit(result_path, 2)
+                    # split base path and remove slash
+                    name = os.path.join(diff[1:], name)
+                locations.append(name)
+    return jsonify({data_type: locations})
+
+
+def _save_file(request, data_type, path=None):
+    if path:
+        result_path = _compose_path(data_type, path)
+        #subfolder should already exists
+        if not os.path.exists(result_path):
+            abort(404)
+    else:
+        result_path = _compose_path(data_type)
+    file_to_upload = request.files.get('file')
+    if file_to_upload:
+        filename = secure_filename(file_to_upload.filename)
+        if os.path.exists(os.path.join(result_path, filename)):
+            abort(403)
+        file_to_upload.save(os.path.join(result_path, filename))
+        _update_cache(data_type)
+        return jsonify(result='success')
+    else:
+        abort(400)
+
+
+def _compose_path(data_type, path=None):
+    if path:
+        return os.path.join(CONF.manifests, getattr(CONF, data_type), path)
+    else:
+        return os.path.join(CONF.manifests, getattr(CONF, data_type))
+
+
+def _check_data_type(data_type):
+    if data_type not in DATA_TYPES:
+        abort(404)
+
+
+def _get_manifest_files(manifest):
+    return dict((k, v) for k, v in manifest.__dict__.iteritems()
+                if k in DATA_TYPES)
+
+
+def _exclude_common_files(files_for_deletion, manifests):
+    all_manifest_files = [_get_manifest_files(manifest)
+                          for manifest in manifests]
+    for data_type, files in files_for_deletion.items():
+        files_for_deletion[data_type] = set(files_for_deletion[data_type])
+        for manifest_files in all_manifest_files:
+            files_for_deletion[data_type] -= set(manifest_files[data_type])
+    return files_for_deletion
+
+
+def _check_service_name(service_name):
+    if not re.match(r'^\w+(\.\w+)*\w+$', service_name):
+        abort(404)
+
+
+def _perform_deletion(files_for_deletion, manifest_for_deletion):
+    def backup_data():
+        backup_dir = os.path.join(
+            os.path.dirname(CONF.manifests),
+            'Backup_{0}'.format(datetime.datetime.utcnow())
+        )
+        log.debug('Creating service data backup to {0}'.format(backup_dir))
+        shutil.copytree(CONF.manifests, backup_dir)
+        return backup_dir
+
+    def release_backup(backup):
+        try:
+            shutil.rmtree(backup, ignore_errors=True)
+        except Exception as e:
+            log.error(
+                'Release Backup: '
+                'Backup {0} deletion failed {1}'.format(backup, e.message)
+            )
+
+    def restore_backup(backup):
+        log.debug('Restore service data after unsuccessful deletion')
+        shutil.rmtree(CONF.manifests, ignore_errors=True)
+        os.rename(backup, CONF.manifests)
+
+    backup_dir = backup_data()
+    service_name = manifest_for_deletion.full_service_name
+    path_to_manifest = os.path.join(CONF.manifests,
+                                    manifest_for_deletion.manifest_file_name)
+    try:
+        if os.path.exists(path_to_manifest):
+            log.debug('Deleting manifest file {0}'.format(path_to_manifest))
+            os.remove(path_to_manifest)
+
+        for data_type, files in files_for_deletion.iteritems():
+            data_type_dir = os.path.join(CONF.manifests, getattr(CONF,
+                                                                 data_type))
+            for file in files:
+                path_to_delete = os.path.join(data_type_dir, file)
+                if os.path.exists(path_to_delete):
+                    log.debug('Delete {0}: Removing {1} file'.format(
+                        service_name, path_to_delete))
+                    os.remove(path_to_delete)
+    except Exception as e:
+        log.exception('Deleting operation failed '
+                      'due to {0}'.format(e.message))
+        restore_backup(backup_dir)
+        abort(500)
+    else:
+        release_backup(backup_dir)
+        return jsonify(result='success')
+
+
+def _save_archive(request):
+    err_resp = make_response('There is no data to upload', 409)
+    if request.content_type == 'application/octet-stream':
+        data = request.environ['wsgi.input'].read()
+        if not data:
+            return err_resp
+        with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+                uploaded_file.write(data)
+        path_to_archive = uploaded_file.name
+    else:
+        file_to_upload = request.files.get('file')
+        if file_to_upload:
+            filename = secure_filename(file_to_upload.filename)
+        else:
+            return err_resp
+        path_to_archive = os.path.join(CACHE_DIR, filename)
+        file_to_upload.save(path_to_archive)
+    return path_to_archive
