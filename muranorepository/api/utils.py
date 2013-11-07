@@ -185,9 +185,8 @@ def save_archive(request):
         data = request.environ['wsgi.input'].read()
         if not data:
             return err_resp
-
         with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
-                uploaded_file.write(data)
+            uploaded_file.write(data)
         path_to_archive = uploaded_file.name
     else:
         file_to_upload = request.files.get('file')
