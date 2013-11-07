@@ -91,9 +91,11 @@ def save_file(request, data_type, path=None, filename=None):
         if not filename:
             return make_response("'filename' should be in request arguments",
                                  400)
-
-        with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+        uploaded_file = tempfile.NamedTemporaryFile(delete=False)
+        try:
             uploaded_file.write(data)
+        finally:
+            uploaded_file.close()
         path_to_file = os.path.join(path_to_folder, filename)
         if os.path.exists(path_to_file):
                 abort(403)
@@ -202,8 +204,11 @@ def save_archive(request):
         data = request.environ['wsgi.input'].read()
         if not data:
             return err_resp
-        with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
-                uploaded_file.write(data)
+        uploaded_file = tempfile.NamedTemporaryFile(delete=False)
+        try:
+            uploaded_file.write(data)
+        finally:
+            uploaded_file.close()
         path_to_archive = uploaded_file.name
     else:
         file_to_upload = request.files.get('file')

@@ -88,9 +88,12 @@ class Archiver(object):
             return None
 
     def _compose_archive(self, arch_name, path, hash=False, cache_dir=None):
-        with tarfile.open(arch_name, 'w:gz') as tar:
+        tar = tarfile.open(arch_name, 'w:gz')
+        try:
             for item in os.listdir(path):
-                tar.add(os.path.join(path, item), item)
+                    tar.add(os.path.join(path, item), item)
+        finally:
+            tar.close()
         try:
             shutil.rmtree(path, ignore_errors=True)
         except Exception as e:
@@ -219,8 +222,11 @@ class Archiver(object):
         """
         try:
             path_to_extract = tempfile.mkdtemp()
-            with tarfile.open(path_to_archive) as archive:
+            archive = tarfile.open(path_to_archive)
+            try:
                 archive.extractall(path_to_extract)
+            finally:
+                archive.close()
             # assert manifest file
             manifests = glob.glob(os.path.join(path_to_extract,
                                                '*-manifest.yaml'))
