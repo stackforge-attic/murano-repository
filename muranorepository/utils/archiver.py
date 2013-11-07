@@ -88,9 +88,12 @@ class Archiver(object):
             return None
 
     def _compose_archive(self, arch_name, path, hash=False, cache_dir=None):
-        with tarfile.open(arch_name, 'w:gz') as tar:
+        try:
+            tar =tarfile.open(arch_name, 'w:gz')
             for item in os.listdir(path):
-                tar.add(os.path.join(path, item), item)
+                    tar.add(os.path.join(path, item), item)
+        finally:
+            tar.close()
         try:
             shutil.rmtree(path, ignore_errors=True)
         except Exception as e:

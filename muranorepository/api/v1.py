@@ -70,14 +70,15 @@ def get_data_type_locations(data_type):
 @v1_api.route('/admin/<data_type>', methods=['POST'])
 def upload_file(data_type):
     api.check_data_type(data_type)
+    filename = request.args.get('filename')
     try:
-        return api.save_file(request, data_type)
+        return api.save_file(request, data_type, path=None, filename=filename)
     except:
         abort(403)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>')
-def _get_locations_in_nested_path_or_get_file(data_type, path):
+def get_locations_in_nested_path_or_get_file(data_type, path):
     api.check_data_type(data_type)
     result_path = api.compose_path(data_type, path)
     if os.path.isfile(result_path):

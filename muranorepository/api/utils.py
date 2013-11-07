@@ -75,25 +75,41 @@ def get_locations(data_type, result_path):
     return jsonify({data_type: locations})
 
 
-def save_file(request, data_type, path=None):
+def save_file(request, data_type, path=None, filename=None):
     if path:
-        result_path = compose_path(data_type, path)
+        path_to_folder = compose_path(data_type, path)
         #subfolder should already exists
-        if not os.path.exists(result_path):
+        if not os.path.exists(path_to_folder):
             abort(404)
     else:
-        result_path = compose_path(data_type)
-    file_to_upload = request.files.get('file')
-    if file_to_upload:
-        filename = secure_filename(file_to_upload.filename)
-        if os.path.exists(os.path.join(result_path, filename)):
-            abort(403)
-        file_to_upload.save(os.path.join(result_path, filename))
-        update_cache(data_type)
-        return jsonify(result='success')
-    else:
-        abort(400)
+        path_to_folder = compose_path(data_type)
 
+    if request.content_type == 'application/octet-stream':
+        data = request.environ['wsgi.input'].read()
+        if not data:
+             return make_response('No file to upload', 400)
+        if not filename:
+            return make_response("'filename' should be in request arguments",
+                                 400)
+
+        with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
+            uploaded_file.write(data)
+        path_to_file = os.path.join(path_to_folder, filename)
+        if os.path.exists(path_to_file):
+                abort(403)
+        shutil.move(uploaded_file.name, path_to_file)
+    else:
+        file_to_upload = request.files.get('file')
+        if file_to_upload:
+            filename = secure_filename(file_to_upload.filename)
+            path_to_file = os.path.join(path_to_folder, filename)
+            if os.path.exists(path_to_file):
+                abort(403)
+            file_to_upload.save(path_to_file)
+        else:
+            return make_response('No file to upload', 400)
+    update_cache(data_type)
+    return jsonify(result='success')
 
 def compose_path(data_type, path=None):
     if path:
@@ -185,7 +201,6 @@ def save_archive(request):
         data = request.environ['wsgi.input'].read()
         if not data:
             return err_resp
-
         with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
                 uploaded_file.write(data)
         path_to_archive = uploaded_file.name
