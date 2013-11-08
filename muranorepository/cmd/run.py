@@ -71,6 +71,7 @@ def main():
     })
     if not os.path.isabs(config.CONF.manifests):
         config.CONF.manifests = os.path.join(possible_topdir,
+                                             'muranorepository',
                                              config.CONF.manifests)
     wsgi.server(eventlet.listen((cfg.CONF.host, cfg.CONF.port),
                                 backlog=500),
