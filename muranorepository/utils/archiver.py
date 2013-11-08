@@ -174,7 +174,7 @@ class Archiver(object):
                                 '{1}'.format(data_type, DATA_TYPES))
 
             for manifest in manifests:
-                if not manifest.enabled and not manifest.valid:
+                if not manifest.enabled or not manifest.valid:
                     continue
 
                 if hasattr(manifest, data_type):
