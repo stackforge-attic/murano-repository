@@ -17,23 +17,12 @@ import logging as log
 CONF = cfg.CONF
 
 
-def update_cache(data_type):
-    client = None
-    for client_type, client_data_types in CLIENTS_DICT.iteritems():
-        if data_type in client_data_types:
-            client = client_type
-            break
-    if not client:
-        abort(404)
-    cache_dir = os.path.join(CONF.cache_dir, client)
-    if not os.path.exists(cache_dir):
-        os.mkdir(cache_dir)
-    manifests = ManifestParser().parse()
-    archive_manager = Archiver()
-    existing_hash = archive_manager.get_existing_hash(cache_dir)
-    if existing_hash:
-        archive_manager.remove_existing_hash(cache_dir, existing_hash)
-    archive_manager.create(cache_dir, manifests, CLIENTS_DICT[client])
+def reset_cache():
+    try:
+        shutil.rmtree(CONF.cache_dir, ignore_errors=True)
+        os.mkdir(CONF.cache_dir)
+    except:
+        return make_response('Unable to reset cache', 500)
 
 
 def get_archive(client, hash_sum):
@@ -107,7 +96,7 @@ def save_file(request, data_type, path=None, filename=None):
             file_to_upload.save(path_to_file)
         else:
             return make_response('No file to upload', 400)
-    update_cache(data_type)
+    reset_cache()
     return jsonify(result='success')
 
 
@@ -192,6 +181,7 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
         abort(500)
     else:
         release_backup(backup_dir)
+        reset_cache()
         return jsonify(result='success')
 
 
