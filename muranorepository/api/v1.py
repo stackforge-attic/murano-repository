@@ -22,9 +22,11 @@ from muranorepository.api import utils as api
 from muranorepository.utils.parser import ManifestParser
 from muranorepository.utils.archiver import Archiver
 from muranorepository.consts import DATA_TYPES, MANIFEST
-from muranorepository.consts import CLIENTS_DICT, CACHE_DIR
+from muranorepository.consts import CLIENTS_DICT
+from oslo.config import cfg
 import logging as log
 v1_api = Blueprint('v1', __name__)
+CONF = cfg.CONF
 
 
 @v1_api.route('/client/<path:client_type>')
@@ -209,8 +211,8 @@ def toggleEnabled(service_name):
 @v1_api.route('/admin/reset_caches', methods=['POST'])
 def reset_caches():
     try:
-        shutil.rmtree(CACHE_DIR, ignore_errors=True)
-        os.mkdir(CACHE_DIR)
+        shutil.rmtree(CONF.cache_dir, ignore_errors=True)
+        os.mkdir(CONF.cache_dir)
         return jsonify(result='success')
     except:
         return make_response('Unable to perform operation', 500)
