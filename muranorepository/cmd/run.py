@@ -18,6 +18,7 @@
 import os
 import sys
 import eventlet
+import tempfile
 from eventlet import wsgi
 from oslo.config import cfg
 # If ../murano_service/__init__.py exists, add ../ to Python search path,
@@ -50,6 +51,15 @@ def main():
 
     config.parse_configs(sys.argv[1:], config_files)
     log.setup('muranorepository')
+
+    #configuring and initializing cache directory
+    if cfg.CONF.cache_dir is None:
+        cfg.CONF.cache_dir = os.path.join(
+            tempfile.gettempdir(), 'murano-cache'
+        )
+    if not os.path.exists(cfg.CONF.cache_dir):
+        os.mkdir(cfg.CONF.cache_dir)
+    log.debug('Cache is located at: {0}'.format(cfg.CONF.cache_dir))
 
     app = server.make_app({
         'auth_host': cfg.CONF.keystone.auth_host,

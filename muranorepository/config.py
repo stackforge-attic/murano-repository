@@ -20,6 +20,8 @@ server_opts = [
     cfg.StrOpt('host', default='127.0.0.1'),
     cfg.IntOpt('port', default=5000)]
 
+cache_opt = cfg.StrOpt('cache_dir')
+
 keystone_opts = [
     cfg.StrOpt('auth_host', default='localhost'),
     cfg.IntOpt('auth_port', default=5000),
@@ -40,7 +42,7 @@ CONF.register_cli_opts(server_opts)
 CONF.register_opts(type_dirs_opts)
 CONF.register_opts(type_dirs_opts, group='output')
 CONF.register_opts(keystone_opts, group='keystone')
-
+CONF.register_opt(cache_opt)
 
 ARGV = []
 
