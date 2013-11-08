@@ -130,6 +130,7 @@ def delete_directory_or_file(data_type, path):
             os.rmdir(result_path)
         except Exception:
             make_response('Directory must be empty to be deleted', 403)
+    api.reset_cache()
     return jsonify(result='success')
 
 
