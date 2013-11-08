@@ -13,7 +13,6 @@ from muranorepository.consts import DATA_TYPES, MANIFEST
 from muranorepository.consts import CLIENTS_DICT
 from muranorepository.consts import ARCHIVE_PKG_NAME
 from muranorepository.config import cfg
-from muranorepository.consts import CACHE_DIR
 import logging as log
 CONF = cfg.CONF
 
@@ -26,7 +25,7 @@ def update_cache(data_type):
             break
     if not client:
         abort(404)
-    cache_dir = os.path.join(CACHE_DIR, client)
+    cache_dir = os.path.join(CONF.cache_dir, client)
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     manifests = ManifestParser().parse()
@@ -40,7 +39,7 @@ def update_cache(data_type):
 def get_archive(client, hash_sum):
     types = CLIENTS_DICT.get(client)
     archive_manager = Archiver()
-    cache_dir = os.path.join(CACHE_DIR, client)
+    cache_dir = os.path.join(CONF.cache_dir, client)
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     existing_hash = archive_manager.get_existing_hash(cache_dir)
@@ -195,6 +194,6 @@ def save_archive(request):
             filename = secure_filename(file_to_upload.filename)
         else:
             return err_resp
-        path_to_archive = os.path.join(CACHE_DIR, filename)
+        path_to_archive = os.path.join(CONF.cache_dir, filename)
         file_to_upload.save(path_to_archive)
     return path_to_archive
