@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Approved+1: Ekaterina Fedorova <efedorova@mirantis.com>
+Code-Review+2: Ekaterina Fedorova <efedorova@mirantis.com>
+Code-Review-1: Timur Sufiev <tsufiev@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Fri, 08 Nov 2013 09:01:57 +0000
+Reviewed-on: https://review.openstack.org/55632
+Project: stackforge/murano-repository
+Branch: refs/heads/master
