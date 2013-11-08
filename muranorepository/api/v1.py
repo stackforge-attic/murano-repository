@@ -53,7 +53,8 @@ def download_service_archive(service_name):
     #ToDo: Create new class to prevent opening twice the same file for writing
     with tempfile.NamedTemporaryFile() as tempf:
         try:
-            file = archive_manager.create_service_archive(manifest, tempf.name)
+            file = archive_manager.create_service_archive(service_manifest,
+                                                          tempf.name)
         except:
             log.error('Unable to create service archive')
             abort(500)
