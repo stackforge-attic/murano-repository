@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
-import shutil
 import tarfile
 import tempfile
 from flask import Blueprint, send_file
@@ -74,10 +73,7 @@ def get_data_type_locations(data_type):
 def upload_file(data_type):
     api.check_data_type(data_type)
     filename = request.args.get('filename')
-    try:
-        return api.save_file(request, data_type, path=None, filename=filename)
-    except:
-        abort(403)
+    return api.save_file(request, data_type, path=None, filename=filename)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>')
@@ -171,6 +167,7 @@ def upload_new_service():
     archive_manager = Archiver()
     result = archive_manager.extract(path_to_archive)
     if result:
+        api.reset_cache()
         return jsonify(result='success')
     else:
         return make_response('Uploading file failed.', 400)
@@ -212,9 +209,5 @@ def toggleEnabled(service_name):
 
 @v1_api.route('/admin/reset_caches', methods=['POST'])
 def reset_caches():
-    try:
-        shutil.rmtree(CONF.cache_dir, ignore_errors=True)
-        os.mkdir(CONF.cache_dir)
-        return jsonify(result='success')
-    except:
-        return make_response('Unable to perform operation', 500)
+    api.reset_cache()
+    return jsonify(result='success')

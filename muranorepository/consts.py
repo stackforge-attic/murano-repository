@@ -13,7 +13,6 @@
 #    under the License.
 
 # List of data types should corresponds to sections in manifest files
-import os
 
 MANIFEST = 'manifests'
 UI = 'ui'

@@ -59,7 +59,7 @@ def main():
         )
     if not os.path.exists(cfg.CONF.cache_dir):
         os.mkdir(cfg.CONF.cache_dir)
-    LOG.debug('Cache is located at: {0}'.format(cfg.CONF.cache_dir))
+    LOG.info('Cache is located at: {0}'.format(cfg.CONF.cache_dir))
 
     app = server.make_app({
         'auth_host': cfg.CONF.keystone.auth_host,
