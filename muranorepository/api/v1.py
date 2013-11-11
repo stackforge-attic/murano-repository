@@ -202,6 +202,7 @@ def toggleEnabled(service_name):
     parser = ManifestParser()
     result = parser.toggle_enabled(service_name)
     if result:
+        api.reset_cache()
         return jsonify(result='success')
     else:
         return make_response('Unable to toggle '
