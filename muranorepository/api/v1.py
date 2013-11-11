@@ -49,12 +49,13 @@ def download_service_archive(service_name):
                         if manifest.full_service_name == service_name]
     if not service_manifest:
         abort(404)
-    assert len(service_manifest) == 1
+    if len(service_manifest) != 1:
+        return make_response('Fully qualified service name is not unique', 500)
     archive_manager = Archiver(dst_by_data_type=True)
     #ToDo: Create new class to prevent opening twice the same file for writing
     with tempfile.NamedTemporaryFile() as tempf:
         try:
-            file = archive_manager.create_service_archive(service_manifest,
+            file = archive_manager.create_service_archive(service_manifest[0],
                                                           tempf.name)
         except:
             log.error('Unable to create service archive')
