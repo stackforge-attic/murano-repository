@@ -122,9 +122,8 @@ def delete_directory_or_file(data_type, path):
     if os.path.isfile(result_path):
         try:
             os.remove(result_path)
-            api.update_cache(data_type)
         except Exception:
-            abort(404)
+            abort(500)
     else:
         try:
             # enable to delete only empty directories
