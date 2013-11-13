@@ -117,14 +117,15 @@ def get_manifest_files(manifest):
                 if k in DATA_TYPES)
 
 
-def exclude_common_files(files_for_deletion, manifests):
+def exclude_common_files(files, manifests):
     all_manifest_files = [get_manifest_files(manifest)
                           for manifest in manifests]
-    for data_type, files in files_for_deletion.items():
-        files_for_deletion[data_type] = set(files_for_deletion[data_type])
+    for data_type in files.keys():
+        files[data_type] = set(files[data_type])
         for manifest_files in all_manifest_files:
-            files_for_deletion[data_type] -= set(manifest_files[data_type])
-    return files_for_deletion
+            if manifest_files.get(data_type):
+                files[data_type] -= set(manifest_files[data_type])
+    return files
 
 
 def check_service_name(service_name):
