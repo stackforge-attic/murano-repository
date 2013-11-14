@@ -1,0 +1,28 @@
+version: 0.1
+service_display_name: Linux Telnet Service
+
+description: >-
+   <strong> Linux Telnet Service </strong>
+   Demonstrates a simple linux agent, which installs Telnet if required.
+
+full_service_name: linuxTelnetService
+author: Mirantis Inc.
+service_version: 1.0
+enabled: True
+
+ui:
+  - LinuxTelnet.yaml
+
+workflows:
+  - LinuxTelnet.xml
+
+heat:
+  - Linux.template
+
+agent:
+  - DeployTelnet.template
+
+scripts:
+ - Linux/common.sh
+ - Linux/installer.sh
+ - Linux/runTelnetDeploy.sh
