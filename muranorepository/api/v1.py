@@ -14,6 +14,7 @@
 import os
 import tarfile
 import tempfile
+import json
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
@@ -26,6 +27,21 @@ from oslo.config import cfg
 import logging as log
 v1_api = Blueprint('v1', __name__)
 CONF = cfg.CONF
+
+
+def convert(input):
+        """
+        Convert unicode to regular strings
+        """
+        if isinstance(input, dict):
+            return dict([(convert(key), convert(value))
+                         for key, value in input.iteritems()])
+        elif isinstance(input, list):
+            return [convert(element) for element in input]
+        elif isinstance(input, unicode):
+            return input.encode('utf-8')
+        else:
+            return input
 
 
 @v1_api.route('/client/<path:client_type>')
@@ -92,7 +108,8 @@ def upload_file_in_nested_path(data_type, path):
     api.check_data_type(data_type)
 
     if data_type == MANIFEST:
-        make_response('It is forbidden to upload manifests to subfolders', 403)
+        make_response('It is forbidden to upload manifests to subfolders',
+                      403)
     return api.save_file(request, data_type, path)
 
 
@@ -213,3 +230,29 @@ def toggleEnabled(service_name):
 def reset_caches():
     api.reset_cache()
     return jsonify(result='success')
+
+
+@v1_api.route('/admin/services/create', methods=['PUT'])
+def create_service():
+    try:
+        service_data = convert(json.loads(request.data))
+    except:
+        return make_response('Unable to load json data' , 500)
+    resp = api.create_service(service_data)
+    api.reset_cache()
+    return resp
+
+
+@v1_api.route('/admin/services/<service_name>', methods=['POST'])
+def update_service(service_name):
+    api.check_service_name(service_name)
+    parser = ManifestParser()
+    try:
+        service_data = convert(json.loads(request.data))
+    except:
+        return make_response('Unable to load json data' , 500)
+    result = parser.update_service(service_name, service_data)
+    if result:
+        api.reset_cache()
+    else:
+        return make_response('Unable to update service', 500)
