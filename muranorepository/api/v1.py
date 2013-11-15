@@ -14,6 +14,7 @@
 import os
 import tarfile
 import tempfile
+import json
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
@@ -26,6 +27,21 @@ from oslo.config import cfg
 import logging as log
 v1_api = Blueprint('v1', __name__)
 CONF = cfg.CONF
+
+
+def convert(input):
+        """
+        Convert unicode to regular strings
+        """
+        if isinstance(input, dict):
+            return dict([(convert(key), convert(value))
+                         for key, value in input.iteritems()])
+        elif isinstance(input, list):
+            return [convert(element) for element in input]
+        elif isinstance(input, unicode):
+            return input.encode('utf-8')
+        else:
+            return input
 
 
 @v1_api.route('/client/<path:client_type>')
@@ -213,3 +229,24 @@ def toggleEnabled(service_name):
 def reset_caches():
     api.reset_cache()
     return jsonify(result='success')
+
+
+@v1_api.route('/admin/services/create', methods=['POST'])
+def create_service():
+    service_data = convert(json.loads(request.data))
+    resp = api.create_service(service_data)
+    api.reset_cache()
+    return resp
+
+
+@v1_api.route('/admin/services/<service_name>', methods=['POST'])
+def update_service(service_name):
+    api.check_service_name(service_name)
+    parser = ManifestParser()
+    service_data = convert(json.loads(request.data))
+    result = parser.update_service(service_name, service_data)
+    if result:
+        api.reset_cache()
+    else:
+        return make_response('Unable to update service', 500)
+
