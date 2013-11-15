@@ -14,6 +14,7 @@
 import os
 import tarfile
 import tempfile
+import json
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
@@ -211,5 +212,19 @@ def toggleEnabled(service_name):
 
 @v1_api.route('/admin/reset_caches', methods=['POST'])
 def reset_caches():
+    api.reset_cache()
+    return jsonify(result='success')
+
+
+@v1_api.route('/admin/services/create', methods=['POST'])
+def create_service():
+    service_params = json.loads(request.data)
+    api.create_service(service_params)
+    api.reset_cache(service_params)
+    return jsonify(result='success')
+
+
+@v1_api.route('/admin/services/<service_name>/update', methods=['PUT'])
+def update_service(service_name):
     api.reset_cache()
     return jsonify(result='success')

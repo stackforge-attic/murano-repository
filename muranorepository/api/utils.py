@@ -3,6 +3,7 @@ import shutil
 import re
 import tempfile
 import datetime
+import yaml
 from flask import jsonify, abort
 from flask import make_response
 from werkzeug import secure_filename
@@ -204,3 +205,8 @@ def save_archive(request):
         path_to_archive = os.path.join(CONF.cache_dir, filename)
         file_to_upload.save(path_to_archive)
     return path_to_archive
+
+
+def create_service(data):
+    with open('new_service.yml', 'w') as service_manifest:
+        service_manifest.write(yaml.dump(data, default_flow_style=True))
