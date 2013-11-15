@@ -3,6 +3,7 @@ import shutil
 import re
 import tempfile
 import datetime
+import yaml
 from flask import jsonify, abort
 from flask import make_response
 from werkzeug import secure_filename
@@ -204,3 +205,15 @@ def save_archive(request):
         path_to_archive = os.path.join(CONF.cache_dir, filename)
         file_to_upload.save(path_to_archive)
     return path_to_archive
+
+
+def create_service(data):
+    for parameter in  ['full_service_name', 'service_display_name']:
+        value = data.get(parameter)
+        if not value:
+            return make_response('There is no {parameter} in json'.format(
+                parameter=parameter), 409)
+    service_id = data.get('full_service_name')
+    path_to_manifest = os.path.join(CONF.manifests, service_id + '-manifest.yaml')
+    with open(path_to_manifest, 'w') as service_manifest:
+        service_manifest.write(yaml.dump(data, default_flow_style=False))
