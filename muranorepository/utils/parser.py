@@ -83,14 +83,18 @@ class ManifestParser(object):
                 manifests.append(Manifest(manifest_data))
         return manifests
 
-    def toggle_enabled(self, service_name):
+    def _get_manifest_path(self, service_name):
+        # ToDO: Rename manifests to it's id and remove this func
         manifests = self.parse()
-        path_to_manifest = None
         for manifest in manifests:
             if manifest.full_service_name == service_name:
                 path_to_manifest = os.path.join(self.manifest_directory,
                                                 manifest.manifest_file_name)
-                break
+                return path_to_manifest
+        return None
+
+    def toggle_enabled(self, service_name):
+        path_to_manifest = self._get_manifest_path(service_name)
         if not path_to_manifest:
             log.error('There is no manifest '
                       'file for {0} service'.format(service_name))
@@ -99,6 +103,22 @@ class ManifestParser(object):
             service_manifest_data = yaml.load(stream)
         service_manifest_data['enabled'] = \
             not service_manifest_data.get('enabled')
+        with open(path_to_manifest, 'w') as manifest_file:
+            manifest_file.write(yaml.dump(service_manifest_data,
+                                          default_flow_style=False))
+        return True
+
+    def update_service(self, service_name, data):
+        path_to_manifest = self._get_manifest_path(service_name)
+        if not path_to_manifest:
+            log.error('There is no manifest '
+                      'file for {0} service'.format(service_name))
+            return False
+        with open(path_to_manifest) as stream:
+            service_manifest_data = yaml.load(stream)
+        for key, value in data.iteritems():
+            service_manifest_data[key] = data[key]
+
         with open(path_to_manifest, 'w') as manifest_file:
             manifest_file.write(yaml.dump(service_manifest_data,
                                           default_flow_style=False))
