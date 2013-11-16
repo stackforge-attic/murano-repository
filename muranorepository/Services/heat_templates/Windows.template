@@ -65,6 +65,18 @@
                         "IpProtocol": "icmp",
                         "FromPort": "-1",
                         "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort" : "1",
+                        "ToPort": "65535",
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "udp",
+                        "FromPort" : "1",
+                        "ToPort": "65535",
+                        "CidrIp": "0.0.0.0/0"
                     }
                 ],
                 "GroupDescription": "Default security group for Murano Environments"
