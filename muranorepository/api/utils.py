@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import re
@@ -217,10 +218,33 @@ def create_service(data):
                                     service_id + '-manifest.yaml')
     try:
         with open(path_to_manifest, 'w') as service_manifest:
-            service_manifest.write(yaml.dump(data, default_flow_style=False))
+            service_manifest.write(serialize(data))
     except Exception as e:
         log.exception(e)
         if os.path.exists(path_to_manifest):
             os.remove(path_to_manifest)
         return make_response('Error during service manifest creation', 500)
     return jsonify(result='success')
+
+
+def serialize(data):
+    def convert(data):
+        """
+        Convert unicode to regular strings. Needed in python 2.x to handle
+        differences in str/unicode processing.
+        """
+        if isinstance(data, dict):
+            return dict([(convert(key), convert(value))
+                         for key, value in data.iteritems()])
+        elif isinstance(data, list):
+            return [convert(element) for element in input]
+        elif isinstance(data, unicode):
+            return data.encode('utf-8')
+        else:
+            return data
+
+    if sys.version >= (3,):
+        return yaml.dump(data, allow_unicode=True, encoding='utf-8',
+                         default_flow_style=False)
+    else:
+        return yaml.dump(convert(data))

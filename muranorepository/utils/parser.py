@@ -16,6 +16,7 @@ import os
 import yaml
 from oslo.config import cfg
 import logging as log
+from muranorepository.api import utils as api
 from muranorepository.manifest import Manifest
 from muranorepository.consts import DATA_TYPES, MANIFEST
 CONF = cfg.CONF
@@ -120,6 +121,5 @@ class ManifestParser(object):
             service_manifest_data[key] = data[key]
 
         with open(path_to_manifest, 'w') as manifest_file:
-            manifest_file.write(yaml.dump(service_manifest_data,
-                                          default_flow_style=False))
+            manifest_file.write(api.serialize(service_manifest_data))
         return True
