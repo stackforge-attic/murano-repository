@@ -1,14 +1,15 @@
+
 import os
 import shutil
 import re
 import tempfile
 import datetime
-import yaml
+
 from flask import jsonify, abort
 from flask import make_response
 from werkzeug import secure_filename
 
-from muranorepository.utils.parser import ManifestParser
+from muranorepository.utils.parser import ManifestParser, serialize
 from muranorepository.utils.archiver import Archiver
 from muranorepository.consts import DATA_TYPES, MANIFEST
 from muranorepository.consts import CLIENTS_DICT
@@ -217,7 +218,7 @@ def create_service(data):
                                     service_id + '-manifest.yaml')
     try:
         with open(path_to_manifest, 'w') as service_manifest:
-            service_manifest.write(yaml.dump(data, default_flow_style=False))
+            service_manifest.write(serialize(data))
     except Exception as e:
         log.exception(e)
         if os.path.exists(path_to_manifest):
