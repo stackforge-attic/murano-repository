@@ -21,7 +21,7 @@
                 "NetworkInterfaces": [ { "Ref": "$port-{instanceName}" } ]
             }
         },
-        "$port-{instanceName}": {
+        "$instancePort": {
             "Type": "OS::Quantum::Port",
             "Properties": {
                 "network_id": {
