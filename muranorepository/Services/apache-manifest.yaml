@@ -1,5 +1,5 @@
 version: 0.1
-service_display_name: Apache Service
+service_display_name: Linux Apache
 
 description: >-
    <strong> Linux Apache Service </strong>

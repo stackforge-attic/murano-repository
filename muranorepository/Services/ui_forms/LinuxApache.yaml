@@ -1,4 +1,4 @@
-name: Apache Service
+name: Linux Apache
 type: linuxApacheService
 
 description: >-
