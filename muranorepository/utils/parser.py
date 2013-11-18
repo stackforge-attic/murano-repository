@@ -14,11 +14,35 @@
 
 import os
 import yaml
+import sys
 from oslo.config import cfg
 import logging as log
 from muranorepository.manifest import Manifest
 from muranorepository.consts import DATA_TYPES, MANIFEST
 CONF = cfg.CONF
+
+
+def serialize(data):
+    def convert(data):
+        """
+        Convert unicode to regular strings. Needed in python 2.x to handle
+        differences in str/unicode processing.
+        """
+        if isinstance(data, dict):
+            return dict([(convert(key), convert(value))
+                         for key, value in data.iteritems()])
+        elif isinstance(data, list):
+            return [convert(element) for element in input]
+        elif isinstance(data, unicode):
+            return data.encode('utf-8')
+        else:
+            return data
+
+    if sys.version >= (3,):
+        return yaml.dump(data, allow_unicode=True, encoding='utf-8',
+                         default_flow_style=False)
+    else:
+        return yaml.dump(convert(data))
 
 
 class ManifestParser(object):
@@ -120,6 +144,5 @@ class ManifestParser(object):
             service_manifest_data[key] = data[key]
 
         with open(path_to_manifest, 'w') as manifest_file:
-            manifest_file.write(yaml.dump(service_manifest_data,
-                                          default_flow_style=False))
+            manifest_file.write(serialize(service_manifest_data))
         return True
