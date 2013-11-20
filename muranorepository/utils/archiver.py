@@ -25,6 +25,16 @@ CONF = cfg.CONF
 CHUNK_SIZE = 1 << 20  # 1MB
 
 
+def clean_dir(dir_path):
+    """Removes all files and dirs inside a directory."""
+    for entry_name in os.listdir(dir_path):
+        path = os.path.join(dir_path, entry_name)
+        if os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
+
+
 class Archiver(object):
     def __init__(self, src_by_data_type=False, dst_by_data_type=False):
         self.dst_directories = {}
@@ -104,6 +114,7 @@ class Archiver(object):
             if not cache_dir:
                 raise ValueError('cache_dir parameter should not be None. '
                                  'It is needed to create hash directory')
+            clean_dir(cache_dir)
             hash_folder = self._create_hash_folder(arch_name, cache_dir)
             try:
                 shutil.move(ARCHIVE_PKG_NAME, os.path.join(hash_folder,
@@ -131,18 +142,16 @@ class Archiver(object):
         existing_caches = os.listdir(cache_dir)
         log.debug('Asserting there is just one archive in cache folder. Clear '
                   'folder {0} in case of Assertion Error'.format(cache_dir))
-        assert len(existing_caches) < 2
         if not len(existing_caches):
             return None
-        else:
-            path = os.path.join(cache_dir,
-                                existing_caches[0],
-                                ARCHIVE_PKG_NAME)
-            if not os.path.exists(path):
-                raise RuntimeError(
-                    'Archive package is missing at dir {0}'.format(
-                        os.path.join(cache_dir)))
-            return existing_caches[0]
+
+        path = os.path.join(cache_dir,
+                            existing_caches[0],
+                            ARCHIVE_PKG_NAME)
+        if not os.path.exists(path):
+            raise RuntimeError('Archive package is missing at dir {0}'.format(
+                os.path.join(cache_dir)))
+        return existing_caches[0]
 
     def hashes_match(self, cache_dir, existing_hash, hash_to_check):
         if hash_to_check is None or existing_hash is None:
