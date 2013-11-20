@@ -32,13 +32,25 @@ forms:
           attributeNames: [name, domain]
           minLength: 2
           maxLength: 255
-          regexpValidator: '^[0-9A-Za-z](?!--)[0-9A-Za-z\-]{0,13}[0-9A-Za-z]\.[0-9A-Za-z][0-9A-Za-z\-]{0,61}[0-9A-Za-z]$'
-          errorMessages:
-            invalid: >-
-              Only letters, numbers and dashes in the middle are
-              allowed. Period characters are allowed only when they are
-              used to delimit the components of domain style
-              names. Single-level domain is not appropriate.
+          validators:
+            - expr:
+                regexpValidator: '^([0-9A-Za-z]|[0-9A-Za-z][0-9A-Za-z-]*[0-9A-Za-z])\.[0-9A-Za-z][0-9A-Za-z-]*[0-9A-Za-z]$'
+              message: >-
+                Only letters, numbers and dashes in the middle are
+                allowed. Period characters are allowed only when they
+                are used to delimit the components of domain style
+                names. Single-level domain is not
+                appropriate. Subdomains are not allowed.
+            - expr:
+                regexpValidator: '^[^.]{1,15}\..*$'
+              message: >-
+                NetBIOS name cannot be shorter than 1 symbol and
+                longer than 15 symbols.
+            - expr:
+                regexpValidator: '^[^.]*\.[^.]{2,63}.*$'
+              message: >-
+                DNS host name cannot be shorter than 2 symbols and
+                longer than 63 symbols.
           helpText: >-
             Just letters, numbers and dashes are allowed.
             A dot can be used to create subdomains
