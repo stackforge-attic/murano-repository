@@ -32,13 +32,17 @@ forms:
           attributeNames: [name, domain]
           minLength: 2
           maxLength: 255
-          regexpValidator: '^[0-9A-Za-z](?!--)[0-9A-Za-z\-]{0,13}[0-9A-Za-z]\.[0-9A-Za-z][0-9A-Za-z\-]{0,61}[0-9A-Za-z]$'
-          errorMessages:
-            invalid: >-
-              Only letters, numbers and dashes in the middle are
-              allowed. Period characters are allowed only when they are
-              used to delimit the components of domain style
-              names. Single-level domain is not appropriate.
+          validators:
+            - expr: 
+                YAQL: $.serviceConfiguration.name.test('^[0-9A-Za-z][0-9A-Za-z\-]*\.[0-9A-Za-z][0-9A-Za-z\-]{0,61}[0-9A-Za-z]$')
+              message: >-
+                Only letters, numbers and dashes in the middle are
+                allowed. Period characters are allowed only when they are
+                used to delimit the components of domain style
+                names. Single-level domain is not appropriate.
+            - expr: 
+                YAQL: $.serviceConfiguration.name.test('^[0-9A-Za-z](?!--)[0-9A-Za-z\-]{0,13}[0-9A-Za-z]\.[^.]+$')
+              message: No more than 15 symbols are allowed before first dot.
           helpText: >-
             Just letters, numbers and dashes are allowed.
             A dot can be used to create subdomains
