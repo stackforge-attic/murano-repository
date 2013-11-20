@@ -32,7 +32,9 @@ def get_archive(client, hash_sum):
     cache_dir = os.path.join(CONF.cache_dir, client)
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
-    existing_hash = archive_manager.get_existing_hash(cache_dir)
+        existing_hash = None
+    else:
+        existing_hash = archive_manager.get_existing_hash(cache_dir)
 
     if existing_hash and hash_sum is None:
         log.debug('Transferring existing archive')

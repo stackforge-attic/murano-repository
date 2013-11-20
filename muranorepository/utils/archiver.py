@@ -131,8 +131,10 @@ class Archiver(object):
         existing_caches = os.listdir(cache_dir)
         log.debug('Asserting there is just one archive in cache folder. Clear '
                   'folder {0} in case of Assertion Error'.format(cache_dir))
-        assert len(existing_caches) < 2
         if not len(existing_caches):
+            return None
+        if len(existing_caches) > 1:
+            shutil.rmtree(cache_dir, ignore_errors=True)
             return None
         else:
             path = os.path.join(cache_dir,
