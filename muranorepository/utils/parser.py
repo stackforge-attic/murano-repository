@@ -36,7 +36,7 @@ def serialize(data):
             return dict([(convert(key), convert(value))
                          for key, value in data.iteritems()])
         elif isinstance(data, list):
-            return [convert(element) for element in input]
+            return [convert(element) for element in data]
         elif isinstance(data, unicode):
             return data.encode('utf-8')
         else:
