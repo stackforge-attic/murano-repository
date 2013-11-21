@@ -39,3 +39,6 @@ Changelog
 .idea
 
 /etc/murano-repository.conf
+
+# virtualenv
+.venv
