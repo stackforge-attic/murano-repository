@@ -23,6 +23,7 @@ def make_app(kwargs):
     """
 
     app = flask.Flask(__name__)
+    app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
     app.register_blueprint(v1_api, url_prefix='/v1')
     app.wsgi_app = auth_token.filter_factory(
         app.config, **kwargs)(app.wsgi_app)
