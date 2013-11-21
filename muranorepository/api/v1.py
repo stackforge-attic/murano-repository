@@ -239,5 +239,6 @@ def update_service(service_name):
     result = parser.update_service(service_name, service_data)
     if result:
         api.reset_cache()
+        return jsonify(result='success')
     else:
         return make_response('Unable to update service', 500)
