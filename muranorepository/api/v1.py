@@ -217,28 +217,12 @@ def reset_caches():
     return jsonify(result='success')
 
 
-@v1_api.route('/admin/services/create', methods=['PUT'])
-def create_service():
+@v1_api.route('/admin/services/<service_name>', methods=['PUT'])
+def create_service(service_name):
     try:
         service_data = json.loads(request.data)
     except:
         return make_response('Unable to load json data', 500)
-    resp = api.create_service(service_data)
+    resp = api.create_service(service_name, service_data)
     api.reset_cache()
     return resp
-
-
-@v1_api.route('/admin/services/<service_name>', methods=['POST'])
-def update_service(service_name):
-    api.check_service_name(service_name)
-    parser = ManifestParser()
-    try:
-        service_data = json.loads(request.data)
-    except:
-        return make_response('Unable to load json data', 500)
-    result = parser.update_service(service_name, service_data)
-    if result:
-        api.reset_cache()
-        return jsonify(result='success')
-    else:
-        return make_response('Unable to update service', 500)
