@@ -38,7 +38,7 @@ Changelog
 .pydevproject
 .idea
 
-/etc/murano-repository.conf
+
 
 # virtualenv
 .venv
