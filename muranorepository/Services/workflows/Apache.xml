@@ -19,7 +19,10 @@
 					<mapping name="instancePort">
 						port-<select path="state.hostname"/>
 					</mapping>
-					<mapping name="networkName">
+					<mapping name="keyName"> 
+                        <select path="::keyPair.name"/>
+                    </mapping>
+                    <mapping name="networkName">
 						network-<select path="/id"/>
 					</mapping>
 					<mapping name="userData">
