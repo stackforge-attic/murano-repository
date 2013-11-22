@@ -16,6 +16,9 @@
 					<mapping name="instanceName">
 						<select path="state.hostname"/>
 					</mapping>
+                    <mapping name="keyName">
+                        <select path="::keyPair.name"/>
+                    </mapping>
 					<mapping name="userData">
 						<prepare-user-data template="Linux" initFile="linux_init.sh">
 							<parameter name="hostname">

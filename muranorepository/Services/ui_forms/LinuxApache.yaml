@@ -34,6 +34,11 @@ forms:
           label: Instance Count
           description: Several instances with Apache web Service can be created at one time.
           helpText: Enter an integer value between 1 and 10
+        - name: keyPair
+          type: keypair
+          label: Key Pair
+          description: >-
+             The Key Pair for VMs with this service
         - name: unitNamingPattern
           type: string
           label: Hostname

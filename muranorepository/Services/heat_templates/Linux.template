@@ -5,7 +5,7 @@
         "KeyName": {
             "Description": "Key Pair name for Load Balancer",
             "Type": "String",
-            "Default": "murano-lb-key"
+            "Default": "$keyName"
         }
     },
 
@@ -13,6 +13,7 @@
         "$instanceName": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
+                "KeyName": { "Ref" : "KeyName" },
                 "InstanceType": "$instanceType",
                 "ImageId": "$imageName",
                 "AvailabilityZone": "$availabilityZone",
