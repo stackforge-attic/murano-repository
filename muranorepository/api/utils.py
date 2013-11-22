@@ -212,7 +212,7 @@ def save_archive(request):
 
 
 def create_service(data):
-    for parameter in ['full_service_name', 'service_display_name']:
+    for parameter in ['full_service_name', 'service_display_name', 'enabled']:
         if not data.get(parameter):
             return make_response('There is no {parameter} in json'.format(
                 parameter=parameter), 400)
