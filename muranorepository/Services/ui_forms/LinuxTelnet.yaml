@@ -43,6 +43,12 @@ forms:
           required: false
           widgetMedia:
             css: {all: [muranodashboard/css/checkbox.css]}
+        - name: keyPair
+          type: keypair
+          label: Key Pair
+          description: >-
+             The Key Pair for VMs with this service 
+          required: true
         - name: unitNamingPattern
           type: string
           label: Hostname
