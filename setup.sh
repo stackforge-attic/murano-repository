@@ -138,13 +138,14 @@ CLONE_FROM_GIT=$1
 			exit 1
 		fi
 	fi
-# making sample configs 
+# de-sample-ing configs 
 	log "Making sample configuration files at \"$ETC_CFG_DIR\""
-	#for file in `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc`
 	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc`
 	do
-		#cp -f "$GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc/$file" "$ETC_CFG_DIR/$file.sample"
-		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file.sample"
+	        if [ "${file#*.}" = "conf.sample" ]; then
+		    # cutting .sample prefix only for .conf.sample files
+		    cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/${file%.*}"
+	        fi
 	done
 }
 
