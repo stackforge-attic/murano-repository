@@ -140,11 +140,9 @@ CLONE_FROM_GIT=$1
 	fi
 # making sample configs 
 	log "Making sample configuration files at \"$ETC_CFG_DIR\""
-	#for file in `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc`
 	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc`
 	do
-		#cp -f "$GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc/$file" "$ETC_CFG_DIR/$file.sample"
-		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file.sample"
+	        cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file"    
 	done
 }
 
