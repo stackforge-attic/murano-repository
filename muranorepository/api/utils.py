@@ -212,10 +212,21 @@ def save_archive(request):
 
 
 def create_service(data):
-    for parameter in ['full_service_name', 'service_display_name']:
+    required = ['full_service_name', 'service_display_name']
+    optional = {'enabled': True,
+                'version': 0.1,
+                'description': '',
+                'author': '',
+                'service_version': ''}
+
+    for parameter in required:
         if not data.get(parameter):
             return make_response('There is no {parameter} in json'.format(
                 parameter=parameter), 400)
+    for parameter in optional.keys():
+        if not data.get(parameter):
+            data[parameter] = optional[parameter]
+
     service_id = data.get('full_service_name')
     path_to_manifest = os.path.join(CONF.manifests,
                                     service_id + '-manifest.yaml')
