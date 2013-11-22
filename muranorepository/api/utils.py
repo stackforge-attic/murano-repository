@@ -211,7 +211,7 @@ def save_archive(request):
     return path_to_archive
 
 
-def create_service(data):
+def create_service(service_id, data):
     required = ['full_service_name', 'service_display_name']
     optional = {'enabled': True,
                 'version': 0.1,
@@ -227,15 +227,23 @@ def create_service(data):
         if not data.get(parameter):
             data[parameter] = optional[parameter]
 
-    service_id = data.get('full_service_name')
     path_to_manifest = os.path.join(CONF.manifests,
                                     service_id + '-manifest.yaml')
+
+    backup_done = False
+    with tempfile.NamedTemporaryFile() as backup:
+        # make a backup
+        if os.path.exists(path_to_manifest):
+            backup_done = True
+            shutil.copy(path_to_manifest, backup.name)
     try:
         with open(path_to_manifest, 'w') as service_manifest:
             service_manifest.write(serialize(data))
     except Exception as e:
         log.exception(e)
-        if os.path.exists(path_to_manifest):
+        if backup_done:
+            shutil.move(backup.name, path_to_manifest)
+        elif os.path.exists(path_to_manifest):
             os.remove(path_to_manifest)
         return make_response('Error during service manifest creation', 500)
     return jsonify(result='success')
