@@ -2,8 +2,8 @@ version: 0.1
 service_display_name: Active Directory
 
 description: >-
-  <strong> The Active Directory Service </strong> 
-  includes one primary and optionally a few secondary 
+  <strong> The Active Directory Service </strong>
+  includes one primary and optionally a few secondary
   Domain Controllers, with DNS
 
 full_service_name: activeDirectory
@@ -35,4 +35,5 @@ scripts:
   - Get-DnsListeningIpAddress.ps1
   - Get-DnsListeningIpAddress.ps1
   - Join-Domain.ps1
+  - Install-RolePrimaryDomainController.ps1
   - Install-RoleSecondaryDomainController.ps1
