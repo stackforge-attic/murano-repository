@@ -67,7 +67,8 @@ def main():
         'auth_protocol': cfg.CONF.keystone.auth_protocol,
         'admin_user': cfg.CONF.keystone.admin_user,
         'admin_password': cfg.CONF.keystone.admin_password,
-        'admin_tenant_name': cfg.CONF.keystone.admin_tenant_name
+        'admin_tenant_name': cfg.CONF.keystone.admin_tenant_name,
+        'signing_dir': cfg.CONF.keystone.signing_dir
     })
     if not os.path.isabs(config.CONF.manifests):
         config.CONF.manifests = os.path.join(possible_topdir,
