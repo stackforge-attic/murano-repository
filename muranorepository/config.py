@@ -18,7 +18,8 @@ from muranorepository.consts import *
 
 server_opts = [
     cfg.StrOpt('host', default='127.0.0.1'),
-    cfg.IntOpt('port', default=5000)]
+    cfg.IntOpt('port', default=5000)
+]
 
 cache_opt = cfg.StrOpt('cache_dir')
 
@@ -28,7 +29,9 @@ keystone_opts = [
     cfg.StrOpt('auth_protocol', default='http'),
     cfg.StrOpt('admin_user', default='admin'),
     cfg.StrOpt('admin_password', default=None),
-    cfg.StrOpt('admin_tenant_name', default='admin')]
+    cfg.StrOpt('admin_tenant_name', default='admin'),
+    cfg.StrOpt('signing_dir', default='/tmp/keystone-muranorepository')
+]
 
 type_dirs_opts = [cfg.StrOpt(x) for x in DATA_TYPES]
 
