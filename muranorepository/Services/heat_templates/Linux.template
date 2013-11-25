@@ -22,7 +22,7 @@
             }
         },
         "$instancePort": {
-            "Type": "OS::Quantum::Port",
+            "Type": "OS::Neutron::Port",
             "Properties": {
                 "network_id": {
                     "Ref": "network"
@@ -76,13 +76,13 @@
             }
         },
         "network": {
-            "Type": "OS::Quantum::Net",
+            "Type": "OS::Neutron::Net",
             "Properties": {
                 "name": "$network-{environmentId}"
             }
         },
         "subnet": {
-            "Type": "OS::Quantum::Subnet",
+            "Type": "OS::Neutron::Subnet",
             "Properties": {
                 "network_id": {
                     "Ref": "network"
@@ -99,10 +99,10 @@
             }
         },
         "router": {
-            "Type": "OS::Quantum::Router"
+            "Type": "OS::Neutron::Router"
         },
         "router_interface": {
-            "Type": "OS::Quantum::RouterInterface",
+            "Type": "OS::Neutron::RouterInterface",
             "Properties": {
                 "router_id": {
                     "Ref": "router"
@@ -113,7 +113,7 @@
             }
         },
         "router_gateway": {
-            "Type": "OS::Quantum::RouterGateway",
+            "Type": "OS::Neutron::RouterGateway",
             "Properties": {
                 "router_id": {
                     "Ref": "router"
