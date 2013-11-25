@@ -16,10 +16,18 @@ ui:
 workflows:
   - MsSqlServer.xml
   - Common.xml
+  - Networking.xml
 
 heat:
   - Windows.template
   - SQL-security.template
+  - InstancePort.template
+  - InstancePortWSubnet.template
+  - Network.template
+  - Param.template
+  - RouterInterface.template
+  - Subnet.template
+
 
 agent:
   - SetPassword.template

@@ -15,9 +15,18 @@ ui:
 
 workflows:
   - Demo.xml
+  - Common.xml
+  - Networking.xml
 
 heat:
   - Demo.template
+  - InstancePort.template
+  - InstancePortWSubnet.template
+  - Network.template
+  - Param.template
+  - RouterInterface.template
+  - Subnet.template
+
 
 agent:
   - Demo.template

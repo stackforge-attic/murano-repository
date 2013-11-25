@@ -1,6 +1,6 @@
 <workflow>
 
-	<rule match="$.services[?(@.type == 'linuxTelnetService')].units[?(@.state.hostname and not @.temp.instanceName)]"
+	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'linuxTelnetService')].units[?(@.state.hostname and not @.temp.instanceName)]"
 		desc="Units of Linux Telnet service having hostname and image names assigned but without instances">
 		<report entity="unit">
 			<parameter name="id"><select path="id"/></parameter>
@@ -10,8 +10,6 @@
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
-                    <mapping name="instancePort">port-<select path="state.hostname"/></mapping>
-                    <mapping name="networkName">network-<select path="/id"/></mapping>
 					<mapping name="userData">
 						<prepare-user-data template="Linux" initFile="linux_init.sh">
 							<parameter name="hostname"><select path="state.hostname"/></parameter>
