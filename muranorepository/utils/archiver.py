@@ -140,8 +140,6 @@ class Archiver(object):
 
     def get_existing_hash(self, cache_dir):
         existing_caches = os.listdir(cache_dir)
-        log.debug('Asserting there is just one archive in cache folder. Clear '
-                  'folder {0} in case of Assertion Error'.format(cache_dir))
         if not len(existing_caches):
             return None
 
