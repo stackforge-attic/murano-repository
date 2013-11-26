@@ -223,6 +223,13 @@ def create_service(service_name):
         service_data = json.loads(request.data)
     except:
         return make_response('Unable to load json data', 500)
+
+    service_id = service_data.get('full_service_name')
+    if not service_id or service_id != service_name:
+        return make_response(
+            "Body attribute 'full_service_name' value is {0} which doesn't "
+            "correspond to 'service_name' part of URL (equals to {1})".format(
+                service_id, service_name), 400)
     resp = api.create_service(service_name, service_data)
     api.reset_cache()
     return resp
