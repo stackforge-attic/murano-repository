@@ -55,7 +55,7 @@ def main():
     #configuring and initializing cache directory
     if cfg.CONF.cache_dir is None:
         cfg.CONF.cache_dir = os.path.join(
-            tempfile.gettempdir(), 'murano-cache'
+            tempfile.gettempdir(), 'muranorepository-cache'
         )
     if not os.path.exists(cfg.CONF.cache_dir):
         os.mkdir(cfg.CONF.cache_dir)
