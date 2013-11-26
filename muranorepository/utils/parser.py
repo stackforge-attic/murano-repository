@@ -52,8 +52,16 @@ class ManifestParser(object):
         self.manifest_directory = manifest_directory
 
     def _validate_manifest(self, file, service_manifest_data):
+        service_id = service_manifest_data.get('full_service_name')
+        if not service_id or '{0}-manifest.yaml'.format(service_id) != file:
+            log.error("Attribute 'full_service_name' inside manifest '{0}' "
+                      "has value '{1}' which doesn't correspond to its "
+                      "filename, skipping this manifest completely."
+                      "".format(file, service_id))
+            return False, False
+
+        valid_file_info = True
         for key, value in service_manifest_data.iteritems():
-            valid_file_info = True
             if key in DATA_TYPES:
                 if key != MANIFEST:
                     root_directory = os.path.join(self.manifest_directory,
@@ -78,7 +86,7 @@ class ManifestParser(object):
                             "doesn't exist at {2}".format(filename,
                                                           file,
                                                           absolute_path))
-        return valid_file_info
+        return valid_file_info, True
 
     def parse(self):
         manifests = []
@@ -99,23 +107,18 @@ class ManifestParser(object):
                                  "The reason: {1!s}".format(manifest_file,
                                                             exc))
                         continue
-                manifest_data['manifest_file_name'] = file
-                manifest_is_valid = self._validate_manifest(file,
-                                                            manifest_data)
-                manifest_data["valid"] = manifest_is_valid
 
-                manifests.append(Manifest(manifest_data))
+                manifest_is_valid, use_manifest = self._validate_manifest(
+                    file, manifest_data)
+                if use_manifest:
+                    manifest_data["valid"] = manifest_is_valid
+                    manifests.append(Manifest(manifest_data))
+
         return manifests
 
     def _get_manifest_path(self, service_name):
-        # ToDO: Rename manifests to it's id and remove this func
-        manifests = self.parse()
-        for manifest in manifests:
-            if manifest.full_service_name == service_name:
-                path_to_manifest = os.path.join(self.manifest_directory,
-                                                manifest.manifest_file_name)
-                return path_to_manifest
-        return None
+        return os.path.join(self.manifest_directory,
+                            '{0}-manifest.yaml'.format(service_name))
 
     def toggle_enabled(self, service_name):
         path_to_manifest = self._get_manifest_path(service_name)
