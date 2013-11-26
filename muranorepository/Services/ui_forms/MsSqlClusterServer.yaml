@@ -188,6 +188,9 @@ forms:
               columnType: radio
               title: Master
           initial: {YAQL: $.clusterConfiguration.dcInstances}
+          minValue: 2
+          maxValue: 5
+          maxSync: 2
           description: >-
             Configure cluster instances. Cluster node quantity can be set
             with 'Add' and 'Remove' buttons. Configure Sync mode by
