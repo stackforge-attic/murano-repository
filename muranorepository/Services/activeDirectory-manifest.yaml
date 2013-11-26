@@ -14,6 +14,7 @@ heat:
 - RouterInterface.template
 - Windows.template
 - Network.template
+- NNSecurity.template
 - Param.template
 - Subnet.template
 - InstancePortWSubnet.template

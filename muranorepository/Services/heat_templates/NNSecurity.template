@@ -1,0 +1,13 @@
+{
+    "Resources": {
+        "$instanceName": {
+            "Properties": {
+                "SecurityGroups": [
+                    {
+                        "Ref": "MuranoDefaultSecurityGroup"
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -8,6 +8,7 @@ heat:
 - Demo.template
 - RouterInterface.template
 - Network.template
+- NNSecurity.template
 - Param.template
 - Subnet.template
 - InstancePortWSubnet.template
