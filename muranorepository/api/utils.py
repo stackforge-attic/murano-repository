@@ -165,7 +165,7 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
     backup_dir = backup_data()
     service_name = manifest_for_deletion.full_service_name
     path_to_manifest = os.path.join(CONF.manifests,
-                                    manifest_for_deletion.manifest_file_name)
+                                    '{0}-manifest.yaml'.format(service_name))
     try:
         if os.path.exists(path_to_manifest):
             log.debug('Deleting manifest file {0}'.format(path_to_manifest))

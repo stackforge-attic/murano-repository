@@ -1,0 +1,24 @@
+agent:
+- Demo.template
+author: ''
+description: <strong> Demo Service </strong> shows how Murano is working.
+enabled: true
+full_service_name: demoService
+heat:
+- Demo.template
+- RouterInterface.template
+- Network.template
+- Param.template
+- Subnet.template
+- InstancePortWSubnet.template
+- InstancePort.template
+scripts: []
+service_display_name: Demo Service 11
+service_version: ''
+ui:
+- Demo.yaml
+version: '0.1'
+workflows:
+- Networking.xml
+- Common.xml
+- Demo.xml

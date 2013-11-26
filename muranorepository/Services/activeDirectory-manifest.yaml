@@ -1,0 +1,36 @@
+agent:
+- CreatePrimaryDC.template
+- LeaveDomain.template
+- SetPassword.template
+- CreateSecondaryDC.template
+- AskDnsIp.template
+- JoinDomain.template
+author: ''
+description: <strong> The Active Directory Service </strong> includes one primary
+  and optionally a few secondary Domain Controllers, with DNS
+enabled: true
+full_service_name: activeDirectory
+heat:
+- RouterInterface.template
+- Windows.template
+- Network.template
+- Param.template
+- Subnet.template
+- InstancePortWSubnet.template
+- InstancePort.template
+scripts:
+- Install-RoleSecondaryDomainController.ps1
+- Install-RolePrimaryDomainController.ps1
+- Join-Domain.ps1
+- ImportCoreFunctions.ps1
+- Get-DnsListeningIpAddress.ps1
+- Set-LocalUserPassword.ps1
+service_display_name: Active Directory
+service_version: ''
+ui:
+- ActiveDirectory.yaml
+version: '0.1'
+workflows:
+- AD.xml
+- Networking.xml
+- Common.xml
