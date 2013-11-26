@@ -42,12 +42,12 @@ forms:
                 names. Single-level domain is not
                 appropriate. Subdomains are not allowed.
             - expr:
-                regexpValidator: '^[^.]{1,15}\..*$'
+                regexpValidator: '(^[^.]+$|^[^.]{1,15}\..*$)'
               message: >-
                 NetBIOS name cannot be shorter than 1 symbol and
                 longer than 15 symbols.
             - expr:
-                regexpValidator: '^[^.]*\.[^.]{2,63}.*$'
+                regexpValidator: '(^[^.]+$|^[^.]*\.[^.]{2,63}.*$)'
               message: >-
                 DNS host name cannot be shorter than 2 symbols and
                 longer than 63 symbols.
