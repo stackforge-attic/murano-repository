@@ -151,15 +151,21 @@ def get_services_list():
 @v1_api.route('/admin/services/<service_name>')
 def get_files_for_service(service_name):
     api.check_service_name(service_name)
-    manifests = ManifestParser().parse()
-    data = []
-    for manifest in manifests:
-        if manifest.full_service_name == service_name:
-            data = api.get_manifest_files(manifest)
-            break
-    if not data:
+    manifest = ManifestParser().parse_manifest(service_name)
+    if not manifest:
         abort(404)
+    data = api.get_manifest_files(manifest)
     return jsonify(service_files=data)
+
+
+@v1_api.route('/admin/services/<service_name>/info')
+def get_service_info(service_name):
+    api.check_service_name(service_name)
+    manifest = ManifestParser().parse_manifest(service_name)
+    if not manifest:
+        abort(404)
+    data = api.get_manifest_info(manifest)
+    return jsonify(service_info=data)
 
 
 @v1_api.route('/admin/services', methods=['POST'])

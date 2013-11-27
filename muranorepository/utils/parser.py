@@ -14,7 +14,6 @@
 
 import os
 import yaml
-import sys
 from oslo.config import cfg
 import logging as log
 from muranorepository.manifest import Manifest
@@ -115,6 +114,28 @@ class ManifestParser(object):
                     manifests.append(Manifest(manifest_data))
 
         return manifests
+
+    def parse_manifest(self, manifest_name):
+        manifest_file = os.path.join(self.manifest_directory,
+                                      manifest_name + '-manifest.yaml')
+        if not os.path.exists(manifest_file):
+            log.error("There is no manifest file '{0}' for {1} "
+                      "service".format(manifest_file, manifest_name))
+            return None
+        if not os.path.isfile(manifest_file):
+            log.error("'{0}' is not file".format(manifest_file))
+            return None
+
+        try:
+            with open(manifest_file) as stream:
+                manifest_data = yaml.load(stream)
+        except yaml.YAMLError, exc:
+                log.warn("Failed to load manifest file. {0}. "
+                         "The reason: {1!s}".format(manifest_file,
+                                                    exc))
+                return None
+        return Manifest(manifest_data)
+
 
     def _get_manifest_path(self, service_name):
         return os.path.join(self.manifest_directory,
