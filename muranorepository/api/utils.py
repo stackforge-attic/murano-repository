@@ -122,6 +122,11 @@ def get_manifest_files(manifest):
                 if k in DATA_TYPES)
 
 
+def get_manifest_info(manifest):
+    return dict((k, v) for k, v in manifest.__dict__.iteritems()
+                if k not in DATA_TYPES)
+
+
 def exclude_common_files(files, manifests):
     all_manifest_files = [get_manifest_files(manifest)
                           for manifest in manifests]
