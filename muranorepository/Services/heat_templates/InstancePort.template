@@ -4,12 +4,12 @@
             "Properties": {
                 "NetworkInterfaces": [
                     {
-                        "Ref": "$instancePort"
+                        "Ref": "$port-{instanceName}"
                     }
                 ]
             }
         },
-        "$instancePort": {
+        "$port-{instanceName}": {
             "Type": "OS::Neutron::Port",
             "Properties": {
                 "security_groups": [

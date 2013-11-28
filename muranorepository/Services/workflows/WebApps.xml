@@ -17,7 +17,7 @@
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
-                    <mapping name="instancePort">port-<select path="state.hostname"/></mapping>
+					<mapping name="environmentId"><select path="/id"/></mapping>
 					<mapping name="userData">
 						<prepare-user-data>
 							<parameter name="hostname"><select path="state.hostname"/></parameter>
@@ -41,7 +41,7 @@
                 <report entity="unit" level="error">
 					<parameter name="id"><select path="id"/></parameter>
 					<parameter name="text">Unable to deploy instance <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/></parameter>
-				</report>
+					</report>
                 <stop/>
             </failure>
 		</update-cf-stack>
