@@ -1,6 +1,6 @@
 {
     "Resources": {
-        "$portName": {
+        "$port-{instanceName}": {
             "Properties": {
                 "security_groups" : [ {"Ref" : "ApacheSecurityGroup"} ]
             }

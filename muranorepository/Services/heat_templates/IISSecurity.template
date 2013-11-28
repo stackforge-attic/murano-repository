@@ -2,39 +2,40 @@
     "Resources": {
         "$port-{instanceName}": {
             "Properties": {
-                "SecurityGroups" : [ {"Ref" : "MsSqlSecurityGroup"} ]
+                "security_groups" : [ {"Ref" : "IISSecurityGroup"} ]
             }
         },
-        "MsSqlSecurityGroup": {
+        "IISSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "SecurityGroupIngress": [
                     {
-                        "ToPort": "4022",
+                        "ToPort": "8172",
                         "IpProtocol": "tcp",
-                        "FromPort": "4022",
+                        "FromPort": "8172",
                         "CidrIp": "0.0.0.0/0"
                     },
                     {
-                        "ToPort": "135",
+                        "ToPort": "80",
                         "IpProtocol": "tcp",
-                        "FromPort": "135",
+                        "FromPort": "80",
                         "CidrIp": "0.0.0.0/0"
                     },
                     {
-                        "ToPort": "1433",
+                        "ToPort": "433",
                         "IpProtocol": "tcp",
-                        "FromPort": "1433",
+                        "FromPort": "433",
                         "CidrIp": "0.0.0.0/0"
                     },
                     {
-                        "ToPort": "1434",
+                        "ToPort": "21",
                         "IpProtocol": "tcp",
-                        "FromPort": "1434",
+                        "FromPort": "21",
                         "CidrIp": "0.0.0.0/0"
                     }
                 ],
-                "GroupDescription": "Enable MS SQL access"
+                "GroupDescription": "Enable access to IIS Management Console, HTTP, HTTPS and FTP pr
+otocols"
             }
         }
     }

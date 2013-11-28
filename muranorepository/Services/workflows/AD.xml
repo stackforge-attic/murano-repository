@@ -17,8 +17,7 @@
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
-					<mapping name="instancePort">port-<select path="state.hostname"/></mapping>
-					<mapping name="networkName">network-<select path="/id"/></mapping>
+					<mapping name="environmentId"><select path="/id"/></mapping>
 					<mapping name="userData">
 						<prepare-user-data>
 							<parameter name="hostname"><select path="state.hostname"/></parameter>
@@ -47,6 +46,51 @@
                 <stop/>
             </failure>
 		</update-cf-stack>
+		<!--Start of AD SecurityGroup -->
+		<report entity="unit">
+			<parameter name="id">
+				<select path="id" />
+			</parameter>
+			<parameter name="text">
+				Configuring AD/SMB security groups on <select path="state.hostname" 
+/>(<select path="name" />)
+			</parameter>
+		</report>
+		<update-cf-stack template="ADSecurity" error="exception">
+			<parameter name="mappings">
+				<map>
+					<mapping name="instanceName">
+						<select path="state.hostname" />
+					</mapping>
+				</map>
+			</parameter>
+			<success>
+				<report entity="unit">
+					<parameter name="id">
+						<select path="id" />
+					</parameter>
+					<parameter name="text">
+						AD/SMB security groups configuration on instance <se
+lect path="state.hostname" />(<select path="name" />) is successful
+					</parameter>
+				</report>
+			</success>
+			<failure>
+				<report entity="unit" level="error">
+					<parameter name="id">
+						<select path="id" />
+					</parameter>
+					<parameter name="text">
+						Unable to configure AD/SMB security groups on instan
+ce
+					<select path="state.hostname" />(<select path="name" />) due
+ to <format-error error="exception" />
+					</parameter>
+				</report>
+				<stop />
+			</failure>
+		</update-cf-stack>
+		<!--End of AD SecurityGroup -->
 	</rule>
 
 	<rule match="$.services[?(@.type == 'activeDirectory')].units[?(@.temp.instanceName and @.adminPassword and @.adminPassword != @.state.adminPassword)]"

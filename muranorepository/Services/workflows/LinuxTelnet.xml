@@ -56,7 +56,6 @@
 			</parameter>
 			<parameter name="mappings">
 				<map>
-					<mapping name="appName">telnet-server</mapping>
 				</map>
 			</parameter>
 			<success>

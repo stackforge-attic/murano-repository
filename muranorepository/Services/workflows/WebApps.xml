@@ -17,7 +17,7 @@
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
-                    <mapping name="instancePort">port-<select path="state.hostname"/></mapping>
+					<mapping name="environmentId"><select path="/id"/></mapping>
 					<mapping name="userData">
 						<prepare-user-data>
 							<parameter name="hostname"><select path="state.hostname"/></parameter>
@@ -45,6 +45,36 @@
                 <stop/>
             </failure>
 		</update-cf-stack>
+	
+        <report entity="unit">
+			<parameter name="id"><select path="id"/></parameter>
+			<parameter name="text">Configuring security groups on <select path="state.ho
+stname"/> (<select path="name"/>)</parameter>
+		</report>
+		<update-cf-stack template="IISSecurity" error="exception">
+			<parameter name="mappings">
+				<map>
+					<mapping name="instanceName"><select path="state.hostna
+me"/></mapping>
+				</map>
+			</parameter>
+			<success>
+				<report entity="unit">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Security groups configuration on inst
+ance <select path="state.hostname"/> (<select path="name"/>) is successful</parameter>
+				</report>
+			</success>
+            <failure>
+                <report entity="unit" level="error">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Unable to configure security groups o
+n instance <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="excep
+tion"/></parameter>
+					</report>
+                <stop/>
+            </failure>
+		</update-cf-stack>
 	</rule>
 
 	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type in ('webServerFarm', 'aspNetAppFarm'))].units[?(@.state.hostname and not @.temp.registeredWithLB)]"
@@ -59,7 +89,7 @@
 			</parameter>
 			<success>
 				<set path="temp.registeredWithLB"><true/></set>
-				<set path="::uri">http://<select source="outputs" path="LoadBalancerIP"/>:<select path="::loadBalancerPort"/></set>
+				<set path="::uri">http://<select source="outputs"><parameter name="path"><select path="::name"/>-LoadBalancerIP</parameter></select>:<select path="::loadBalancerPort"/></set>
 			</success>
             <failure>
                <report entity="unit" level="error">
