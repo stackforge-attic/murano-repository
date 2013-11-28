@@ -37,6 +37,10 @@
             </get-default-network-id>
         </rule>
 
+      <rule match="$[?(@.networking.topology == 'nova' and not @.networking.state.ready_for_cf)]"
+              desc="Nova topology - skip all neutron actions">
+          <set path="networking.state.ready_for_cf"><true/></set>
+      </rule>
 
         <rule match="$[?(@.networking.topology == 'manual' and not @.networking.state.ready_for_cidrs)]"
               desc="No topology queries required, ready to query cidrs">
@@ -184,6 +188,17 @@
                 </success>
             </update-cf-stack>
         </rule>
+
+      <rule match="$[?(@.networking.state.ready_for_cf and @.networking.topology == 'nova')].services[*].units[?(@.state.hostname and not @.temp.instanceName)]"
+              desc="Need to define SecGroups for nova topology">
+          <update-cf-stack template="NNSecurity">
+              <parameter name="mappings">
+                  <map>
+                      <mapping name="instanceName"><select path="state.hostname"/></mapping>
+                  </map>
+              </parameter>
+          </update-cf-stack>
+      </rule>
 
         <rule match="$[?(@.networking.createNetwork and @.networking.state.ready_for_cf)]">
             <rule match="$.services[*].units[?(@.state.hostname and not @.temp.instanceName)]"
