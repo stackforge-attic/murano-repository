@@ -5,7 +5,7 @@
         "network": {
             "Type": "OS::Neutron::Net",
             "Properties": {
-                "name": "$networkName"
+                "name": "$network-{environmentId}"
             }
         }
     },
