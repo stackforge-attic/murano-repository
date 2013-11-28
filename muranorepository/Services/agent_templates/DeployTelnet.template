@@ -15,8 +15,8 @@ Scripts:
     Version: 1.0.0
     EntryPoint: Linux/runTelnetDeploy.sh
     Files:
-      - Linux/installer.sh
-      - Linux/common.sh
+      - <Linux/installer.sh>
+      - <Linux/common.sh>
     Options:
       captureStdout: true
       captureStderr: false
