@@ -6,6 +6,7 @@ import tempfile
 import datetime
 
 from flask import jsonify, abort
+import yaml
 from flask import make_response
 from werkzeug import secure_filename
 
@@ -89,7 +90,8 @@ def save_file(request, data_type, path=None, filename=None):
             uploaded_file.write(data)
         path_to_file = os.path.join(path_to_folder, filename)
         if os.path.exists(path_to_file):
-            abort(403)
+            return make_response('File {0} already exists'.format(filename),
+                                 403)
         shutil.move(uploaded_file.name, path_to_file)
     else:
         file_to_upload = request.files.get('file')
@@ -236,14 +238,16 @@ def create_service(service_id, data):
                                     service_id + '-manifest.yaml')
 
     backup_done = False
-    with tempfile.NamedTemporaryFile() as backup:
+    with tempfile.NamedTemporaryFile(delete=False) as backup:
         # make a backup
+        #ToDo: What if it was modify request and manifest not exists?
         if os.path.exists(path_to_manifest):
             backup_done = True
             shutil.copy(path_to_manifest, backup.name)
     try:
         with open(path_to_manifest, 'w') as service_manifest:
             service_manifest.write(serialize(data))
+        os.remove(backup.name)
     except Exception as e:
         log.exception(e)
         if backup_done:
@@ -251,4 +255,33 @@ def create_service(service_id, data):
         elif os.path.exists(path_to_manifest):
             os.remove(path_to_manifest)
         return make_response('Error during service manifest creation', 500)
+    return jsonify(result='success')
+
+
+def update_service_files(service_id, data_type, data):
+    path_to_manifest = os.path.join(CONF.manifests,
+                                    service_id + '-manifest.yaml')
+    if not os.path.exists(path_to_manifest):
+        msg = 'There is no manifest file {0} for service {1}'.format(
+            path_to_manifest, service_id)
+        log.error(msg)
+        make_response(msg, 404)
+    with tempfile.NamedTemporaryFile(delete=False) as backup:
+        # make a backup
+        shutil.copy(path_to_manifest, backup.name)
+    try:
+        with open(path_to_manifest) as service_manifest:
+            service_manifest_data = yaml.load(service_manifest)
+        if data_type in service_manifest_data.keys():
+            service_manifest_data[data_type] += \
+                list(set(data) - set(service_manifest_data[data_type]))
+        else:
+            service_manifest_data[data_type] = data
+        with open(path_to_manifest, 'w') as service_manifest:
+            service_manifest.write(serialize(service_manifest_data))
+        os.remove(backup.name)
+    except Exception as e:
+        log.exception(e)
+        shutil.move(backup.name, path_to_manifest)
+        return make_response('Error during edit service manifest', 500)
     return jsonify(result='success')
