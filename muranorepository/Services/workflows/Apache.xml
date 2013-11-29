@@ -17,7 +17,7 @@
 						<select path="state.hostname"/>
 					</mapping>
                     <mapping name="keyName">
-                        <select path="::keyPair.name"/>
+                        <select path="::keyPair"/>
                     </mapping>
 					<mapping name="userData">
 						<prepare-user-data template="Linux" initFile="linux_init.sh">
@@ -119,7 +119,7 @@
 		</report>
 		<!-- Commands sequence -->
 		<!-- Command #1-->
-		<send-command template="DeployApache" error='exception'>
+		<send-command template="DeployApache" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
