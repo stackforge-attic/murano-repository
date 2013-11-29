@@ -1,6 +1,6 @@
 agent:
 - Demo.template
-author: ''
+author: 'Mirantis Inc.'
 description: <strong> Demo Service </strong> shows how Murano is working.
 enabled: true
 full_service_name: demoService
@@ -14,7 +14,7 @@ heat:
 - InstancePortWSubnet.template
 - InstancePort.template
 scripts: []
-service_display_name: Demo Service 11
+service_display_name: Demo Service 
 service_version: ''
 ui:
 - Demo.yaml
