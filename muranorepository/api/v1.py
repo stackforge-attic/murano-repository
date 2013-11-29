@@ -61,7 +61,10 @@ def download_service_archive(service_name):
         except:
             log.error('Unable to create service archive')
             abort(500)
-        return send_file(file, mimetype='application/octet-stream')
+        return send_file(file,
+                         mimetype='application/octet-stream',
+                         as_attachment=True,
+                         attachment_filename=service_name+'.tar.gz')
 
 
 @v1_api.route('/admin/<data_type>')
@@ -83,7 +86,9 @@ def get_locations_in_nested_path_or_get_file(data_type, path):
     api.check_data_type(data_type)
     result_path = api.compose_path(data_type, path)
     if os.path.isfile(result_path):
-        return send_file(result_path, mimetype='application/octet-stream')
+        return send_file(result_path,
+                         mimetype='application/octet-stream',
+                         as_attachment=True)
     else:
         return api.get_locations(data_type, result_path)
 
@@ -225,6 +230,13 @@ def reset_caches():
 
 @v1_api.route('/admin/services/<service_name>', methods=['PUT'])
 def create_service(service_name):
+    """
+    Create or modify service.
+     In this call all existing attributes will be
+     replaced to new ones during modification
+     json example:    {"webServer": {"ui":["test.txt", "new.txt"]},
+                                     "version": "2"}
+    """
     try:
         service_data = json.loads(request.data)
     except:
@@ -237,5 +249,28 @@ def create_service(service_name):
             "correspond to 'service_name' part of URL (equals to {1})".format(
                 service_id, service_name), 400)
     resp = api.create_service(service_name, service_data)
+    api.reset_cache()
+    return resp
+
+@v1_api.route('/admin/services/<service_name>/update', methods=['POST'])
+def update_service_files(service_name):
+    """
+    Update list of files
+    json example:    {"ui": ["test.txt"]}
+    """
+    try:
+        data = json.loads(request.data)
+    except:
+        return make_response('Unable to load json data', 400)
+    if not data:
+        return make_response('Json data is empty', 400)
+    data_type, file_names = data.popitem()
+    if data_type not in DATA_TYPES:
+        return make_response('{0} is not valid data_type'.format(data_type),
+                             404)
+    if not isinstance(file_names, list):
+        return make_response('File names should list', 400)
+
+    resp = api.update_service_files(service_name, data_type, file_names)
     api.reset_cache()
     return resp

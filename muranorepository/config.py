@@ -29,8 +29,7 @@ keystone_opts = [
     cfg.StrOpt('auth_protocol', default='http'),
     cfg.StrOpt('admin_user', default='admin'),
     cfg.StrOpt('admin_password', default=None),
-    cfg.StrOpt('admin_tenant_name', default='admin'),
-    cfg.StrOpt('signing_dir', default='/tmp/keystone-muranorepository')
+    cfg.StrOpt('admin_tenant_name', default='admin'),cfg.StrOpt('signing_dir', default='/tmp/keystone-muranorepository')
 ]
 
 type_dirs_opts = [cfg.StrOpt(x) for x in DATA_TYPES]

@@ -155,17 +155,17 @@ class ManifestParser(object):
                                           default_flow_style=False))
         return True
 
-    def update_service(self, service_name, data):
-        path_to_manifest = self._get_manifest_path(service_name)
-        if not path_to_manifest:
-            log.error('There is no manifest '
-                      'file for {0} service'.format(service_name))
-            return False
-        with open(path_to_manifest) as stream:
-            service_manifest_data = yaml.load(stream)
-        for key, value in data.iteritems():
-            service_manifest_data[key] = data[key]
-
-        with open(path_to_manifest, 'w') as manifest_file:
-            manifest_file.write(serialize(service_manifest_data))
-        return True
+    # def update_service(self, service_name, data):
+    #     path_to_manifest = self._get_manifest_path(service_name)
+    #     if not path_to_manifest:
+    #         log.error('There is no manifest '
+    #                   'file for {0} service'.format(service_name))
+    #         return False
+    #     with open(path_to_manifest) as stream:
+    #         service_manifest_data = yaml.load(stream)
+    #     for key, value in data.iteritems():
+    #         service_manifest_data[key] = data[key]
+    #
+    #     with open(path_to_manifest, 'w') as manifest_file:
+    #         manifest_file.write(serialize(service_manifest_data))
+    #     return True
