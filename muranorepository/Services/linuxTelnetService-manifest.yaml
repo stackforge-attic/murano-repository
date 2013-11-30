@@ -1,5 +1,5 @@
 version: 0.1
-service_display_name: Linux Telnet Service
+service_display_name: Linux Telnet
 
 description: >-
    <strong> Linux Telnet Service </strong>
