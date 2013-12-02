@@ -1,0 +1,64 @@
+description: This all works!
+forms:
+- serviceConfiguration:
+    fields:
+    - description: To identify your service in logs please specify a service name
+      label: Service Name
+      name: name
+      type: string
+    - attributeNames:
+      - units
+      - instanceCount
+      description: Several instances with ${service_display_name} web Service can
+        be created at one time.
+      helpText: Enter an integer value between 1 and 10
+      initial: 1
+      label: Instance Count
+      maxValue: 10
+      minValue: 1
+      name: dcInstances
+      type: instance
+    - description: For your convenience instance hostname can be specified. Enter
+        a name or leave blank for random name generation.
+      helpText: Optional field for a machine hostname
+      label: Hostname
+      name: unitNamingPattern
+      regexpValidator: ^(([a-zA-Z0-9#][a-zA-Z0-9-#]*[a-zA-Z0-9#])\.)*([A-Za-z0-9#]|[A-Za-z0-9#][A-Za-z0-9-#]*[A-Za-z0-9#])$
+      required: false
+      type: string
+      widgetMedia:
+        css:
+          all:
+          - muranodashboard/css/support_placeholder.css
+        js:
+        - muranodashboard/js/support_placeholder.js
+- instanceConfiguration:
+    fields:
+    - attributeNames: false
+      description: Specify some instance parameters on which service would be created.
+      descriptionTitle: Instance Configuration
+      hidden: true
+      name: title
+      required: false
+      type: string
+    - description: Select registered in Openstack flavor. Consider that service performance
+        depends on this parameter.
+      label: Instance flavor
+      name: flavor
+      required: false
+      type: flavor
+    - description: Select valid image for a service. Image should already be prepared
+        and registered in glance.
+      imageType: linux
+      label: Instance image
+      name: osImage
+      type: image
+    - description: Select availability zone where service would be installed.
+      label: Availability zone
+      name: availabilityZone
+      required: false
+      type: azone
+name: Template Service
+type: template
+unitTemplates:
+- {}

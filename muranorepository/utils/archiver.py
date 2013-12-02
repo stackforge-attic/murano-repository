@@ -17,9 +17,13 @@ import tarfile
 import tempfile
 import shutil
 import hashlib
+import yaml
+import re
 import logging as log
 from oslo.config import cfg
+from .parser import serialize
 from muranorepository.consts import DATA_TYPES, ARCHIVE_PKG_NAME
+from muranorepository.consts import UI
 CONF = cfg.CONF
 
 CHUNK_SIZE = 1 << 20  # 1MB
@@ -162,6 +166,23 @@ class Archiver(object):
             self.remove_existing_hash(cache_dir, existing_hash)
             return False
 
+    def _render_ui_forms(self, manifest, file_list, scr_directory):
+        with open(os.path.join(scr_directory, 'template.yaml')) as file:
+            ui_description = yaml.load(file)
+        for key, value in ui_description.iteritems():
+            if isinstance(value, str):
+                result = re.sub(r'.*\${(.*)}.*',
+                                lambda m: getattr(manifest, m.group(1)),
+                                value)
+                ui_description[key] = result
+        rendered_form_name = manifest.full_service_name + '.yaml'
+        with open(os.path.join(scr_directory,
+                               rendered_form_name), 'w') as ui_form:
+            ui_form.write(serialize(ui_description))
+        file_list.append(rendered_form_name)
+        file_list.remove('template.yaml')
+        return file_list
+
     def create(self, cache_dir, manifests, types):
         """
         cache_dir - full path to dir where cache contains
@@ -190,6 +211,10 @@ class Archiver(object):
                         CONF.manifests, self.src_directories[data_type])
                     dst_directory = os.path.join(
                         temp_dir, self.dst_directories[data_type])
+                    if data_type == UI and 'template.yaml' in file_list:
+                        file_list = self._render_ui_forms(manifest,
+                                                          file_list,
+                                                          scr_directory)
                     self._copy_data(file_list, scr_directory, dst_directory)
                 else:
                     log.info(
