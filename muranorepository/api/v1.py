@@ -155,7 +155,7 @@ def get_files_for_service(service_name):
     if not manifest:
         abort(404)
     data = api.get_manifest_files(manifest)
-    return jsonify(service_files=data)
+    return jsonify(data)
 
 
 @v1_api.route('/admin/services/<service_name>/info')
@@ -165,7 +165,7 @@ def get_service_info(service_name):
     if not manifest:
         abort(404)
     data = api.get_manifest_info(manifest)
-    return jsonify(service_info=data)
+    return jsonify(data)
 
 
 @v1_api.route('/admin/services', methods=['POST'])
@@ -224,7 +224,7 @@ def reset_caches():
 
 
 @v1_api.route('/admin/services/<service_name>', methods=['PUT'])
-def create_service(service_name):
+def create_or_update_service(service_name):
     try:
         service_data = json.loads(request.data)
     except:
@@ -236,6 +236,6 @@ def create_service(service_name):
             "Body attribute 'full_service_name' value is {0} which doesn't "
             "correspond to 'service_name' part of URL (equals to {1})".format(
                 service_id, service_name), 400)
-    resp = api.create_service(service_name, service_data)
+    resp = api.create_or_update_service(service_name, service_data)
     api.reset_cache()
     return resp
