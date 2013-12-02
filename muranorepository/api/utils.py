@@ -216,7 +216,7 @@ def save_archive(request):
     return path_to_archive
 
 
-def create_service(service_id, data):
+def create_or_update_service(service_id, data):
     required = ['full_service_name', 'service_display_name']
     optional = {'enabled': True,
                 'version': 0.1,
