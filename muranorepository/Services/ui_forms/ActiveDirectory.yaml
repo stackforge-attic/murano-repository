@@ -1,11 +1,3 @@
-name: Active Directory
-type: activeDirectory
-
-description: >-
-  <strong> The Active Directory Service </strong> 
-  includes one primary and optionally a few secondary 
-  Domain Controllers, with DNS 
-
 unitTemplates:
   - isMaster: true
     recoveryPassword: {YAQL: $.serviceConfiguration.recoveryPassword}

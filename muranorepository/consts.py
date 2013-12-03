@@ -26,3 +26,7 @@ CLIENTS_DICT = {'conductor': (WORKFLOW, HEAT, AGENT, SCRIPTS),
                 'ui': (UI,)}
 
 ARCHIVE_PKG_NAME = 'data.tar.gz'
+
+UI_FIELDS_IN_MANIFEST = {'description': 'description',
+                         'type': 'full_service_name',
+                         'name': 'service_display_name'}
