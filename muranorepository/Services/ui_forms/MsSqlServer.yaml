@@ -1,10 +1,3 @@
-name: MS SQL Server
-type: msSqlServer
-
-description: >-
-  <strong> The MS SQL Service </strong> installs an instance of
-  Microsoft SQL Server
-
 unitTemplates:
   - {}
 

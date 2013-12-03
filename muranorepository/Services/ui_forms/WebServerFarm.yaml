@@ -1,9 +1,3 @@
-name: Internet Information Services Web Farm
-type: webServerFarm
-
-description: >-
-  <strong> The IIS Farm Service </strong> sets up a load-balanced set of IIS servers
-
 unitTemplates:
   - {}
 

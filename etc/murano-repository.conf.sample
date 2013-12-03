@@ -31,7 +31,8 @@ agent = agent_templates
 scripts = scripts
 
 # Configure archive structure
-# data_type = desired folder
+# Format: data_type = desired folder
+# Note: ui parameter is not actually used
 [output]
 ui = service_forms
 workflows = workflows

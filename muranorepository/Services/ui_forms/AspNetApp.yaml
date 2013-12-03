@@ -1,10 +1,3 @@
-name: ASP.NET Application
-type: aspNetApp
-
-description: >-
-  <strong> The ASP.NET Application Service </strong> installs 
-  custom application onto one IIS Web Server
-
 unitTemplates:
   - {}
 
