@@ -30,8 +30,9 @@ heat = heat_templates
 agent = agent_templates
 scripts = scripts
 
-# Configure archive structure
-# data_type = desired folder
+# Configure client archive structure
+# Format: data_type = desired folder
+# ui parameter is not actually used, but is kept to not break things apart
 [output]
 ui = service_forms
 workflows = workflows

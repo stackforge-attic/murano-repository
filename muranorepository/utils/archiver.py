@@ -17,9 +17,12 @@ import tarfile
 import tempfile
 import shutil
 import hashlib
+import yaml
 import logging as log
 from oslo.config import cfg
+from .parser import serialize
 from muranorepository.consts import DATA_TYPES, ARCHIVE_PKG_NAME
+from muranorepository.consts import UI, UI_FIELDS_IN_MANIFEST
 CONF = cfg.CONF
 
 CHUNK_SIZE = 1 << 20  # 1MB
@@ -138,6 +141,24 @@ class Archiver(object):
             os.mkdir(pkg_dir)
         return pkg_dir
 
+    def _compose_ui_forms(self, manifest, ui_definitions, src, dst):
+        """
+        Extends ui_forms before sending to client.
+        Some parameters defined UI_FIELDS_IN_MANIFEST that are required
+        for ui forms are specified in manifest.
+        """
+        new_dst = os.path.join(os.path.dirname(dst),
+                               manifest.full_service_name)
+        if not os.path.exists(new_dst):
+            os.makedirs(new_dst)
+        for file in ui_definitions:
+            with open(os.path.join(src, file)) as ui_form:
+                content = yaml.load(ui_form)
+            for ui_name, manifest_name in UI_FIELDS_IN_MANIFEST.iteritems():
+                content[ui_name] = getattr(manifest, manifest_name)
+            with open(os.path.join(new_dst, file), 'w') as ui_form:
+                ui_form.write(serialize(content))
+
     def get_existing_hash(self, cache_dir):
         existing_caches = os.listdir(cache_dir)
         if not len(existing_caches):
@@ -190,7 +211,13 @@ class Archiver(object):
                         CONF.manifests, self.src_directories[data_type])
                     dst_directory = os.path.join(
                         temp_dir, self.dst_directories[data_type])
-                    self._copy_data(file_list, scr_directory, dst_directory)
+                    if data_type == UI:
+                        self._compose_ui_forms(manifest, file_list,
+                                               scr_directory, dst_directory)
+                    else:
+                        self._copy_data(file_list,
+                                        scr_directory,
+                                        dst_directory)
                 else:
                     log.info(
                         'Manifest for {0} service has no file definitions for '
