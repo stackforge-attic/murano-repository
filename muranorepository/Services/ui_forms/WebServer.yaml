@@ -1,10 +1,3 @@
-name: Internet Information Services
-type: webServer
-
-description: >-
-  <strong> The  Internet Information Service </strong> 
-  sets up an IIS server and joins it into an existing domain
-
 unitTemplates:
   - {}
 

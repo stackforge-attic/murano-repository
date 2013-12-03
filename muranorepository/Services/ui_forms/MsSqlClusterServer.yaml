@@ -1,10 +1,3 @@
-name: MS SQL Server Cluster
-type: msSqlClusterServer
-
-description: >-
-  <strong> The MS SQL Failover Cluster </strong> installs
-  Microsoft SQL Failover Cluster Server
-
 unitTemplates:
   - isMaster: true
     isSync: true
