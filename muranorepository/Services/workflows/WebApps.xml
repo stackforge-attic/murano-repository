@@ -53,13 +53,14 @@
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
+					<mapping name="lbIp"><select path="::loadBalancerIp"/></mapping>
 					<mapping name="lbPort"><select path="::loadBalancerPort"/></mapping>
 					<mapping name="lbName"><select path="::name"/></mapping>
 				</map>
 			</parameter>
 			<success>
 				<set path="temp.registeredWithLB"><true/></set>
-				<set path="::uri">http://<select source="outputs" path="LoadBalancerIP"/>:<select path="::loadBalancerPort"/></set>
+				<set path="::uri">http://<select path="::loadBalancerIp"/>:<select path="::loadBalancerPort"/></set>
 			</success>
             <failure>
                <report entity="unit" level="error">
