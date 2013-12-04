@@ -1,13 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Parameters": {
-        "KeyName": {
-            "Description": "Key Pair name for Load Balancer",
-            "Type": "String",
-            "Default": "murano-lb-key"
-        }
-    },
+    "Parameters": {},
 
     "Resources": {
         "$instanceName": {

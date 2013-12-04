@@ -3,7 +3,7 @@
 
     "Parameters": {
         "KeyName": {
-            "Description": "Key Pair name for Load Balancer",
+            "Description": "Key Pair",
             "Type": "String",
             "Default": "$keyName"
         }
