@@ -172,7 +172,7 @@ def get_service_info(service_name):
 def upload_new_service():
     path_to_archive = api.save_archive(request)
     if not tarfile.is_tarfile(path_to_archive):
-        return make_response('Uploading file should be a tar.gz archive', 403)
+        return make_response('Uploading file should be a tar.gz archive', 400)
     archive_manager = Archiver()
     result = archive_manager.extract(path_to_archive)
     if result:
