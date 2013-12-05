@@ -1,14 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Parameters": {
-        "KeyName": {
-            "Description": "Key Pair name for Load Balancer",
-            "Type": "String",
-            "Default": "murano-lb-key"
-        }
-    },
-
     "Resources": {
         "$instanceName": {
             "Type": "AWS::EC2::Instance",
@@ -24,12 +16,6 @@
             "Properties": {
                 "SecurityGroupIngress": [
                     {
-                        "ToPort": "3389",
-                        "IpProtocol": "tcp",
-                        "FromPort": "3389",
-                        "CidrIp": "0.0.0.0/0"
-                    },
-                    {
                         "ToPort": "22",
                         "IpProtocol": "tcp",
                         "FromPort": "22",
@@ -42,12 +28,8 @@
                         "CidrIp": "0.0.0.0/0"
                     }
                 ],
-                "GroupDescription": "Default security group for Murano Environments"
+                "GroupDescription": "Demo security group for Murano Environments"
             }
         }
-
     },
-
-    "Outputs": {
-    }
 }
