@@ -38,7 +38,7 @@ scripts:
  - ImportCoreFunctions.ps1
  - Set-LocalUserPassword.ps1
  - OptionParser.ps1
- - SQLServerOptionParsers.ps1
- - SQLServerInstaller.ps1
- - Install-SQLServer.ps1
+ - SQLServer/SQLServerOptionParsers.ps1
+ - SQLServer/SQLServerInstaller.ps1
+ - SQLServer/Install-SQLServer.ps1
  - Alter-FirewallRulesForSQL.ps1

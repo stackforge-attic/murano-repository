@@ -50,6 +50,6 @@ scripts:
  - Start-PowerShellProcess.ps1
  - Failover-Cluster.ps1
  - OptionParser.ps1
- - SQLServerOptionParsers.ps1
- - SQLServerInstaller.ps1
+ - SQLServer/SQLServerOptionParsers.ps1
+ - SQLServer/SQLServerInstaller.ps1
  - Export-Function.ps1

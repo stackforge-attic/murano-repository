@@ -1,5 +1,3 @@
-agent:
-- Demo.template
 author: 'Mirantis Inc.'
 description: <strong> Demo Service </strong> shows how Murano is working.
 enabled: true
