@@ -11,8 +11,10 @@ heat:
 - Subnet.template
 - InstancePortWSubnet.template
 - InstancePort.template
+- DefaultSecurity.template
+- DemoSecurity.template
 scripts: []
-service_display_name: Demo Service 
+service_display_name: Demo Service
 service_version: ''
 ui:
 - Demo.yaml

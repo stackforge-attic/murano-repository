@@ -27,6 +27,8 @@ heat:
   - Param.template
   - RouterInterface.template
   - Subnet.template
+  - DefaultSecurity.template
+  - ApacheSecurity.template
 
 agent:
   - DeployApache.template
