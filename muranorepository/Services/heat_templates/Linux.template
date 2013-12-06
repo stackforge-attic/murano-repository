@@ -1,19 +1,10 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Parameters": {
-        "KeyName": {
-            "Description": "Key Pair",
-            "Type": "String",
-            "Default": "$keyName"
-        }
-    },
-
     "Resources": {
         "$instanceName": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "KeyName": { "Ref" : "KeyName" },
                 "InstanceType": "$instanceType",
                 "ImageId": "$imageName",
                 "AvailabilityZone": "$availabilityZone",
