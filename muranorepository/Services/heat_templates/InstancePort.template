@@ -14,7 +14,7 @@
             "Properties": {
                 "security_groups": [
                     {
-                        "Ref": "MuranoDefaultSecurityGroup"
+                        "Ref": "$MuranoSecurityGroup-{envName}"
                     }
                 ],
                 "network_id": {
