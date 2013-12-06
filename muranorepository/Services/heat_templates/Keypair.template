@@ -1,0 +1,17 @@
+{
+    "Parameters": {
+        "${instanceName}-key": {
+            "Description": "Key Pair",
+            "Type": "String",
+            "Default": "$keyName"
+        }
+    },
+
+    "Resources": {
+        "$instanceName": {
+            "Properties": {
+                "KeyName": { "Ref" : "${instanceName}-key" }
+            }
+        }
+    }
+}
