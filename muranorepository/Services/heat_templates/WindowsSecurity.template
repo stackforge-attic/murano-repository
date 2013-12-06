@@ -5,15 +5,9 @@
             "Properties": {
                 "SecurityGroupIngress": [
                     {
-                        "ToPort": "80",
+                        "ToPort": "3389",
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "CidrIp": "0.0.0.0/0"
-                    },
-                    {
-                        "ToPort": "433",
-                        "IpProtocol": "tcp",
-                        "FromPort": "433",
+                        "FromPort": "3389",
                         "CidrIp": "0.0.0.0/0"
                     }
                 ]

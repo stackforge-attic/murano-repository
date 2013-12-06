@@ -1,4 +1,11 @@
 <workflow>
+    <rule match="$.services[?(@.type == 'msSqlClusterServer' and not @.securityTemplates)]">
+        <set path="securityTemplates">
+            <list>
+                <text>SQL-security</text>
+            </list>
+        </set>
+	</rule>
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer' and @.domain)].units[*]"
             desc="Units of SQL Server Cluster services which are part of the domain">
