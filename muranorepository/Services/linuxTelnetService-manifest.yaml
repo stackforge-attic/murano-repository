@@ -29,6 +29,7 @@ heat:
   - DefaultSecurity.template
   - LinuxSecurity.template
   - TelnetSecurity.template
+  - Keypair.template
 
 agent:
   - DeployTelnet.template
