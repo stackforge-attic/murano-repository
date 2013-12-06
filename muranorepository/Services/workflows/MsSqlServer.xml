@@ -1,4 +1,13 @@
 <workflow>
+
+    <rule match="$.services[?(@.type == 'msSqlServer' and not @.securityTemplates)]">
+        <set path="securityTemplates">
+            <list>
+                <text>SQL-security</text>
+            </list>
+        </set>
+	</rule>
+
 	<rule match="$.services[?(@.type == 'msSqlServer' and @.domain)].units[*]"
             desc="Units of SQL Server services which are part of the domain">
 		<set path="domain">
@@ -51,26 +60,6 @@
 			<parameter name="id"><select path="id"/></parameter>
 			<parameter name="text">Opening SQL ports on <select path="state.hostname"/> (<select path="name"/>)</parameter>
 		</report>
-		<update-cf-stack template="SQL-security" error="exception">
-			<parameter name="mappings">
-				<map>
-					<mapping name="instancePort">port-<select path="state.hostname"/></mapping>
-				</map>
-			</parameter>
-			<success>
-				<report entity="unit">
-					<parameter name="id"><select path="id"/></parameter>
-					<parameter name="text">SQL ports open on <select path="state.hostname"/> (<select path="name"/>)</parameter>
-				</report>
-			</success>
-            <failure>
-                <report entity="unit" level="error">
-					<parameter name="id"><select path="id"/></parameter>
-					<parameter name="text">Unable to open SQL ports on instance <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/></parameter>
-				</report>
-                <stop/>
-            </failure>
-		</update-cf-stack>
 	</rule>
 
 	<rule match="$.services[?(@.type == 'msSqlServer' and @.adminPassword and @.adminPassword != @.state.adminPassword)].units[?(@.temp.instanceName)]"

@@ -28,6 +28,8 @@ heat:
   - RouterInterface.template
   - Subnet.template
   - LoadBalancer.template
+  - DefaultSecurity.template
+  - WindowsSecurity.template
 
 agent:
  - SetPassword.template

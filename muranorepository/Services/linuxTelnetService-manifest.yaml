@@ -26,6 +26,7 @@ heat:
   - Param.template
   - RouterInterface.template
   - Subnet.template
+  - DefaultSecurity.template
 
 agent:
   - DeployTelnet.template

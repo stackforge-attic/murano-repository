@@ -28,6 +28,9 @@ heat:
   - Param.template
   - RouterInterface.template
   - Subnet.template
+  - DefaultSecurity.template
+  - WindowsSecurity.template
+  - SQL-security.template
 
 
 agent:
