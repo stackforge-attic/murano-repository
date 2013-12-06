@@ -1,5 +1,27 @@
 <workflow>
 
+	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'linuxTelnetService' and @.keyPair)].units[?(@.temp.KeyPairMapping)]"
+		desc="This rule allows to set Key Pair for all VMs with this service">
+		<update-cf-stack template="Keypair" result="outputs" error="exception">
+			<parameter name="mappings">
+				<map>
+					<mapping name="instanceName"><select path="state.hostname"/></mapping>
+					<mapping name="keyName"><select path="::keyPair"/></mapping>
+				</map>
+			</parameter>
+			<success>
+				<set path="temp.KeyPairMapping"><true/></set>
+			</success>
+			<failure>
+				<report entity="unit" level="error">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Unable to assign Key Pair on unit <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/></parameter>
+				</report>
+				<stop/>
+			</failure>
+		</update-cf-stack>
+	</rule>
+
 	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'linuxTelnetService')].units[?(@.state.hostname and not @.temp.instanceName)]"
 		desc="Units of Linux Telnet service having hostname and image names assigned but without instances">
 		<report entity="unit">
@@ -10,7 +32,6 @@
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
-                    <mapping name="keyName"><select path="::keyPair"/></mapping>
 					<mapping name="userData">
 						<prepare-user-data template="Linux" initFile="linux_init.sh">
 							<parameter name="hostname"><select path="state.hostname"/></parameter>
@@ -39,7 +60,6 @@
 		</failure>
 		</update-cf-stack>
 	</rule>
-
 
     	<rule match="$.services[?(@.type == 'linuxTelnetService')].units[?(@.temp.instanceName and not @.state.TelnetInstalled)]"
 			desc="Units of Linux Telnet service which have got an instance deployed but have not got telnet service installed">
