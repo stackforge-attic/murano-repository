@@ -4,7 +4,7 @@
             "Properties": {
                 "SecurityGroups": [
                     {
-                        "Ref": "MuranoDefaultSecurityGroup"
+                        "Ref": "$MuranoSecurityGroup-{envName}"
                     }
                 ]
             }

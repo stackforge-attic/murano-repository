@@ -1,5 +1,15 @@
 <workflow>
 	<!-- Provisioning rules -->
+    <rule match="$.services[?(@.type == 'linuxApacheService' and not @.securityTemplates)]">
+        <set path="securityTemplates">
+            <list>
+                <text>WebServerSecurity</text>
+                <text>LinuxSecurity</text>
+            </list>
+        </set>
+    </rule>
+
+
 	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'linuxApacheService')].units[?(@.state.hostname and not @.temp.instanceName)]"
 		desc="Units of Linux Telnet service having hostname and image names assigned but without instances">
 		<report entity="unit">
@@ -77,34 +87,6 @@
 				Configuring security groups on <select path="state.hostname"/> (<select path="name"/>)
 			</parameter>
 		</report>
-		<update-cf-stack template="ApacheSecurity" error="exception">
-			<parameter name="mappings">
-				<map>
-					<mapping name="portName">port-<select path="state.hostname"/></mapping>
-				</map>
-			</parameter>
-			<success>
-				<report entity="unit">
-					<parameter name="id">
-						<select path="id"/>
-					</parameter>
-					<parameter name="text">
-						Security groups configuration on instance <select path="state.hostname"/> (<select path="name"/>) is successful
-					</parameter>
-				</report>
-			</success>
-			<failure>
-				<report entity="unit" level="error">
-					<parameter name="id">
-						<select path="id"/>
-					</parameter>
-					<parameter name="text">
-						Unable to configure security groups on instance <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/>
-					</parameter>
-				</report>
-				<stop/>
-			</failure>
-		</update-cf-stack>
 	</rule>
 	<!-- Agent rules -->
 	<rule match="$.services[?(@.type == 'linuxApacheService')].units[?(@.temp.instanceName and not @.state.ApacheInstalled)]"

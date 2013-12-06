@@ -19,7 +19,7 @@ workflows:
 
 heat:
   - Linux.template
-  - ApacheSecurity.template
+  - WebServerSecurity.template
   - InstancePort.template
   - InstancePortWSubnet.template
   - Network.template
@@ -27,6 +27,9 @@ heat:
   - Param.template
   - RouterInterface.template
   - Subnet.template
+  - DefaultSecurity.template
+  - WebServerSecurity.template
+  - LinuxSecurity.template
 
 agent:
   - DeployApache.template

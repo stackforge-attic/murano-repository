@@ -39,6 +39,7 @@
 
       <rule match="$[?(@.networking.topology == 'nova' and not @.networking.state.ready_for_cf)]"
               desc="Nova topology - skip all neutron actions">
+          <set path="networking.cidr">0.0.0.0/0</set>
           <set path="networking.state.ready_for_cf"><true/></set>
       </rule>
 
@@ -59,7 +60,7 @@
         </rule>
 
         <rule match="$[?(@.networking.state.ready_for_cidrs)].networking.networks[?(@.createSubnet and not @.cidr)]"
-                desc="Need to find cidr for network-to-join">
+                desc="Need to generate cidr for new subnet in network-to-join">
             <get-cidr result="cidr">
                 <parameter name="routerId"><select path="/networking.routerId"/></parameter>
                 <success>
@@ -67,6 +68,18 @@
                 </success>
             </get-cidr>
         </rule>
+
+       <rule match="$[?(@.networking.state.ready_for_cidrs)].networking.networks[?(not @.createSubnet and not @.cidr)]"
+                desc="Need to find cidr in existing subnet in network-to-join">
+            <get-cidr result="cidr">
+                <parameter name="existingNetwork"><select path="networkId"/></parameter>
+                <success>
+                    <set path="cidr"><select source="cidr" path="cidr"/></set>
+                </success>
+            </get-cidr>
+        </rule>
+
+
 
         <rule match="$[?(@.networking.state.ready_for_cidrs)]">
             <rule match="$[?(@.networking.createNetwork and not @.networking.cidr)]"
@@ -79,7 +92,7 @@
         </rule>
 
         <rule match="$[?(@.networking.state.ready_for_cidrs)]">
-            <rule match="$.networking.networks[?(@.createSubnet and not @.cidr)]"
+            <rule match="$.networking.networks[?(not @.cidr)]"
                     desc="No more cidr config required for joined networks">
                 <empty>
                     <set path="networking.state.join_net_cidr_done"><true/></set>
@@ -195,6 +208,7 @@
               <parameter name="mappings">
                   <map>
                       <mapping name="instanceName"><select path="state.hostname"/></mapping>
+                      <mapping name="envName"><select path="/name"/></mapping>
                   </map>
               </parameter>
           </update-cf-stack>
@@ -206,6 +220,7 @@
                 <update-cf-stack template="InstancePortWSubnet">
                     <parameter name="mappings">
                         <map>
+                            <mapping name="envName"><select path="/name"/></mapping>
                             <mapping name="instanceName"><select path="state.hostname"/></mapping>
                             <mapping name="instancePort">port-<select path="state.hostname"/></mapping>
                             <mapping name="network">network</mapping>
@@ -225,6 +240,7 @@
                 <update-cf-stack template="InstancePortWSubnet">
                     <parameter name="mappings">
                         <map>
+                            <mapping name="envName"><select path="/name"/></mapping>
                             <mapping name="instanceName"><select path="state.hostname"/></mapping>
                             <mapping name="instancePort">network-port-<select path="state.hostname"/></mapping>
                             <mapping name="network">network-<select source="network" path="id"/> </mapping>
@@ -244,11 +260,92 @@
                 <update-cf-stack template="InstancePort">
                     <parameter name="mappings">
                         <map>
+                            <mapping name="envName"><select path="/name"/></mapping>
                             <mapping name="instanceName"><select path="state.hostname"/></mapping>
                             <mapping name="instancePort">join-<select source="network" path="id"/>-port-<select path="state.hostname"/></mapping>
                             <mapping name="network">network-<select source="network" path="id"/> </mapping>
                         </map>
                     </parameter>
+                </update-cf-stack>
+            </rule>
+        </rule>
+
+        <rule match="$[?(@.networking.state.ready_for_cf and not @.temp.defaultSecurityApplied)]"
+                desc = "Need to apply default security rules">
+            <update-cf-stack template="DefaultSecurity">
+                <parameter name="mappings">
+                    <map>
+                        <mapping name="envName"><select path="/name"/></mapping>
+                        <mapping name="cidr"><select path="/networking.cidr"/></mapping>
+                    </map>
+                </parameter>
+                <success>
+                    <set path="/temp.defaultSecurityApplied"><true/></set>
+                    <report entity="environment" level="info">
+                             <parameter name="id"><select path="/id"/></parameter>
+                             <parameter name="text">Applied default security template in subnet <select path="/networking.cidr"/></parameter>
+                    </report>
+                </success>
+            </update-cf-stack>
+            <rule match="$.networking.networks[*]">
+                <update-cf-stack template="DefaultSecurity">
+                    <parameter name="mappings">
+                        <map>
+                            <mapping name="envName"><select path="/name"/></mapping>
+                            <mapping name="cidr"><select path="cidr"/></mapping>
+                        </map>
+                    </parameter>
+                    <success>
+                        <set path="/temp.defaultSecurityApplied"><true/></set>
+                        <report entity="environment" level="info">
+                             <parameter name="id"><select path="/id"/></parameter>
+                             <parameter name="text">Applied default security template in subnet <select path="cidr"/></parameter>
+                        </report>
+                    </success>
+                </update-cf-stack>
+            </rule>
+        </rule>
+
+        <rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.securityTemplates and not @.temp.securityApplied)].securityTemplates[*]"
+                desc="Custom security templates exist">
+           <set path="#templateName">
+                <select/>
+           </set>
+           <update-cf-stack>
+                <parameter name="template"><select/></parameter>
+                <parameter name="mappings">
+                    <map>
+                        <mapping name="envName"><select path="/name"/></mapping>
+                        <mapping name="cidr"><select path="/networking.cidr"/></mapping>
+                    </map>
+                </parameter>
+                <success>
+                    <set path="::temp.securityApplied"><true/></set>
+                    <report entity="service" level="info">
+                        <parameter name="id"><select path="::id"/></parameter>
+                        <parameter name="text">Applied security template <select source="templateName"/> for <select path="::name"/> in subnet <select path="/networking.cidr"/></parameter>
+                    </report>
+                </success>
+            </update-cf-stack>
+
+           <set path="#service">
+                <select path="::"/>
+           </set>
+            <rule match="/$.networking.networks[*]">
+                <update-cf-stack>
+                    <parameter name="template"><select source="templateName"/></parameter>
+                    <parameter name="mappings">
+                        <map>
+                            <mapping name="envName"><select path="/name"/></mapping>
+                            <mapping name="cidr"><select path="cidr"/></mapping>
+                        </map>
+                    </parameter>
+                    <success>
+                        <report entity="service" level="info">
+                            <parameter name="id"><select path="id" source="service"/></parameter>
+                            <parameter name="text">Applied security template <select source="templateName"/> for <select path="name" source="service"/> in subnet <select path="cidr"/></parameter>
+                        </report>
+                    </success>
                 </update-cf-stack>
             </rule>
         </rule>

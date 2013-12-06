@@ -14,11 +14,13 @@ heat:
 - RouterInterface.template
 - Windows.template
 - Network.template
-- NNSecurity.template
 - Param.template
 - Subnet.template
 - InstancePortWSubnet.template
 - InstancePort.template
+- NNSecurity.template
+- DefaultSecurity.template
+- WindowsSecurity.template
 scripts:
 - Install-RoleSecondaryDomainController.ps1
 - Install-RolePrimaryDomainController.ps1

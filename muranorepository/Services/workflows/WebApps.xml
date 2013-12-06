@@ -1,4 +1,14 @@
 <workflow>
+
+    <rule match="$.services[?(@.type in ('webServer', 'aspNetApp', 'webServerFarm', 'aspNetAppFarm') and not @.securityTemplates)]">
+        <set path="securityTemplates">
+            <list>
+                <text>Windows</text>
+                <text>WebServerSecurity</text>
+            </list>
+        </set>
+	</rule>
+
 	<rule match="$.services[?(@.type in ('webServer', 'aspNetApp', 'webServerFarm', 'aspNetAppFarm') and @.domain)].units[*]"
           desc='Units of web services with domain'>
 		<set path="domain">
