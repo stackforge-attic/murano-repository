@@ -6,6 +6,12 @@
                 "SecurityGroupIngress": [
                     {
                         "ToPort": "53",
+                        "IpProtocol": "udp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "53",
                         "IpProtocol": "tcp",
                         "FromPort": "53",
                         "CidrIp": "$cidr"
