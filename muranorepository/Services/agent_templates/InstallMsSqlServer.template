@@ -1,6 +1,6 @@
 {
   "Scripts": [
-    "ImportCoreFunctions.ps1", 
+    "ImportCoreFunctions.ps1",
     "OptionParser.ps1",
     "SQLServer/SQLServerOptionParsers.ps1",
     "SQLServer/SQLServerInstaller.ps1",
