@@ -10,6 +10,7 @@
 	<rule match="$.services[?(@.type == 'activeDirectory' and not @.securityTemplates)]">
         <set path="securityTemplates">
             <list>
+                <text>DomainSecurity</text>
                 <text>WindowsSecurity</text>
             </list>
         </set>

@@ -21,6 +21,7 @@ heat:
 - NNSecurity.template
 - DefaultSecurity.template
 - WindowsSecurity.template
+- DomainSecurity.template
 scripts:
 - Install-RoleSecondaryDomainController.ps1
 - Install-RolePrimaryDomainController.ps1
