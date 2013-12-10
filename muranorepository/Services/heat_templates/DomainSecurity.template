@@ -5,9 +5,93 @@
             "Properties": {
                 "SecurityGroupIngress": [
                     {
+                        "ToPort": "123",
+                        "IpProtocol": "udp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "135",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "464",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "464",
+                        "IpProtocol": "udp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "389",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "389",
+                        "IpProtocol": "udp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "636",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "3268",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    }
+                    {
+                        "ToPort": "3269",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
                         "ToPort": "53",
                         "IpProtocol": "tcp",
                         "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "53",
+                        "IpProtocol": "udp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "88",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "88",
+                        "IpProtocol": "udp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "445",
+                        "IpProtocol": "tcp",
+                        "FromPort": "53",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "65535",
+                        "IpProtocol": "tcp",
+                        "FromPort": "49152",
                         "CidrIp": "$cidr"
                     }
                 ]
