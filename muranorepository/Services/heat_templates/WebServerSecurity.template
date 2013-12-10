@@ -11,9 +11,9 @@
                         "CidrIp": "0.0.0.0/0"
                     },
                     {
-                        "ToPort": "433",
+                        "ToPort": "443",
                         "IpProtocol": "tcp",
-                        "FromPort": "433",
+                        "FromPort": "443",
                         "CidrIp": "0.0.0.0/0"
                     }
                 ]
