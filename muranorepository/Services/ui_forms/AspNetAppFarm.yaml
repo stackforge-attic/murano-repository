@@ -89,6 +89,8 @@ forms:
             hostname restrictions.
           required: false
           regexpValidator: '^(([a-zA-Z0-9#][a-zA-Z0-9-#]*[a-zA-Z0-9#])\.)*([A-Za-z0-9#]|[A-Za-z0-9#][A-Za-z0-9-#]*[A-Za-z0-9#])$'
+          # FIXME: does not work for # turning into 2-digit numbers
+          maxLength: 15
           helpText: Optional field for a machine hostname template
           # temporaryHack
           widgetMedia:

@@ -269,9 +269,12 @@ class Archiver(object):
             # assert manifest file
             manifests = glob.glob(os.path.join(path_to_extract,
                                                '*-manifest.yaml'))
+            if not manifests:
+                log.error('There is no manifest file in archive')
+                return False
             if len(manifests) != 1:
-                raise AssertionError('There should be one '
-                                     'manifest file in archive')
+                log.error('There are more then one manifest file in archive')
+                return False
 
             shutil.copy(manifests[0], CONF.manifests)
             #Todo: Check manifest is valid

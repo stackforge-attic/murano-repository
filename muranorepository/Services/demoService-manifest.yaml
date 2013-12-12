@@ -1,9 +1,23 @@
+version: 0.1
+service_display_name: Demo Service
+
+description: <strong> Demo Service </strong> shows how Murano is working.
+full_service_name: demoService
+author: Mirantis Inc.
+service_version: 1
+enabled: true
+
 agent:
 - Demo.template
-author: 'Mirantis Inc.'
-description: <strong> Demo Service </strong> shows how Murano is working.
-enabled: true
-full_service_name: demoService
+
+ui:
+- Demo.yaml
+
+workflows:
+- Networking.xml
+- Common.xml
+- Demo.xml
+
 heat:
 - Demo.template
 - RouterInterface.template
@@ -16,13 +30,5 @@ heat:
 - DefaultSecurity.template
 - LinuxSecurity.template
 - DemoSecurity.template
+
 scripts: []
-service_display_name: Demo Service
-service_version: ''
-ui:
-- Demo.yaml
-version: '0.1'
-workflows:
-- Networking.xml
-- Common.xml
-- Demo.xml
