@@ -241,6 +241,9 @@ class Archiver(object):
                 log.info(
                     '{0} manifest has no file definitions for '
                     '{1}'.format(manifest.service_display_name, data_type))
+        #Add manifest file into archive
+        manifest_filename =  manifest.full_service_name + '-manifest.yaml'
+        self._copy_data([manifest_filename], CONF.manifests, temp_dir)
         return self._compose_archive(file_name, temp_dir)
 
     def remove_existing_hash(self, cache_dir, hash):
