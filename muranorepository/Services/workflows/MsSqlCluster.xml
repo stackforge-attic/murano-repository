@@ -3,6 +3,7 @@
         <set path="securityTemplates">
             <list>
                 <text>SQL-security</text>
+                <text>WindowsSecurity</text>
             </list>
         </set>
 	</rule>
