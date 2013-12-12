@@ -128,7 +128,7 @@
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer')].units[?(@.state.domain and not @.state.failoverClusterPrerequisitesInstalled)]"
             desc="Units of SQL Server Cluster services that are already joined AD domain">
-		<send-command template="SqlServerCluster/FailoverClusterPrerequisites" error="exception">
+		<send-command template="FailoverClusterPrerequisites" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
@@ -167,7 +167,7 @@
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer' and not @.state.failoverClusterCreated)].units[?(@.state.failoverClusterPrerequisitesInstalled)]" limit="1"
             desc="First unit of SQL Server Cluster services that is already has failover cluster prerequisites installed">
-		<send-command template="SqlServerCluster/FailoverCluster" error="exception">
+		<send-command template="FailoverCluster" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
@@ -218,7 +218,7 @@
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer' and @.state.failoverClusterCreated and not @.state.agEnvironmentConfigured)].units[*]"
             desc="First unit of SQL Server Cluster services that is already has failover cluster created">
-		<send-command template="SqlServerCluster/ConfigureEnvironmentForAOAG" error="exception">
+		<send-command template="ConfigureEnvironmentForAOAG" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
@@ -251,7 +251,7 @@
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer' and @.state.agEnvironmentConfigured)].units[?(@.state.failoverClusterPrerequisitesInstalled and not @.state.sqlServerInstalled)]"
             desc="All units of SQL Server Cluster services that is already has environment configured">
-		<send-command template="SqlServerCluster/InstallSqlServerForAOAG" error="exception">
+		<send-command template="InstallSqlServerForAOAG" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
@@ -296,7 +296,7 @@
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer')].units[?(@.state.sqlServerInstalled and not @.state.alwaysOnInitialized)]"
             desc="All units of SQL Server Cluster services that has SQL Server installed">
-		<send-command template="SqlServerCluster/InitializeAlwaysOn" error="exception">
+		<send-command template="InitializeAlwaysOn" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
@@ -341,7 +341,7 @@
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer')].units[?(@.state.alwaysOnInitialized and not @.state.primaryReplicaInitialized)]"
             desc="All units of SQL Server Cluster services that has AlwaysOn initialized">
-		<send-command template="SqlServerCluster/InitializeAOAGPrimaryReplica" error="exception">
+		<send-command template="InitializeAOAGPrimaryReplica" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
@@ -401,7 +401,7 @@
 
 	<rule match="$.services[?(@.type == 'msSqlClusterServer')].units[?(@.state.primaryReplicaInitialized and not @.state.secondaryReplicaInitialized)]"
             desc="All units of SQL Server Cluster services that has primary replica initialized">
-		<send-command template="SqlServerCluster/InitializeAOAGSecondaryReplica" error="exception">
+		<send-command template="InitializeAOAGSecondaryReplica" error="exception">
 			<parameter name="unit">
 				<select path="id"/>
 			</parameter>
