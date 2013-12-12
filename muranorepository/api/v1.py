@@ -230,9 +230,13 @@ def create_or_update_service(service_name):
     except:
         return make_response('Unable to load json data', 500)
 
-    service_id = service_data.get('full_service_name', service_name)
+    service_id = service_data.get('full_service_name')
+    if not service_id:
+        service_id = service_name
+        service_data['full_service_name'] = service_name
+
     #TODO: Pass service_name instead of service_id
-    if not service_id or service_id != service_name:
+    if service_id != service_name:
         return make_response(
             "Body attribute 'full_service_name' value is {0} which doesn't "
             "correspond to 'service_name' part of URL (equals to {1})".format(
