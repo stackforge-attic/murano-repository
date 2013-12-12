@@ -35,13 +35,13 @@ heat:
 
 agent:
   - SetPassword.template
-  - SqlServerCluster/FailoverClusterPrerequisites.template
-  - SqlServerCluster/FailoverCluster.template
-  - SqlServerCluster/ConfigureEnvironmentForAOAG.template
-  - SqlServerCluster/InstallSqlServerForAOAG.template
-  - SqlServerCluster/InitializeAlwaysOn.template
-  - SqlServerCluster/InitializeAOAGPrimaryReplica.template
-  - SqlServerCluster/InitializeAOAGSecondaryReplica.template
+  - FailoverClusterPrerequisites.template
+  - FailoverCluster.template
+  - ConfigureEnvironmentForAOAG.template
+  - InstallSqlServerForAOAG.template
+  - InitializeAlwaysOn.template
+  - InitializeAOAGPrimaryReplica.template
+  - InitializeAOAGSecondaryReplica.template
 
 
 scripts:
