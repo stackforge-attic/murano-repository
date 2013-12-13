@@ -24,6 +24,25 @@
                     }
                 ]
             }
+        },
+        "$MuranoSecurityGroup-{envName}": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "SecurityGroupIngress": [
+                    {
+                        "FromPort": "1",
+                        "ToPort": "65535",
+                        "IpProtocol": "tcp",
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "FromPort": "1",
+                        "ToPort": "65535",
+                        "IpProtocol": "udp",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
         }
     }
 }
