@@ -5,15 +5,15 @@
             "Properties": {
                 "SecurityGroupIngress": [
                     {
-                        "ToPort": "4022",
-                        "IpProtocol": "tcp",
-                        "FromPort": "4022",
-                        "CidrIp": "$cidr"
-                    },
-                    {
                         "ToPort": "135",
                         "IpProtocol": "tcp",
                         "FromPort": "135",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "ToPort": "137",
+                        "IpProtocol": "udp",
+                        "FromPort": "137",
                         "CidrIp": "$cidr"
                     },
                     {
@@ -21,6 +21,18 @@
                         "IpProtocol": "tcp",
                         "FromPort": "1433",
                         "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "FromPort": "1024",
+                        "ToPort": "65535",
+                        "IpProtocol": "tcp",
+                        "CidrIp": "$cidr"
+                    },
+                    {
+                        "FromPort": "1024",
+                        "ToPort": "65535",
+                        "IpProtocol": "udp",
+                        "CidrIp": "$cidr"
                     }
                 ]
             }
