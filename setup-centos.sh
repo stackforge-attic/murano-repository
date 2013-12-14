@@ -163,9 +163,9 @@ CLONE_FROM_GIT=$1
 	fi
 # making smaple configs
 	log "Making sample configuration files at \"$ETC_CFG_DIR\""
-	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc`
+	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc/murano`
 	do
-		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file"
+		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/murano/$file" "$ETC_CFG_DIR/$file"
 	done
 }
 
