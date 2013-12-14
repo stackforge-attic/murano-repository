@@ -1,4 +1,3 @@
-recursive-include Services *
 include ChangeLog
 include README.rst
 include MANIFEST.in
@@ -10,5 +9,5 @@ include tox.ini
 include muranorepository/tests/test.conf
 exclude .gitignore
 exclude .gitreview
-
+recursive-include etc *
 global-exclude *.pyc
