@@ -8,13 +8,15 @@ port = 8084
 #cache_dir =
 
 # Show more verbose log output (sets INFO log level output)
-verbose = True
+verbose = False
 
 # Show debugging output in logs (sets DEBUG log level output)
-debug = True
+debug = False
 
 # Log to this file. Make sure the user has permissions to write to this file!
-log_file = /tmp/murano-repository.log
+#log_file = /valr/log/murano/murano-repository.log
+use_syslog=True
+syslog-log-facility=LOG_LOCAL0
 
 # Provide information about data types
 # absolute or relative path to manifest location(root directory)
