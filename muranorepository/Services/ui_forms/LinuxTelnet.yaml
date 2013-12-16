@@ -27,15 +27,6 @@ forms:
           hidden: true
           attributeNames: units
           initial: 1
-        - name: deployTelnet
-          type: boolean
-          label: Deploy Telnet
-          description: >-
-             Indicates if the target machine has to get telnet deployed
-          initial: true
-          required: false
-          widgetMedia:
-            css: {all: [muranodashboard/css/checkbox.css]}
         - name: keyPair
           type: keypair
           label: Key Pair
