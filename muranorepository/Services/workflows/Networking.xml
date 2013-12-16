@@ -9,13 +9,35 @@
 
         <rule match="$[?(@.networking.topology == 'routed' and not @.networking.routerId)]"
               desc="Router-based topology, need to detect router">
-           <get-default-router-id result="result">
-               <success>
-                   <set path="networking.routerId"><select source="result" path="routerId"/></set>
-                   <set path="networking.state.ready_for_cidrs"><true/></set>
-                   <set path="networking.createNetwork"><true/></set>
-               </success>
-           </get-default-router-id>
+            <get-default-router-id result="result">
+                <success>
+                    <set path="networking.routerId">
+                        <select source="result" path="routerId"/>
+                    </set>
+
+                    <rule match="$[?(@.networking.routerId == 'NOT_FOUND')]"
+                          desc="Router could not be found">
+                        <report entity="environment" level="error">
+                            <parameter name="id">
+                                <select path="/id"/>
+                            </parameter>
+                            <parameter name="text">Unable to configure network: the tenant does not have a Router. Please, create a router in the current tenant</parameter>
+                        </report>
+                        <set path="networking.routerId">
+                            <null/>
+                        </set>
+                        <stop/>
+                        <empty>
+                            <set path="networking.state.ready_for_cidrs">
+                                <true/>
+                            </set>
+                            <set path="networking.createNetwork">
+                                <true/>
+                            </set>
+                        </empty>
+                    </rule>
+                </success>
+            </get-default-router-id>
         </rule>
 
         <rule match="$[?(@.networking.topology == 'flat' and not @.networking.networks)]"
