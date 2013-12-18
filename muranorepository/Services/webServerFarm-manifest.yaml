@@ -6,7 +6,7 @@ description: >-
 
 full_service_name: webServerFarm
 author: Mirantis Inc.
-service_version: 1.0
+service_version: 1
 enabled: True
 
 ui:
