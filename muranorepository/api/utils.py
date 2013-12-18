@@ -33,7 +33,7 @@ def get_archive(client, hash_sum):
     archive_manager = Archiver()
     cache_dir = os.path.join(CONF.cache_dir, client)
     if not os.path.exists(cache_dir):
-        os.mkdir(cache_dir)
+        os.makedirs(cache_dir)
         existing_hash = None
     else:
         existing_hash = archive_manager.get_existing_hash(cache_dir)
