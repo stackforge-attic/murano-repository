@@ -1,0 +1,11 @@
+Verified+2: Jenkins
+Code-Review+1: Igor Yozhikov <iyozhikov@mirantis.com>
+Verified+1: murano-ci
+Approved+1: Timur Sufiev <tsufiev@mirantis.com>
+Code-Review+2: Timur Sufiev <tsufiev@mirantis.com>
+Code-Review+2: Alexander Tivelkov <ativelkov@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Wed, 18 Dec 2013 17:02:34 +0000
+Reviewed-on: https://review.openstack.org/62889
+Project: stackforge/murano-repository
+Branch: refs/heads/master
