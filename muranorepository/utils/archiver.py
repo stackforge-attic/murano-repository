@@ -120,14 +120,14 @@ class Archiver(object):
             clean_dir(cache_dir)
             hash_folder = self._create_hash_folder(arch_name, cache_dir)
             try:
-                shutil.move(ARCHIVE_PKG_NAME, os.path.join(hash_folder,
-                                                           arch_name))
+                shutil.move(arch_name, os.path.join(hash_folder,
+                                                    ARCHIVE_PKG_NAME))
             except Exception as e:
                 log.error('Unable to move created archive {0}'
                           ' to hash folder {1} due to {2}'.format(arch_name,
                                                                   hash_folder,
                                                                   e))
-            return os.path.abspath(os.path.join(hash_folder, arch_name))
+        return os.path.abspath(os.path.join(hash_folder, ARCHIVE_PKG_NAME))
 
     def _create_hash_folder(self, archive_name, cache_dir):
         """
@@ -222,7 +222,9 @@ class Archiver(object):
                     log.info(
                         'Manifest for {0} service has no file definitions for '
                         '{1}'.format(manifest.service_display_name, data_type))
-        return self._compose_archive(ARCHIVE_PKG_NAME,
+
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            return  self._compose_archive(temp_file.name,
                                      temp_dir,
                                      hash=True,
                                      cache_dir=cache_dir)
