@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Code-Review+2: Ekaterina Fedorova <efedorova@mirantis.com>
+Approved+1: Alexander Tivelkov <ativelkov@mirantis.com>
+Code-Review+2: Alexander Tivelkov <ativelkov@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 19 Dec 2013 15:58:48 +0000
+Reviewed-on: https://review.openstack.org/63152
+Project: stackforge/murano-repository
+Branch: refs/heads/release-0.4
