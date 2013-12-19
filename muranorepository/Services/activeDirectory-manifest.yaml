@@ -1,15 +1,22 @@
-agent:
-- CreatePrimaryDC.template
-- LeaveDomain.template
-- SetPassword.template
-- CreateSecondaryDC.template
-- AskDnsIp.template
-- JoinDomain.template
-author: ''
+version: 0.1
+service_display_name: Active Directory
+
 description: <strong> The Active Directory Service </strong> includes one primary
   and optionally a few secondary Domain Controllers, with DNS
-enabled: true
+
 full_service_name: activeDirectory
+author: Mirantis Inc.
+service_version: 1
+enabled: true
+
+ui:
+- ActiveDirectory.yaml
+
+workflows:
+- AD.xml
+- Networking.xml
+- Common.xml
+
 heat:
 - RouterInterface.template
 - Windows.template
@@ -22,6 +29,15 @@ heat:
 - DefaultSecurity.template
 - WindowsSecurity.template
 - DomainSecurity.template
+
+agent:
+- CreatePrimaryDC.template
+- LeaveDomain.template
+- SetPassword.template
+- CreateSecondaryDC.template
+- AskDnsIp.template
+- JoinDomain.template
+
 scripts:
 - Install-RoleSecondaryDomainController.ps1
 - Install-RolePrimaryDomainController.ps1
@@ -29,12 +45,4 @@ scripts:
 - ImportCoreFunctions.ps1
 - Get-DnsListeningIpAddress.ps1
 - Set-LocalUserPassword.ps1
-service_display_name: Active Directory
-service_version: ''
-ui:
-- ActiveDirectory.yaml
-version: '0.1'
-workflows:
-- AD.xml
-- Networking.xml
-- Common.xml
+

@@ -7,7 +7,7 @@ description: >-
 
 full_service_name: aspNetApp
 author: Mirantis Inc.
-service_version: 1.0
+service_version: 1
 enabled: True
 
 ui:
