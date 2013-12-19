@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Approved+1: Serg Melikyan <smelikyan@mirantis.com>
+Code-Review+2: Serg Melikyan <smelikyan@mirantis.com>
+Code-Review+2: Timur Sufiev <tsufiev@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 19 Dec 2013 08:54:14 +0000
+Reviewed-on: https://review.openstack.org/63071
+Project: stackforge/murano-repository
+Branch: refs/heads/release-0.4
