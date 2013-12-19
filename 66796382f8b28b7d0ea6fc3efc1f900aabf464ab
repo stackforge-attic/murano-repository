@@ -1,0 +1,11 @@
+Change-Id: I66796382f8b28b7d0ea6fc3efc1f900aabf464ab
+Verified+2: Jenkins
+Approved+1: Ekaterina Fedorova <efedorova@mirantis.com>
+Code-Review+2: Ekaterina Fedorova <efedorova@mirantis.com>
+Code-Review+2: Timur Sufiev <tsufiev@mirantis.com>
+Code-Review-1: Alexander Tivelkov <ativelkov@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 19 Dec 2013 15:37:54 +0000
+Reviewed-on: https://review.openstack.org/63137
+Project: stackforge/murano-repository
+Branch: refs/heads/release-0.4
