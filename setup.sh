@@ -147,6 +147,15 @@ CLONE_FROM_GIT=$1
 	do
 		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/murano/$file" "$ETC_CFG_DIR/$file"
 	done
+        log "Making common /var/lib/murano"
+        if [ ! -d "/var/lib/murano" ]; then
+                mkdir -p "/var/lib/murano"
+                if [ $? -ne 0 ];then
+                        log "Can't create \"/var/lib/murano\", exiting!!!"
+                        exit 1
+                fi
+        fi
+
 }
 
 # searching for service executable in path
