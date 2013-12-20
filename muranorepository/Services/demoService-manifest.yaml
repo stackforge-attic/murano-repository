@@ -7,6 +7,9 @@ author: Mirantis Inc.
 service_version: 1
 enabled: true
 
+agent:
+- Demo.template
+
 ui:
 - Demo.yaml
 
