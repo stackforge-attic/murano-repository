@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Approved+1: Serg Melikyan <smelikyan@mirantis.com>
+Code-Review+2: Serg Melikyan <smelikyan@mirantis.com>
+Verified+1: murano-ci
+Code-Review+2: Alexander Tivelkov <ativelkov@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Fri, 20 Dec 2013 11:02:39 +0000
+Reviewed-on: https://review.openstack.org/62400
+Project: stackforge/murano-repository
+Branch: refs/heads/master
