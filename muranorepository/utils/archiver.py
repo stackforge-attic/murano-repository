@@ -23,6 +23,7 @@ from oslo.config import cfg
 from .parser import serialize
 from muranorepository.consts import DATA_TYPES, ARCHIVE_PKG_NAME
 from muranorepository.consts import UI, UI_FIELDS_IN_MANIFEST
+from muranorepository.utils import utils
 from muranorepository.openstack.common.gettextutils import _  # noqa
 CONF = cfg.CONF
 
@@ -100,7 +101,7 @@ class Archiver(object):
                        " no hash to calculate".format(archive_path)))
             return None
 
-    def _compose_archive(self, arch_name, path, hash=False, cache_dir=None):
+    def _compose_archive(self, arch_name, path, hash=False, data_dir=None):
         tar = tarfile.open(arch_name, 'w:gz')
         try:
             for item in os.listdir(path):
@@ -114,11 +115,11 @@ class Archiver(object):
         if not hash:
             return arch_name
         else:
-            if not cache_dir:
-                raise ValueError(_('cache_dir parameter should not be None. '
+            if not data_dir:
+                raise ValueError(_('data_dir parameter should not be None. '
                                    'It is needed to create hash directory'))
-            clean_dir(cache_dir)
-            hash_folder = self._create_hash_folder(arch_name, cache_dir)
+            clean_dir(data_dir)
+            hash_folder = self._create_hash_folder(arch_name, data_dir)
             try:
                 shutil.move(arch_name, os.path.join(hash_folder,
                                                     ARCHIVE_PKG_NAME))
@@ -128,14 +129,14 @@ class Archiver(object):
 
         return os.path.abspath(os.path.join(hash_folder, ARCHIVE_PKG_NAME))
 
-    def _create_hash_folder(self, archive_name, cache_dir):
+    def _create_hash_folder(self, archive_name, data_dir):
         """
         Creates folder with data archive inside that has
         name equals to hash calculated from archive
         Return path to created hash folder
         """
         hash_sum = self._get_hash(archive_name)
-        pkg_dir = os.path.join(cache_dir, hash_sum)
+        pkg_dir = os.path.join(data_dir, hash_sum)
         if not os.path.exists(pkg_dir):
             os.mkdir(pkg_dir)
         return pkg_dir
@@ -158,20 +159,20 @@ class Archiver(object):
             with open(os.path.join(new_dst, file), 'w') as ui_form:
                 ui_form.write(serialize(content))
 
-    def get_existing_hash(self, cache_dir):
-        existing_caches = os.listdir(cache_dir)
+    def get_existing_hash(self, data_dir):
+        existing_caches = os.listdir(data_dir)
         if not len(existing_caches):
             return None
 
-        path = os.path.join(cache_dir,
+        path = os.path.join(data_dir,
                             existing_caches[0],
                             ARCHIVE_PKG_NAME)
         if not os.path.exists(path):
             raise IOError(_('Archive package is missing '
-                            'at dir {0}'.format(cache_dir)))
+                            'at dir {0}'.format(data_dir)))
         return existing_caches[0]
 
-    def hashes_match(self, cache_dir, existing_hash, hash_to_check):
+    def hashes_match(self, data_dir, existing_hash, hash_to_check):
         if hash_to_check is None or existing_hash is None:
             return False
         if existing_hash == hash_to_check:
@@ -179,12 +180,12 @@ class Archiver(object):
                 hash_to_check)))
             return True
         else:
-            self.remove_existing_hash(cache_dir, existing_hash)
+            self.remove_existing_hash(data_dir, existing_hash)
             return False
 
-    def create(self, cache_dir, manifests, types):
+    def create(self, data_dir, manifests, types):
         """
-        cache_dir - full path to dir where cache contains
+        data_dir - full path to dir where cache contains
         manifests -- list of Manifest objects
         types -- desired data types to be added to archive
         return: absolute path to created archive
@@ -206,16 +207,17 @@ class Archiver(object):
 
                 if hasattr(manifest, data_type):
                     file_list = getattr(manifest, data_type)
-                    scr_directory = os.path.join(
-                        CONF.manifests, self.src_directories[data_type])
+                    src_directory = os.path.join(
+                        utils.get_tenant_folder(),
+                        self.src_directories[data_type])
                     dst_directory = os.path.join(
                         temp_dir, self.dst_directories[data_type])
                     if data_type == UI:
                         self._compose_ui_forms(manifest, file_list,
-                                               scr_directory, dst_directory)
+                                               src_directory, dst_directory)
                     else:
                         self._copy_data(file_list,
-                                        scr_directory,
+                                        src_directory,
                                         dst_directory)
                 else:
                     log.info(
@@ -227,30 +229,32 @@ class Archiver(object):
             return self._compose_archive(temp_file.name,
                                          temp_dir,
                                          hash=True,
-                                         cache_dir=cache_dir)
+                                         data_dir=data_dir)
 
     def create_service_archive(self, manifest, file_name):
         temp_dir = tempfile.mkdtemp()
         for data_type in DATA_TYPES:
             if hasattr(manifest, data_type):
                 file_list = getattr(manifest, data_type)
-                scr_directory = os.path.join(
-                    CONF.manifests, self.src_directories[data_type])
+                src_directory = os.path.join(
+                    utils.get_tenant_folder(), self.src_directories[data_type])
                 dst_directory = os.path.join(
                     temp_dir, self.dst_directories[data_type])
-                self._copy_data(file_list, scr_directory, dst_directory)
+                self._copy_data(file_list, src_directory, dst_directory)
             else:
                 log.info(
                     _('{0} manifest has no file definitions for '
                       '{1}'.format(manifest.service_display_name, data_type)))
         #Add manifest file into archive
         manifest_filename = manifest.full_service_name + '-manifest.yaml'
-        self._copy_data([manifest_filename], CONF.manifests, temp_dir)
+        self._copy_data([manifest_filename],
+                        utils.get_tenant_folder(),
+                        temp_dir)
         return self._compose_archive(file_name, temp_dir)
 
-    def remove_existing_hash(self, cache_dir, hash):
-        path = os.path.join(cache_dir, hash)
-        log.info(_('Deleting archive package from {0}.'.format(path)))
+    def remove_existing_hash(self, data_dir, hash):
+        path = os.path.join(data_dir, hash)
+        log.info('Deleting archive package from {0}.'.format(path))
         shutil.rmtree(path, ignore_errors=True)
 
     def extract(self, path_to_archive):
@@ -260,6 +264,7 @@ class Archiver(object):
         return value - True if succeeded , False otherwise
         """
         try:
+            root_folder = utils.get_tenant_folder()
             path_to_extract = tempfile.mkdtemp()
             archive = tarfile.open(path_to_archive)
             try:
@@ -277,7 +282,7 @@ class Archiver(object):
                             'file in archive'))
                 return False
 
-            shutil.copy(manifests[0], CONF.manifests)
+            shutil.copy(manifests[0], root_folder)
             #Todo: Check manifest is valid
             for item in os.listdir(path_to_extract):
                 item_path = os.path.join(path_to_extract, item)
@@ -298,7 +303,7 @@ class Archiver(object):
                         self._copy_data(file_list,
                                         item_path,
                                         os.path.join(
-                                            CONF.manifests,
+                                            root_folder,
                                             self.src_directories[item]),
                                         overwrite=False)
                     else:
