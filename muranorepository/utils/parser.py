@@ -89,29 +89,30 @@ class ManifestParser(object):
 
     def parse(self):
         manifests = []
-        for file in os.listdir(self.manifest_directory):
-            manifest_file = os.path.join(self.manifest_directory, file)
-            if os.path.isfile(manifest_file):
-                if not file.endswith(".yaml"):
-                    log.warning("Extension of {0} file is not yaml. "
-                                "Only yaml file supported for "
-                                "service manifest files.".format(file))
-                    continue
-
-                try:
-                    with open(manifest_file) as stream:
-                        manifest_data = yaml.load(stream)
-                except yaml.YAMLError, exc:
-                        log.warn("Failed to load manifest file. {0}. "
-                                 "The reason: {1!s}".format(manifest_file,
-                                                            exc))
+        if os.path.exists(self.manifest_directory):
+            for file in os.listdir(self.manifest_directory):
+                manifest_file = os.path.join(self.manifest_directory, file)
+                if os.path.isfile(manifest_file):
+                    if not file.endswith(".yaml"):
+                        log.warning("Extension of {0} file is not yaml. "
+                                    "Only yaml file supported for "
+                                    "service manifest files.".format(file))
                         continue
 
-                manifest_is_valid, use_manifest = self._validate_manifest(
-                    file, manifest_data)
-                if use_manifest:
-                    manifest_data["valid"] = manifest_is_valid
-                    manifests.append(Manifest(manifest_data))
+                    try:
+                        with open(manifest_file) as stream:
+                            manifest_data = yaml.load(stream)
+                    except yaml.YAMLError, exc:
+                            log.warn("Failed to load manifest file. {0}. "
+                                     "The reason: {1!s}".format(manifest_file,
+                                                                exc))
+                            continue
+
+                    manifest_is_valid, use_manifest = self._validate_manifest(
+                        file, manifest_data)
+                    if use_manifest:
+                        manifest_data["valid"] = manifest_is_valid
+                        manifests.append(Manifest(manifest_data))
 
         return manifests
 

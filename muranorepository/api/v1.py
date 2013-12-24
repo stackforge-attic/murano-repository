@@ -18,7 +18,7 @@ import json
 from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
-from muranorepository.api import utils as api
+from muranorepository.api import utils
 from muranorepository.utils.parser import ManifestParser
 from muranorepository.utils.archiver import Archiver
 from muranorepository.consts import DATA_TYPES, MANIFEST
@@ -31,9 +31,10 @@ CONF = cfg.CONF
 
 @v1_api.route('/client/<path:client_type>')
 def get_archive_data(client_type):
+    #tenant_id = utils.get_tenant_id()
     if client_type not in CLIENTS_DICT.keys():
         abort(404)
-    path_to_archive = api.get_archive(client_type,
+    path_to_archive = utils.get_archive(client_type,
                                       request.args.get('hash'))
     if path_to_archive:
         return send_file(path_to_archive, mimetype='application/octet-stream')
@@ -44,7 +45,8 @@ def get_archive_data(client_type):
 @v1_api.route('/client/services/<service_name>')
 def download_service_archive(service_name):
     # In the future service name may contains dots
-    api.check_service_name(service_name)
+    utils.check_service_name(service_name)
+    # TODO: Extend manifest from tenant folder
     manifests = ManifestParser().parse()
     services_for_download = [manifest for manifest in manifests
                              if manifest.full_service_name == service_name]
@@ -66,42 +68,46 @@ def download_service_archive(service_name):
 
 @v1_api.route('/admin/<data_type>')
 def get_data_type_locations(data_type):
-    api.check_data_type(data_type)
-    result_path = api.compose_path(data_type)
-    return api.get_locations(data_type, result_path)
+    # ToDo: Extend with tenant dir info
+    utils.check_data_type(data_type)
+    result_path = utils.compose_path_to_common(data_type)
+    return utils.get_locations(data_type, result_path)
 
 
 @v1_api.route('/admin/<data_type>', methods=['POST'])
 def upload_file(data_type):
-    api.check_data_type(data_type)
+    # uploading enabled only to tenant dir
+    utils.check_data_type(data_type)
     filename = request.args.get('filename')
-    return api.save_file(request, data_type, path=None, filename=filename)
+    return utils.save_file(request, data_type, path=None, filename=filename)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>')
 def get_locations_in_nested_path_or_get_file(data_type, path):
-    api.check_data_type(data_type)
-    result_path = api.compose_path(data_type, path)
+    # ToDo: Extend with tenant dir info
+    utils.check_data_type(data_type)
+    result_path = utils.compose_path_to_common(data_type, path)
     if os.path.isfile(result_path):
         return send_file(result_path, mimetype='application/octet-stream')
     else:
-        return api.get_locations(data_type, result_path)
+        return utils.get_locations(data_type, result_path)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['POST'])
 def upload_file_in_nested_path(data_type, path):
-    api.check_data_type(data_type)
+    utils.check_data_type(data_type)
 
     if data_type == MANIFEST:
         make_response('It is forbidden to upload manifests to subfolders',
                       403)
-    return api.save_file(request, data_type, path)
+    filename = request.args.get('filename')
+    return utils.save_file(request, data_type, path, filename)
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['PUT'])
 def create_dirs(data_type, path):
-    api.check_data_type(data_type)
-    result_path = api.compose_path(data_type, path)
+    utils.check_data_type(data_type)
+    result_path = utils.compose_path_to_tenant_folder(data_type, path)
     resp = jsonify(result='success')
     if os.path.exists(result_path):
         return resp
@@ -117,8 +123,11 @@ def create_dirs(data_type, path):
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['DELETE'])
 def delete_directory_or_file(data_type, path):
-    api.check_data_type(data_type)
-    result_path = api.compose_path(data_type, path)
+    utils.check_data_type(data_type)
+    tenant_dir = utils.get_tenant_id()
+    result_path = utils.compose_path_to_tenant_folder(tenant_dir,
+                                                      data_type,
+                                                      path)
     if not os.path.exists(result_path):
         abort(404)
     if os.path.isfile(result_path):
@@ -132,7 +141,7 @@ def delete_directory_or_file(data_type, path):
             os.rmdir(result_path)
         except Exception:
             make_response('Directory must be empty to be deleted', 403)
-    api.reset_cache()
+    utils.reset_cache()
     return jsonify(result='success')
 
 
@@ -150,33 +159,33 @@ def get_services_list():
 
 @v1_api.route('/admin/services/<service_name>')
 def get_files_for_service(service_name):
-    api.check_service_name(service_name)
+    utils.check_service_name(service_name)
     manifest = ManifestParser().parse_manifest(service_name)
     if not manifest:
         abort(404)
-    data = api.get_manifest_files(manifest)
+    data = utils.get_manifest_files(manifest)
     return jsonify(data)
 
 
 @v1_api.route('/admin/services/<service_name>/info')
 def get_service_info(service_name):
-    api.check_service_name(service_name)
+    utils.check_service_name(service_name)
     manifest = ManifestParser().parse_manifest(service_name)
     if not manifest:
         abort(404)
-    data = api.get_manifest_info(manifest)
+    data = utils.get_manifest_info(manifest)
     return jsonify(data)
 
 
 @v1_api.route('/admin/services', methods=['POST'])
 def upload_new_service():
-    path_to_archive = api.save_archive(request)
+    path_to_archive = utils.save_archive(request)
     if not tarfile.is_tarfile(path_to_archive):
         return make_response('Uploading file should be a tar.gz archive', 400)
     archive_manager = Archiver()
     result = archive_manager.extract(path_to_archive)
     if result:
-        api.reset_cache()
+        utils.reset_cache()
         return jsonify(result='success')
     else:
         return make_response('Uploading file failed.', 400)
@@ -184,33 +193,34 @@ def upload_new_service():
 
 @v1_api.route('/admin/services/<service_name>', methods=['DELETE'])
 def delete_service(service_name):
-    api.check_service_name(service_name)
+    utils.check_service_name(service_name)
     manifests = ManifestParser().parse()
     manifest_for_deletion = None
     # Search for manifest to delete
     for manifest in manifests:
         if manifest.full_service_name == service_name:
             manifest_for_deletion = manifest
-            files_for_deletion = api.get_manifest_files(manifest_for_deletion)
+            files_for_deletion = utils.get_manifest_files(
+                manifest_for_deletion)
             manifests.remove(manifest_for_deletion)
             break
     if not manifest_for_deletion:
         abort(404)
 
-    files_for_deletion = api.exclude_common_files(files_for_deletion,
+    files_for_deletion = utils.exclude_common_files(files_for_deletion,
                                                   manifests)
 
-    return api.perform_deletion(files_for_deletion, manifest_for_deletion)
+    return utils.perform_deletion(files_for_deletion, manifest_for_deletion)
 
 
 @v1_api.route('/admin/services/<service_name>/toggle_enabled',
               methods=['POST'])
 def toggleEnabled(service_name):
-    api.check_service_name(service_name)
+    utils.check_service_name(service_name)
     parser = ManifestParser()
     result = parser.toggle_enabled(service_name)
     if result:
-        api.reset_cache()
+        utils.reset_cache()
         return jsonify(result='success')
     else:
         return make_response('Unable to toggle '
@@ -219,7 +229,7 @@ def toggleEnabled(service_name):
 
 @v1_api.route('/admin/reset_caches', methods=['POST'])
 def reset_caches():
-    api.reset_cache()
+    utils.reset_cache()
     return jsonify(result='success')
 
 
@@ -237,6 +247,6 @@ def create_or_update_service(service_name):
             "Body attribute 'full_service_name' value is {0} which doesn't "
             "correspond to 'service_name' part of URL (equals to {1})".format(
                 service_id, service_name), 400)
-    resp = api.create_or_update_service(service_name, service_data)
-    api.reset_cache()
+    resp = utils.create_or_update_service(service_name, service_data)
+    utils.reset_cache()
     return resp

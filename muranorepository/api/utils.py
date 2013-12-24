@@ -6,7 +6,7 @@ import tempfile
 import datetime
 
 from flask import jsonify, abort
-from flask import make_response
+from flask import make_response, request
 from werkzeug import secure_filename
 
 from muranorepository.utils.parser import ManifestParser
@@ -20,12 +20,32 @@ import logging as log
 CONF = cfg.CONF
 
 
+def get_tenant_id():
+    # TODO: When it's a good time o create tenant folder?
+    return request.environ['keystone.token_info']['access']\
+        ['token']['tenant']['id']
+
+
 def reset_cache():
     try:
         shutil.rmtree(CONF.cache_dir, ignore_errors=True)
         os.mkdir(CONF.cache_dir)
     except:
         return make_response('Unable to reset cache', 500)
+
+
+def compose_path_to_common(data_type, path=None):
+    if path:
+        return os.path.join(CONF.manifests, getattr(CONF, data_type), path)
+    else:
+        return os.path.join(CONF.manifests, getattr(CONF, data_type))
+
+
+def compose_path_to_tenant_folder(tenant_id, data_type, path=None):
+    if path:
+        return os.path.join(tenant_id, getattr(CONF, data_type), path)
+    else:
+        return os.path.join(tenant_id, getattr(CONF, data_type))
 
 
 def get_archive(client, hash_sum):
@@ -44,7 +64,11 @@ def get_archive(client, hash_sum):
 
     if archive_manager.hashes_match(cache_dir, existing_hash, hash_sum):
         return None
+
+    tenant_id = get_tenant_id()
     manifests = ManifestParser().parse()
+    manifests2 = ManifestParser(manifest_directory=tenant_id).parse()
+    manifests.extend(manifests2)
     return archive_manager.create(cache_dir, manifests, types)
 
 
@@ -68,14 +92,31 @@ def get_locations(data_type, result_path):
     return jsonify({data_type: locations})
 
 
+def compose_directory_structure(tenant_dir):
+    #ToDo: Add CONF.manifests as parent directory
+    # to tenant_dir and rename this param in config
+    if not os.path.exists(tenant_dir):
+        os.mkdir(tenant_dir)
+    for data_type in DATA_TYPES:
+        if data_type!=MANIFEST:
+            target_folder = os.path.join(tenant_dir,
+                                         CONF.__getattr__(data_type))
+            if not os.path.exists(target_folder):
+                os.mkdir(target_folder)
+
+
 def save_file(request, data_type, path=None, filename=None):
+    tenant_id = get_tenant_id()
+    compose_directory_structure(tenant_id)
     if path:
-        path_to_folder = compose_path(data_type, path)
+        path_to_folder = compose_path_to_tenant_folder(tenant_id,
+                                                       data_type,
+                                                       path)
         #subfolder should already exists
         if not os.path.exists(path_to_folder):
             abort(404)
     else:
-        path_to_folder = compose_path(data_type)
+        path_to_folder = compose_path_to_tenant_folder(tenant_id, data_type)
 
     if request.content_type == 'application/octet-stream':
         data = request.environ['wsgi.input'].read()
@@ -103,13 +144,6 @@ def save_file(request, data_type, path=None, filename=None):
             return make_response('No file to upload', 400)
     reset_cache()
     return jsonify(result='success')
-
-
-def compose_path(data_type, path=None):
-    if path:
-        return os.path.join(CONF.manifests, getattr(CONF, data_type), path)
-    else:
-        return os.path.join(CONF.manifests, getattr(CONF, data_type))
 
 
 def check_data_type(data_type):
