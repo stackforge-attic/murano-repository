@@ -23,6 +23,7 @@ from oslo.config import cfg
 from .parser import serialize
 from muranorepository.consts import DATA_TYPES, ARCHIVE_PKG_NAME
 from muranorepository.consts import UI, UI_FIELDS_IN_MANIFEST
+from muranorepository.utils import utils
 CONF = cfg.CONF
 
 CHUNK_SIZE = 1 << 20  # 1MB
@@ -208,7 +209,7 @@ class Archiver(object):
                 if hasattr(manifest, data_type):
                     file_list = getattr(manifest, data_type)
                     scr_directory = os.path.join(
-                        CONF.manifests, self.src_directories[data_type])
+                        utils.get_tenant_folder(), self.src_directories[data_type])
                     dst_directory = os.path.join(
                         temp_dir, self.dst_directories[data_type])
                     if data_type == UI:
@@ -235,7 +236,7 @@ class Archiver(object):
             if hasattr(manifest, data_type):
                 file_list = getattr(manifest, data_type)
                 scr_directory = os.path.join(
-                    CONF.manifests, self.src_directories[data_type])
+                    utils.get_tenant_folder(), self.src_directories[data_type])
                 dst_directory = os.path.join(
                     temp_dir, self.dst_directories[data_type])
                 self._copy_data(file_list, scr_directory, dst_directory)
@@ -245,7 +246,9 @@ class Archiver(object):
                     '{1}'.format(manifest.service_display_name, data_type))
         #Add manifest file into archive
         manifest_filename = manifest.full_service_name + '-manifest.yaml'
-        self._copy_data([manifest_filename], CONF.manifests, temp_dir)
+        self._copy_data([manifest_filename],
+                        utils.get_tenant_folder(),
+                        temp_dir)
         return self._compose_archive(file_name, temp_dir)
 
     def remove_existing_hash(self, cache_dir, hash):
@@ -260,6 +263,7 @@ class Archiver(object):
         return value - True if succeeded , False otherwise
         """
         try:
+            root_folder = utils.get_tenant_folder()
             path_to_extract = tempfile.mkdtemp()
             archive = tarfile.open(path_to_archive)
             try:
@@ -276,7 +280,7 @@ class Archiver(object):
                 log.error('There are more then one manifest file in archive')
                 return False
 
-            shutil.copy(manifests[0], CONF.manifests)
+            shutil.copy(manifests[0], root_folder)
             #Todo: Check manifest is valid
             for item in os.listdir(path_to_extract):
                 item_path = os.path.join(path_to_extract, item)
@@ -297,7 +301,7 @@ class Archiver(object):
                         self._copy_data(file_list,
                                         item_path,
                                         os.path.join(
-                                            CONF.manifests,
+                                            root_folder,
                                             self.src_directories[item]),
                                         overwrite=False)
                     else:

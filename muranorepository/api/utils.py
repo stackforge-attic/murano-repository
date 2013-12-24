@@ -12,6 +12,7 @@ from werkzeug import secure_filename
 from muranorepository.utils.parser import ManifestParser
 from muranorepository.utils.parser import serialize
 from muranorepository.utils.archiver import Archiver
+from muranorepository.utils import utils
 from muranorepository.consts import DATA_TYPES, MANIFEST
 from muranorepository.consts import CLIENTS_DICT
 from muranorepository.consts import ARCHIVE_PKG_NAME
@@ -22,16 +23,30 @@ CONF = cfg.CONF
 
 def reset_cache():
     try:
-        shutil.rmtree(CONF.cache_dir, ignore_errors=True)
-        os.mkdir(CONF.cache_dir)
+        cache_dir = utils.get_cache_folder()
+        shutil.rmtree(cache_dir, ignore_errors=True)
+        os.mkdir(cache_dir)
     except:
         return make_response('Unable to reset cache', 500)
+
+
+def compose_path(data_type, path=None):
+    tenant_dir = utils.get_tenant_folder()
+    utils.check_tenant_dir_existence(tenant_dir)
+
+    if path:
+        return os.path.join(tenant_dir,
+                            getattr(CONF, data_type),
+                            path)
+    else:
+        return os.path.join(tenant_dir,
+                            getattr(CONF, data_type))
 
 
 def get_archive(client, hash_sum):
     types = CLIENTS_DICT.get(client)
     archive_manager = Archiver()
-    cache_dir = os.path.join(CONF.cache_dir, client)
+    cache_dir = os.path.join(utils.get_cache_folder(), client)
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
         existing_hash = None
@@ -44,6 +59,7 @@ def get_archive(client, hash_sum):
 
     if archive_manager.hashes_match(cache_dir, existing_hash, hash_sum):
         return None
+
     manifests = ManifestParser().parse()
     return archive_manager.create(cache_dir, manifests, types)
 
@@ -105,13 +121,6 @@ def save_file(request, data_type, path=None, filename=None):
     return jsonify(result='success')
 
 
-def compose_path(data_type, path=None):
-    if path:
-        return os.path.join(CONF.manifests, getattr(CONF, data_type), path)
-    else:
-        return os.path.join(CONF.manifests, getattr(CONF, data_type))
-
-
 def check_data_type(data_type):
     if data_type not in DATA_TYPES:
         abort(404)
@@ -146,11 +155,10 @@ def check_service_name(service_name):
 def perform_deletion(files_for_deletion, manifest_for_deletion):
     def backup_data():
         backup_dir = os.path.join(
-            os.path.dirname(CONF.manifests),
-            'Backup_{0}'.format(datetime.datetime.utcnow())
-        )
+            utils.get_cache_folder(),
+            'Backup_{0}'.format(datetime.datetime.utcnow()))
         log.debug('Creating service data backup to {0}'.format(backup_dir))
-        shutil.copytree(CONF.manifests, backup_dir)
+        shutil.copytree(utils.get_tenant_folder(), backup_dir)
         return backup_dir
 
     def release_backup(backup):
@@ -164,12 +172,12 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
 
     def restore_backup(backup):
         log.debug('Restore service data after unsuccessful deletion')
-        shutil.rmtree(CONF.manifests, ignore_errors=True)
-        os.rename(backup, CONF.manifests)
+        shutil.rmtree(utils.get_tenant_folder(), ignore_errors=True)
+        os.rename(backup, utils.get_tenant_folder())
 
     backup_dir = backup_data()
     service_name = manifest_for_deletion.full_service_name
-    path_to_manifest = os.path.join(CONF.manifests,
+    path_to_manifest = os.path.join(utils.get_tenant_folder(),
                                     '{0}-manifest.yaml'.format(service_name))
     try:
         if os.path.exists(path_to_manifest):
@@ -177,8 +185,8 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
             os.remove(path_to_manifest)
 
         for data_type, files in files_for_deletion.iteritems():
-            data_type_dir = os.path.join(CONF.manifests, getattr(CONF,
-                                                                 data_type))
+            data_type_dir = os.path.join(utils.get_tenant_folder(),
+                                         getattr(CONF, data_type))
             for file in files:
                 path_to_delete = os.path.join(data_type_dir, file)
                 if os.path.exists(path_to_delete):
@@ -232,7 +240,7 @@ def create_or_update_service(service_id, data):
         if not data.get(parameter):
             data[parameter] = optional[parameter]
 
-    path_to_manifest = os.path.join(CONF.manifests,
+    path_to_manifest = os.path.join(utils.get_tenant_folder(),
                                     service_id + '-manifest.yaml')
 
     backup_done = False

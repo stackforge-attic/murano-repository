@@ -21,6 +21,7 @@ import eventlet
 import tempfile
 from eventlet import wsgi
 from oslo.config import cfg
+from muranorepository.utils import utils
 # If ../murano_service/__init__.py exists, add ../ to Python search path,
 # so that it will override what happens to be installed in
 # /usr/(local/)lib/python...
@@ -55,11 +56,13 @@ def main():
     #configuring and initializing cache directory
     if cfg.CONF.cache_dir is None:
         cfg.CONF.cache_dir = os.path.join(
-            tempfile.gettempdir(), 'muranorepository-cache'
+            tempfile.gettempdir(), 'muranorepository-data'
         )
-    if not os.path.exists(cfg.CONF.cache_dir):
-        os.mkdir(cfg.CONF.cache_dir)
-    LOG.info('Cache is located at: {0}'.format(cfg.CONF.cache_dir))
+
+    data_cache_dir = utils.get_cache_folder()
+    if not os.path.exists(data_cache_dir):
+        os.makedirs(data_cache_dir)
+    LOG.info('Cache is located at: {0}'.format(data_cache_dir))
 
     app = server.make_app({
         'auth_host': cfg.CONF.keystone.auth_host,
