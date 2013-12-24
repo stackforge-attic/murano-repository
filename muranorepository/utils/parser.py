@@ -16,9 +16,11 @@ import os
 import yaml
 from oslo.config import cfg
 import logging as log
+
 from muranorepository.manifest import Manifest
 from muranorepository.consts import DATA_TYPES, MANIFEST
 from muranorepository.openstack.common.gettextutils import _  # noqa
+from muranorepository.utils import utils
 CONF = cfg.CONF
 
 
@@ -48,8 +50,9 @@ def serialize(data):
 class ManifestParser(object):
     def __init__(self, manifest_directory=None):
         if not manifest_directory:
-            manifest_directory = CONF.manifests
+            manifest_directory = utils.get_tenant_folder()
         self.manifest_directory = manifest_directory
+        utils.check_tenant_dir_existence(self.manifest_directory)
 
     def _validate_manifest(self, file, service_manifest_data):
         service_id = service_manifest_data.get('full_service_name')
@@ -90,28 +93,29 @@ class ManifestParser(object):
 
     def parse(self):
         manifests = []
-        for file in os.listdir(self.manifest_directory):
-            manifest_file = os.path.join(self.manifest_directory, file)
-            if os.path.isfile(manifest_file):
-                if not file.endswith(".yaml"):
-                    log.warning(_("Extension of '{0}' file is not yaml. "
-                                  "Only yaml file supported for "
-                                  "service manifest files.".format(file)))
-                    continue
+        if os.path.exists(self.manifest_directory):
+            for file in os.listdir(self.manifest_directory):
+                manifest_file = os.path.join(self.manifest_directory, file)
+                if os.path.isfile(manifest_file):
+                    if not file.endswith(".yaml"):
+                        log.warning("Extension of {0} file is not yaml. "
+                                    "Only yaml file supported for "
+                                    "service manifest files.".format(file))
+                        continue
 
-                try:
-                    with open(manifest_file) as stream:
-                        manifest_data = yaml.load(stream)
-                except yaml.YAMLError:
-                    log.exception(_("Failed to load manifest "
-                                    "file '{0}'".format(manifest_file)))
-                    continue
+                    try:
+                        with open(manifest_file) as stream:
+                            manifest_data = yaml.load(stream)
+                    except yaml.YAMLError:
+                            log.exception("Failed to load manifest "
+                                          "file '{0}'".format(manifest_file)
+                            continue
 
-                manifest_is_valid, use_manifest = self._validate_manifest(
-                    file, manifest_data)
-                if use_manifest:
-                    manifest_data["valid"] = manifest_is_valid
-                    manifests.append(Manifest(manifest_data))
+                    manifest_is_valid, use_manifest = self._validate_manifest(
+                        file, manifest_data)
+                    if use_manifest:
+                        manifest_data["valid"] = manifest_is_valid
+                        manifests.append(Manifest(manifest_data))
 
         return manifests
 
