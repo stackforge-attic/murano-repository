@@ -49,6 +49,8 @@ CONF.register_opt(cache_opt)
 
 ARGV = []
 
+cfg.set_defaults(log.log_opts, default_log_levels=['iso8601=WARN'])
+
 
 def parse_configs(argv=None, conf_files=None):
     if argv is not None:
