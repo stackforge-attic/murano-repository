@@ -21,7 +21,7 @@ server_opts = [
     cfg.IntOpt('port', default=5000)
 ]
 
-cache_opt = cfg.StrOpt('cache_dir')
+cache_opt = cfg.StrOpt('data_dir')
 
 keystone_opts = [
     cfg.StrOpt('auth_host', default='localhost'),

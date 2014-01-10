@@ -16,8 +16,11 @@ import os
 import yaml
 from oslo.config import cfg
 import logging as log
+
 from muranorepository.manifest import Manifest
 from muranorepository.consts import DATA_TYPES, MANIFEST
+from muranorepository.openstack.common.gettextutils import _  # noqa
+from muranorepository.utils import utils
 CONF = cfg.CONF
 
 
@@ -47,16 +50,17 @@ def serialize(data):
 class ManifestParser(object):
     def __init__(self, manifest_directory=None):
         if not manifest_directory:
-            manifest_directory = CONF.manifests
+            manifest_directory = utils.get_tenant_folder()
         self.manifest_directory = manifest_directory
+        utils.check_tenant_dir_existence(self.manifest_directory)
 
     def _validate_manifest(self, file, service_manifest_data):
         service_id = service_manifest_data.get('full_service_name')
         if not service_id or '{0}-manifest.yaml'.format(service_id) != file:
-            log.error("Attribute 'full_service_name' inside manifest '{0}' "
-                      "has value '{1}' which doesn't correspond to its "
-                      "filename, skipping this manifest completely."
-                      "".format(file, service_id))
+            log.error(_("Attribute 'full_service_name' inside manifest '{0}' "
+                        "has value '{1}' which doesn't correspond to its "
+                        "filename, skipping this manifest completely."
+                        "".format(file, service_id)))
             return False, False
 
         valid_file_info = True
@@ -69,9 +73,9 @@ class ManifestParser(object):
                     root_directory = self.manifest_directory
 
                 if not isinstance(value, list):
-                    log.error("{0} section should represent a file"
-                              " listing in manifest {1}"
-                              "".format(root_directory, file))
+                    log.error(_("'{0}' section should represent a file listing"
+                                " in manifest {1}".format(root_directory,
+                                                          file)))
                     valid_file_info = False
                     continue
                 for filename in value:
@@ -81,37 +85,37 @@ class ManifestParser(object):
                     if not os.path.exists(absolute_path):
                         valid_file_info = False
                         log.warning(
-                            "File {0} specified in manifest {1} "
-                            "doesn't exist at {2}".format(filename,
-                                                          file,
-                                                          absolute_path))
+                            _("File '{0}' specified in manifest '{1}' "
+                              "doesn't exist at '{2}'".format(filename,
+                                                              file,
+                                                              absolute_path)))
         return valid_file_info, True
 
     def parse(self):
         manifests = []
-        for file in os.listdir(self.manifest_directory):
-            manifest_file = os.path.join(self.manifest_directory, file)
-            if os.path.isfile(manifest_file):
-                if not file.endswith(".yaml"):
-                    log.warning("Extension of {0} file is not yaml. "
-                                "Only yaml file supported for "
-                                "service manifest files.".format(file))
-                    continue
-
-                try:
-                    with open(manifest_file) as stream:
-                        manifest_data = yaml.load(stream)
-                except yaml.YAMLError, exc:
-                        log.warn("Failed to load manifest file. {0}. "
-                                 "The reason: {1!s}".format(manifest_file,
-                                                            exc))
+        if os.path.exists(self.manifest_directory):
+            for file in os.listdir(self.manifest_directory):
+                manifest_file = os.path.join(self.manifest_directory, file)
+                if os.path.isfile(manifest_file):
+                    if not file.endswith(".yaml"):
+                        log.warning(_("Extension of {0} file is not yaml. "
+                                      "Only yaml file supported for "
+                                      "service manifest files.".format(file)))
                         continue
 
-                manifest_is_valid, use_manifest = self._validate_manifest(
-                    file, manifest_data)
-                if use_manifest:
-                    manifest_data["valid"] = manifest_is_valid
-                    manifests.append(Manifest(manifest_data))
+                    try:
+                        with open(manifest_file) as stream:
+                            manifest_data = yaml.load(stream)
+                    except yaml.YAMLError:
+                            log.exception(_("Failed to load manifest file "
+                                            " '{0}'".format(manifest_file)))
+                            continue
+
+                    manifest_is_valid, use_manifest = self._validate_manifest(
+                        file, manifest_data)
+                    if use_manifest:
+                        manifest_data["valid"] = manifest_is_valid
+                        manifests.append(Manifest(manifest_data))
 
         return manifests
 
@@ -119,20 +123,20 @@ class ManifestParser(object):
         manifest_file = os.path.join(self.manifest_directory,
                                      manifest_name + '-manifest.yaml')
         if not os.path.exists(manifest_file):
-            log.error("There is no manifest file '{0}' for {1} "
-                      "service".format(manifest_file, manifest_name))
+            log.error(_("There is no manifest file '{0}' for {1} "
+                        "service".format(manifest_file, manifest_name)))
             return None
         if not os.path.isfile(manifest_file):
-            log.error("'{0}' is not file".format(manifest_file))
+            log.error(_("'{0}' is not file".format(manifest_file)))
             return None
 
         try:
             with open(manifest_file) as stream:
                 manifest_data = yaml.load(stream)
-        except yaml.YAMLError, exc:
-                log.warn("Failed to load manifest file. {0}. "
-                         "The reason: {1!s}".format(manifest_file,
-                                                    exc))
+        except yaml.YAMLError:
+                log.exception(_("Failed to load manifest file: '{0}'.".format(
+                    manifest_file)))
+
                 return None
         return Manifest(manifest_data)
 
@@ -142,9 +146,10 @@ class ManifestParser(object):
 
     def toggle_enabled(self, service_name):
         path_to_manifest = self._get_manifest_path(service_name)
+
         if not path_to_manifest:
-            log.error('There is no manifest '
-                      'file for {0} service'.format(service_name))
+            log.error(_("There is no manifest "
+                        "file for '{0}' service".format(service_name)))
             return False
         with open(path_to_manifest) as stream:
             service_manifest_data = yaml.load(stream)
@@ -158,8 +163,8 @@ class ManifestParser(object):
     def update_service(self, service_name, data):
         path_to_manifest = self._get_manifest_path(service_name)
         if not path_to_manifest:
-            log.error('There is no manifest '
-                      'file for {0} service'.format(service_name))
+            log.error(_("There is no manifest "
+                        "file for '{0}' service".format(service_name)))
             return False
         with open(path_to_manifest) as stream:
             service_manifest_data = yaml.load(stream)
