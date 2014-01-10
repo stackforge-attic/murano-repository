@@ -16,6 +16,7 @@ from muranorepository.consts import DATA_TYPES, MANIFEST
 from muranorepository.consts import CLIENTS_DICT
 from muranorepository.consts import ARCHIVE_PKG_NAME
 from muranorepository.config import cfg
+from muranorepository.openstack.common.gettextutils import _  # noqa
 import logging as log
 CONF = cfg.CONF
 
@@ -39,7 +40,7 @@ def get_archive(client, hash_sum):
         existing_hash = archive_manager.get_existing_hash(cache_dir)
 
     if existing_hash and hash_sum is None:
-        log.debug('Transferring existing archive')
+        log.debug(_('Transferring existing archive'))
         return os.path.join(cache_dir, existing_hash, ARCHIVE_PKG_NAME)
 
     if archive_manager.hashes_match(cache_dir, existing_hash, hash_sum):
@@ -149,18 +150,16 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
             os.path.dirname(CONF.manifests),
             'Backup_{0}'.format(datetime.datetime.utcnow())
         )
-        log.debug('Creating service data backup to {0}'.format(backup_dir))
+        log.debug(_('Creating service data backup to {0}'.format(backup_dir)))
         shutil.copytree(CONF.manifests, backup_dir)
         return backup_dir
 
     def release_backup(backup):
         try:
             shutil.rmtree(backup, ignore_errors=True)
-        except Exception as e:
-            log.error(
-                'Release Backup: '
-                'Backup {0} deletion failed {1}'.format(backup, e.message)
-            )
+        except Exception:
+            log.exception(_('Release Backup: '
+                            'Backup {0} deletion failed'.format(backup)))
 
     def restore_backup(backup):
         log.debug('Restore service data after unsuccessful deletion')
@@ -173,7 +172,7 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
                                     '{0}-manifest.yaml'.format(service_name))
     try:
         if os.path.exists(path_to_manifest):
-            log.debug('Deleting manifest file {0}'.format(path_to_manifest))
+            log.debug(_('Deleting manifest file {0}'.format(path_to_manifest)))
             os.remove(path_to_manifest)
 
         for data_type, files in files_for_deletion.iteritems():
@@ -185,9 +184,8 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
                     log.debug('Delete {0}: Removing {1} file'.format(
                         service_name, path_to_delete))
                     os.remove(path_to_delete)
-    except Exception as e:
-        log.exception('Deleting operation failed '
-                      'due to {0}'.format(e.message))
+    except Exception:
+        log.exception('Deleting operation failed')
         restore_backup(backup_dir)
         abort(500)
     else:
@@ -244,8 +242,9 @@ def create_or_update_service(service_id, data):
     try:
         with open(path_to_manifest, 'w') as service_manifest:
             service_manifest.write(serialize(data))
-    except Exception as e:
-        log.exception(e)
+    except Exception:
+        log.exception('Unable to write to service '
+                      'manifest file {0}'.format(path_to_manifest))
         if backup_done:
             shutil.move(backup.name, path_to_manifest)
         elif os.path.exists(path_to_manifest):
