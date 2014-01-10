@@ -30,6 +30,7 @@ heat:
   - DefaultSecurity.template
   - WebServerSecurity.template
   - LinuxSecurity.template
+  - Keypair.template
 
 agent:
   - DeployApache.template
