@@ -23,6 +23,7 @@ from muranorepository.utils.parser import ManifestParser
 from muranorepository.utils.archiver import Archiver
 from muranorepository.consts import DATA_TYPES, MANIFEST
 from muranorepository.consts import CLIENTS_DICT
+from muranorepository.openstack.common.gettextutils import _  # noqa
 from oslo.config import cfg
 import logging as log
 v1_api = Blueprint('v1', __name__)
@@ -59,7 +60,7 @@ def download_service_archive(service_name):
             file = archive_manager.create_service_archive(
                 services_for_download[0], tempf.name)
         except:
-            log.error('Unable to create service archive')
+            log.error(_('Unable to create service archive'))
             abort(500)
         return send_file(file, mimetype='application/octet-stream')
 
