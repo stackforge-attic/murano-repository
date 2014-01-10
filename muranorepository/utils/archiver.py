@@ -23,6 +23,7 @@ from oslo.config import cfg
 from .parser import serialize
 from muranorepository.consts import DATA_TYPES, ARCHIVE_PKG_NAME
 from muranorepository.consts import UI, UI_FIELDS_IN_MANIFEST
+from muranorepository.openstack.common.gettextutils import _  # noqa
 CONF = cfg.CONF
 
 CHUNK_SIZE = 1 << 20  # 1MB
@@ -70,11 +71,11 @@ class Archiver(object):
             if (base_dir != dst) and (not os.path.exists(base_dir)):
                 os.makedirs(os.path.dirname(destination))
             if os.path.exists(destination) and not overwrite:
-                raise IOError('File {0} already exists'.format(destination))
+                raise IOError(_('File {0} already exists'.format(destination)))
             try:
                 shutil.copy(source, destination)
             except IOError:
-                log.error('Unable to copy file {0}'.format(file))
+                log.error(_('Unable to copy file {0}'.format(file)))
 
     def _get_hash(self, archive_path):
         """Calculate SHA1-hash of archive file.
@@ -91,13 +92,12 @@ class Archiver(object):
                     sha1.update(buf)
                     buf = f.read(CHUNK_SIZE)
             hsum = sha1.hexdigest()
-            log.debug('Archive {0} has hash-sum {1}'.format(archive_path,
-                                                            hsum))
+            log.debug(_('Archive {0} has hash-sum {1}'.format(archive_path,
+                                                              hsum)))
             return hsum
         else:
-            log.info(
-                "Archive '{0}' doesn't exist, no hash to calculate".format(
-                    archive_path))
+            log.info(_("Archive '{0}' doesn't exist,"
+                       " no hash to calculate".format(archive_path)))
             return None
 
     def _compose_archive(self, arch_name, path, hash=False, cache_dir=None):
@@ -109,24 +109,23 @@ class Archiver(object):
             tar.close()
         try:
             shutil.rmtree(path, ignore_errors=True)
-        except Exception as e:
-            log.error('Unable to delete temp directory: {0}'.format(e))
+        except Exception:
+            log.exception(_('Unable to delete temp directory'))
         if not hash:
             return arch_name
         else:
             if not cache_dir:
-                raise ValueError('cache_dir parameter should not be None. '
-                                 'It is needed to create hash directory')
+                raise ValueError(_('cache_dir parameter should not be None. '
+                                   'It is needed to create hash directory'))
             clean_dir(cache_dir)
             hash_folder = self._create_hash_folder(arch_name, cache_dir)
             try:
                 shutil.move(arch_name, os.path.join(hash_folder,
                                                     ARCHIVE_PKG_NAME))
-            except Exception as e:
-                log.error('Unable to move created archive {0}'
-                          ' to hash folder {1} due to {2}'.format(arch_name,
-                                                                  hash_folder,
-                                                                  e))
+            except Exception:
+                log.exception('Unable to move created archive {0} to hash '
+                              'folder {1}'.format(arch_name, hash_folder))
+
         return os.path.abspath(os.path.join(hash_folder, ARCHIVE_PKG_NAME))
 
     def _create_hash_folder(self, archive_name, cache_dir):
@@ -168,16 +167,16 @@ class Archiver(object):
                             existing_caches[0],
                             ARCHIVE_PKG_NAME)
         if not os.path.exists(path):
-            raise RuntimeError('Archive package is missing at dir {0}'.format(
-                os.path.join(cache_dir)))
+            raise IOError(_('Archive package is missing '
+                            'at dir {0}'.format(cache_dir)))
         return existing_caches[0]
 
     def hashes_match(self, cache_dir, existing_hash, hash_to_check):
         if hash_to_check is None or existing_hash is None:
             return False
         if existing_hash == hash_to_check:
-            log.debug('Archive package matches hash-sum {0}.'.format(
-                hash_to_check))
+            log.debug(_('Archive package matches hash-sum {0}.'.format(
+                hash_to_check)))
             return True
         else:
             self.remove_existing_hash(cache_dir, existing_hash)
@@ -197,9 +196,9 @@ class Archiver(object):
             temp_dir = '/tmp'
         for data_type in types:
             if data_type not in DATA_TYPES:
-                raise Exception(' {0} data type specified for archiving is not'
-                                ' valid. Supported data types are: '
-                                '{1}'.format(data_type, DATA_TYPES))
+                raise ValueError(_('{0} data type specified for archiving is '
+                                   'not valid. Supported data types are: '
+                                   '{1}'.format(data_type, DATA_TYPES)))
 
             for manifest in manifests:
                 if not manifest.enabled or not manifest.valid:
@@ -220,14 +219,15 @@ class Archiver(object):
                                         dst_directory)
                 else:
                     log.info(
-                        'Manifest for {0} service has no file definitions for '
-                        '{1}'.format(manifest.service_display_name, data_type))
+                        _('Manifest for {0} service has no file definitions '
+                          'for {1}'.format(manifest.service_display_name,
+                                           data_type)))
 
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            return  self._compose_archive(temp_file.name,
-                                          temp_dir,
-                                          hash=True,
-                                          cache_dir=cache_dir)
+            return self._compose_archive(temp_file.name,
+                                         temp_dir,
+                                         hash=True,
+                                         cache_dir=cache_dir)
 
     def create_service_archive(self, manifest, file_name):
         temp_dir = tempfile.mkdtemp()
@@ -241,8 +241,8 @@ class Archiver(object):
                 self._copy_data(file_list, scr_directory, dst_directory)
             else:
                 log.info(
-                    '{0} manifest has no file definitions for '
-                    '{1}'.format(manifest.service_display_name, data_type))
+                    _('{0} manifest has no file definitions for '
+                      '{1}'.format(manifest.service_display_name, data_type)))
         #Add manifest file into archive
         manifest_filename = manifest.full_service_name + '-manifest.yaml'
         self._copy_data([manifest_filename], CONF.manifests, temp_dir)
@@ -250,7 +250,7 @@ class Archiver(object):
 
     def remove_existing_hash(self, cache_dir, hash):
         path = os.path.join(cache_dir, hash)
-        log.info('Deleting archive package from {0}.'.format(path))
+        log.info(_('Deleting archive package from {0}.'.format(path)))
         shutil.rmtree(path, ignore_errors=True)
 
     def extract(self, path_to_archive):
@@ -270,10 +270,11 @@ class Archiver(object):
             manifests = glob.glob(os.path.join(path_to_extract,
                                                '*-manifest.yaml'))
             if not manifests:
-                log.error('There is no manifest file in archive')
+                log.error(_('There is no manifest file in archive'))
                 return False
             if len(manifests) != 1:
-                log.error('There are more then one manifest file in archive')
+                log.error(_('There are more then one manifest '
+                            'file in archive'))
                 return False
 
             shutil.copy(manifests[0], CONF.manifests)
@@ -302,12 +303,12 @@ class Archiver(object):
                                         overwrite=False)
                     else:
                         log.warning(
-                            'Uploading archive contents folder {0} that does '
-                            'not correspond to supported data types: {1}. '
-                            'It will be ignored'.format(item, DATA_TYPES))
+                            _('Uploading archive contents folder {0} that does'
+                              ' not correspond to supported data types: {1}. '
+                              'It will be ignored'.format(item, DATA_TYPES)))
             return True
-        except Exception as e:
-            log.error('Unable to extract archive due to {0}'.format(e.message))
+        except Exception:
+            log.exception(_('Unable to extract archive'))
             return False
         finally:
             os.remove(path_to_archive)
