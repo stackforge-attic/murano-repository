@@ -29,7 +29,7 @@ def reset_cache():
         os.mkdir(cache_dir)
     except:
         log.exception(_('Error while cleaning cache'))
-        return make_response('Unable to reset cache', 500)
+        return make_response(_('Unable to reset cache'), 500)
 
 
 def compose_path(data_type, path=None):
@@ -93,10 +93,10 @@ def save_file(request, data_type, path=None, filename=None):
     if request.content_type == 'application/octet-stream':
         data = request.environ['wsgi.input'].read()
         if not data:
-            return make_response('No file to upload', 400)
+            return make_response(_('No file to upload'), 400)
         if not filename:
-            return make_response("'filename' should be in request arguments",
-                                 400)
+            return make_response(_("'filename' should be in "
+                                   "request arguments"), 400)
 
         with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
             uploaded_file.write(data)
@@ -113,7 +113,7 @@ def save_file(request, data_type, path=None, filename=None):
                 abort(403)
             file_to_upload.save(path_to_file)
         else:
-            return make_response('No file to upload', 400)
+            return make_response(_('No file to upload'), 400)
     reset_cache()
     return jsonify(result='success')
 
@@ -161,12 +161,12 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
     def release_backup(backup):
         try:
             shutil.rmtree(backup, ignore_errors=True)
-        except Exception:
+        except OSError:
             log.exception(_('Release Backup: '
                             'Backup {0} deletion failed'.format(backup)))
 
     def restore_backup(backup):
-        log.debug('Restore service data after unsuccessful deletion')
+        log.debug(_('Restore service data after unsuccessful deletion'))
         shutil.rmtree(utils.get_tenant_folder(), ignore_errors=True)
         os.rename(backup, utils.get_tenant_folder())
 
@@ -185,8 +185,8 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
             for file in files:
                 path_to_delete = os.path.join(data_type_dir, file)
                 if os.path.exists(path_to_delete):
-                    log.debug('Delete {0}: Removing {1} file'.format(
-                        service_name, path_to_delete))
+                    log.debug(_('Delete {0}: Removing {1} file'.format(
+                        service_name, path_to_delete)))
                     os.remove(path_to_delete)
     except Exception:
         log.exception(_('Deleting operation failed'))
@@ -199,7 +199,7 @@ def perform_deletion(files_for_deletion, manifest_for_deletion):
 
 
 def save_archive(request):
-    err_resp = make_response('There is no data to upload', 400)
+    err_resp = make_response(_('There is no data to upload'), 400)
     if request.content_type == 'application/octet-stream':
         data = request.environ['wsgi.input'].read()
         if not data:
@@ -226,8 +226,8 @@ def create_or_update_service(service_id, data):
 
     for parameter in required:
         if not data.get(parameter):
-            return make_response('There is no {parameter} in json'.format(
-                parameter=parameter), 400)
+            return make_response(_('There is no {parameter} in json'.format(
+                parameter=parameter)), 400)
     for parameter in optional.keys():
         if not data.get(parameter):
             data[parameter] = optional[parameter]
@@ -251,5 +251,5 @@ def create_or_update_service(service_id, data):
             shutil.move(backup.name, path_to_manifest)
         elif os.path.exists(path_to_manifest):
             os.remove(path_to_manifest)
-        return make_response('Error during service manifest creation', 500)
+        return make_response(_('Error during service manifest creation'), 500)
     return jsonify(result='success')
