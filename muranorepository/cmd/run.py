@@ -20,8 +20,8 @@ import sys
 import eventlet
 import tempfile
 from eventlet import wsgi
-from oslo.config import cfg
 import gettext
+from muranorepository.openstack.common.gettextutils import _  # noqa
 # If ../murano_service/__init__.py exists, add ../ to Python search path,
 # so that it will override what happens to be installed in
 # /usr/(local/)lib/python...
@@ -37,7 +37,7 @@ if os.path.exists(os.path.join(possible_topdir,
 
 gettext.install('muranorepository', unicode=1)
 
-from muranorepository import config
+from muranorepository import config as cfg
 import muranorepository.main as server
 from muranorepository.openstack.common import log
 
@@ -48,12 +48,17 @@ LOG = log.getLogger(__name__)
 def main():
     dev_conf = os.path.join(possible_topdir,
                             'etc',
+                            'murano',
                             'murano-repository.conf')
     config_files = None
     if os.path.exists(dev_conf):
         config_files = [dev_conf]
 
-    config.parse_configs(sys.argv[1:], config_files)
+    if not sys.argv[1:] and not config_files:
+        msg = _('Unable to locate config file for murano-repository.')
+        raise RuntimeError(msg)
+
+    cfg.parse_configs(sys.argv[1:], config_files)
     log.setup('muranorepository')
 
     #configuring and initializing cache directory
@@ -75,10 +80,10 @@ def main():
         'admin_tenant_name': cfg.CONF.keystone.admin_tenant_name,
         'signing_dir': cfg.CONF.keystone.signing_dir
     })
-    if not os.path.isabs(config.CONF.manifests):
-        config.CONF.manifests = os.path.join(possible_topdir,
-                                             'muranorepository',
-                                             config.CONF.manifests)
+    if not os.path.isabs(cfg.CONF.manifests):
+        cfg.CONF.manifests = os.path.join(possible_topdir,
+                                          'muranorepository',
+                                          cfg.CONF.manifests)
     wsgi.server(eventlet.listen((cfg.CONF.host, cfg.CONF.port),
                                 backlog=500),
                 app)

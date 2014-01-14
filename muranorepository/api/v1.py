@@ -63,7 +63,8 @@ def download_service_archive(service_name):
         except:
             log.exception(_('Unable to create service archive'))
             abort(500)
-        return send_file(file, mimetype='application/octet-stream')
+        else:
+            return send_file(file, mimetype='application/octet-stream')
 
 
 @v1_api.route('/admin/<data_type>')
