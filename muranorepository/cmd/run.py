@@ -21,6 +21,7 @@ import eventlet
 import tempfile
 from eventlet import wsgi
 from oslo.config import cfg
+import gettext
 # If ../murano_service/__init__.py exists, add ../ to Python search path,
 # so that it will override what happens to be installed in
 # /usr/(local/)lib/python...
@@ -32,6 +33,9 @@ if os.path.exists(os.path.join(possible_topdir,
                                'muranorepository',
                                '__init__.py')):
     sys.path.insert(0, possible_topdir)
+
+
+gettext.install('muranorepository', unicode=1)
 
 from muranorepository import config
 import muranorepository.main as server
