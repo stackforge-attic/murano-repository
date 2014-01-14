@@ -139,8 +139,8 @@ def delete_directory_or_file(data_type, path):
             # enable to delete only empty directories
             os.rmdir(result_path)
         except OSError:
-            make_response(_('Directory must be empty to be deleted'),
-                          403)
+            return make_response(_('Directory must be empty to be deleted'),
+                                 403)
     api_utils.reset_cache()
     return jsonify(result='success')
 
