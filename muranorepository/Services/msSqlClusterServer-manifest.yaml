@@ -31,6 +31,7 @@ heat:
   - DefaultSecurity.template
   - WindowsSecurity.template
   - SQL-security.template
+  - WSFCSecurity.template
 
 
 agent:
@@ -48,8 +49,8 @@ scripts:
  - ImportCoreFunctions.ps1
  - Set-LocalUserPassword.ps1
  - Update-ServiceConfig.ps1
- - SQLServerForAOAG.ps1
- - Failover-Cluster.ps1
+ - SqlServerCluster/SQLServerForAOAG.ps1
+ - SqlServerCluster/Failover-Cluster.ps1
  - Start-PowerShellProcess.ps1
  - OptionParser.ps1
  - SQLServer/SQLServerOptionParsers.ps1

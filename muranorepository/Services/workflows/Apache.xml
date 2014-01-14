@@ -1,8 +1,8 @@
 <workflow>
 
-	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'linuxApacheService' and @.keyPair)].units[?(not @.temp.KeyPairMapping)]"
+	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'linuxApacheService' and @.keyPair)].units[?(@.state.hostname and not @.temp.KeyPairMapping)]"
 		desc="This rule allows to set Key Pair for all VMs with this service">
-		<update-cf-stack template="Keypair" result="outputs" error="exception">
+		<update-cf-stack template="Keypair" error="exception">
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
@@ -116,7 +116,7 @@
 				<select path="id"/>
 			</parameter>
 			<parameter name="text">
-				insatalling Apache on unit <select path="state.hostname"/> (<select path="name"/>)
+				Installing Apache on unit <select path="state.hostname"/> (<select path="name"/>)
 			</parameter>
 		</report>
 		<!-- Commands sequence -->

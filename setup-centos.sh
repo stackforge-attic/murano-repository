@@ -22,7 +22,6 @@ PIPAPPS="pip python-pip pip-python"
 PIPCMD=""
 SERVICE_SRV_NAME="murano-repository"
 GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
-#ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
 ETC_CFG_DIR="/etc/murano"
 LOG_DIR="/var/log/murano/"
 SERVICE_CONFIG_FILE_PATH="$ETC_CFG_DIR/murano-repository.conf"

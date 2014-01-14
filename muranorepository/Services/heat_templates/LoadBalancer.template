@@ -21,7 +21,6 @@
                 "name": "${lbName}-Pool",
                 "vip": {
                     "name": "${lbName}-Pool-VIP",
-                    "address": "$lbIp",
                     "protocol_port": "$lbPort"
                 },
                 "monitors": [{"Ref": "${lbName}-HealthMonitor"}]
@@ -34,6 +33,12 @@
                 "protocol_port": "$lbPort",
                 "members": [{"Ref": "$instanceName"}]
             }
+        }
+    },
+    "Outputs": {
+        "${lbName}-loadBalancerIp": {
+            "Value": {"Fn::Select": ["address", {"Fn::GetAtt": ["${lbName}-Pool", "vip"]}]},
+            "Description": "IP assigned to VIP"
         }
     }
 }

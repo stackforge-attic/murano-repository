@@ -77,7 +77,9 @@ def get_locations(data_type, result_path):
                     # add keep path relative to result_path
                     base, diff = path.rsplit(result_path, 2)
                     # split base path and remove slash
-                    name = os.path.join(diff[1:], name)
+                    if diff.startswith('/'):
+                        diff = diff[1:]
+                    name = os.path.join(diff, name)
                 locations.append(name)
     return jsonify({data_type: locations})
 
@@ -226,7 +228,7 @@ def create_or_update_service(service_id, data):
                 'version': 0.1,
                 'description': '',
                 'author': '',
-                'service_version': ''}
+                'service_version': 1}
 
     for parameter in required:
         if not data.get(parameter):

@@ -63,7 +63,8 @@ def download_service_archive(service_name):
         except:
             log.exception(_('Unable to create service archive'))
             abort(500)
-        return send_file(file, mimetype='application/octet-stream')
+        else:
+            return send_file(file, mimetype='application/octet-stream')
 
 
 @v1_api.route('/admin/<data_type>')
@@ -96,8 +97,8 @@ def upload_file_in_nested_path(data_type, path):
     api_utils.check_data_type(data_type)
 
     if data_type == MANIFEST:
-        make_response(_('It is forbidden to upload manifests to subfolders'),
-                      403)
+        return make_response(_('It is forbidden to upload '
+                               'manifests to subfolders'), 403)
     return api_utils.save_file(request, data_type, path)
 
 
@@ -109,8 +110,8 @@ def create_dirs(data_type, path):
     if os.path.exists(result_path):
         return resp
     if data_type == MANIFEST:
-        make_response(_('It is forbidden to create '
-                      'directories for manifest files'), 403)
+        return make_response(_('It is forbidden to create '
+                               'directories for manifest files'), 403)
     try:
         os.makedirs(result_path)
     except OSError:
@@ -217,16 +218,17 @@ def delete_service(service_name):
 
 @v1_api.route('/admin/services/<service_name>/toggle_enabled',
               methods=['POST'])
-def toggleEnabled(service_name):
+def toggle_enabled(service_name):
     api_utils.check_service_name(service_name)
     parser = ManifestParser()
-    result = parser.toggle_enabled(service_name)
-    if result:
-        api_utils.reset_cache()
-        return jsonify(result='success')
-    else:
-        return make_response(_('Unable to toggle '
-                               'enable parameter for specified service'), 500)
+    try:
+        parser.toggle_enabled(service_name)
+    except NameError:
+        return make_response(_("'{0}' service is not "
+                               "defined".format(service_name)), 404)
+    except Exception:
+        return make_response(_('Error toggling service enabled'), 500)
+    return jsonify(result='success'),
 
 
 @v1_api.route('/admin/reset_caches', methods=['POST'])
@@ -237,10 +239,13 @@ def reset_caches():
 
 @v1_api.route('/admin/services/<service_name>', methods=['PUT'])
 def create_or_update_service(service_name):
+    if not request.data:
+        return make_response(_('JSON data expected', 400))
     try:
         service_data = json.loads(request.data)
     except:
-        return make_response('Unable to load json data', 500)
+        return make_response(_('Unable to load json data. '
+                               'Validate json object', 400))
 
     service_id = service_data.get('full_service_name', service_name)
     #TODO: Pass service_name instead of service_id

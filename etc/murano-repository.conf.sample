@@ -13,8 +13,10 @@ verbose = True
 # Show debugging output in logs (sets DEBUG log level output)
 debug = True
 
-# Log to this file. Make sure the user has permissions to write to this file!
+# Set up logging. To use syslog just set use_syslog parameter value to 'True'.
 log_file = /tmp/murano-repository.log
+use_syslog = False
+syslog_log_facility = LOG_LOCAL0
 
 # Provide information about data types
 # absolute or relative path to manifest location(root directory)

@@ -63,14 +63,13 @@
 			<parameter name="mappings">
 				<map>
 					<mapping name="instanceName"><select path="state.hostname"/></mapping>
-					<mapping name="lbIp"><select path="::loadBalancerIp"/></mapping>
 					<mapping name="lbPort"><select path="::loadBalancerPort"/></mapping>
 					<mapping name="lbName"><select path="::name"/></mapping>
 				</map>
 			</parameter>
 			<success>
 				<set path="temp.registeredWithLB"><true/></set>
-				<set path="::uri">http://<select path="::loadBalancerIp"/>:<select path="::loadBalancerPort"/></set>
+				<set path="::uri">http://<select source="outputs"><parameter name="path"><select path="::name"/>-loadBalancerIp</parameter></select>:<select path="::loadBalancerPort"/></set>
 			</success>
             <failure>
                <report entity="unit" level="error">
@@ -81,6 +80,35 @@
             </failure>
 		</update-cf-stack>
 	</rule>
+
+    <rule match="$[?(@.networking.state.ready_for_cf and @.networking.topology == 'routed')].services[?(@.type in ('webServerFarm', 'aspNetAppFarm') and @.assignFloatingIP and not @.floatingip)]"
+          desc="Web-farms services which have no floating assigned yet">
+        <report entity="unit">
+			<parameter name="id"><select path="id"/></parameter>
+			<parameter name="text">Assigning Floating IP to the to LB</parameter>
+		</report>
+		<update-cf-stack template="FloatingIPwithLB" result="outputs" error="exception">
+			<parameter name="mappings">
+				<map>
+                    <mapping name="lbName"><select path="name"/></mapping>
+                    <mapping name="externalNetworkId"><select path="/networking.floatingId"/></mapping>
+				</map>
+			</parameter>
+			<success>
+                <set path="floatingip"><select source="outputs"><parameter name="path"><select path="name"/>-FloatingIPaddress</parameter></select></set>
+				<report entity="unit">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Floating IP has been assigned to LB</parameter>
+				</report>
+			</success>
+            <failure>
+                <report entity="unit" level="error">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Unable to assign floating IP to <select path="name"/> due to <format-error error="exception"/></parameter>
+				</report>
+            </failure>
+		</update-cf-stack>
+    </rule>
 
 	<rule match="$.services[?(@.type in ('webServer', 'aspNetApp', 'webServerFarm', 'aspNetAppFarm') and @.adminPassword and @.adminPassword != @.state.adminPassword)].units[?(@.temp.instanceName)]"
             desc="Units of web services which have got an instance deployed but has not got a correct admin password ">

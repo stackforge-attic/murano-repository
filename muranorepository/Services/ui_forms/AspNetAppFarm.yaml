@@ -66,11 +66,6 @@ forms:
           maxValue: 100
           initial: 2
           helpText: Enter an integer value between 2 and 100
-        - name: loadBalancerIp
-          type: clusterip
-          label: Load Balancer VIP
-          description: Specify IP number where Load Balancer will be running
-          helpText: Enter an free IP address from the subnet where instances will be created
         - name: loadBalancerPort
           type: integer
           label: Load Balancer port
@@ -79,6 +74,15 @@ forms:
           initial: 80
           description: Specify port number where Load Balancer will be running
           helpText: Enter an integer value from 1 to 65536
+        - name: assignFloatingIP
+          type: floatingip
+          label: Assign Floating IP
+          description: >-
+             Select to true to assign floating IP automatically
+          initial: false
+          required: false
+          widgetMedia:
+            css: {all: [muranodashboard/css/checkbox.css]}
         - name: unitNamingPattern
           type: string
           label: Hostname template
