@@ -96,8 +96,8 @@ def upload_file_in_nested_path(data_type, path):
     api_utils.check_data_type(data_type)
 
     if data_type == MANIFEST:
-        make_response(_('It is forbidden to upload manifests to subfolders'),
-                      403)
+        return make_response(_('It is forbidden to upload '
+                               'manifests to subfolders'), 403)
     return api_utils.save_file(request, data_type, path)
 
 
@@ -109,8 +109,8 @@ def create_dirs(data_type, path):
     if os.path.exists(result_path):
         return resp
     if data_type == MANIFEST:
-        make_response(_('It is forbidden to create '
-                      'directories for manifest files'), 403)
+        return make_response(_('It is forbidden to create '
+                               'directories for manifest files'), 403)
     try:
         os.makedirs(result_path)
     except OSError:
