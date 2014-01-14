@@ -58,7 +58,7 @@ def enable_lazy():
 
 def _(msg):
     if USE_LAZY:
-        return Message(msg, 'savanna')
+        return Message(msg, 'murano')
     else:
         if six.PY3:
             return _t.gettext(msg)

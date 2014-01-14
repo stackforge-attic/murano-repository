@@ -254,7 +254,7 @@ class Archiver(object):
 
     def remove_existing_hash(self, cache_dir, hash):
         path = os.path.join(cache_dir, hash)
-        log.info('Deleting archive package from {0}.'.format(path))
+        log.info(_('Deleting archive package from {0}.'.format(path)))
         shutil.rmtree(path, ignore_errors=True)
 
     def extract(self, path_to_archive):
