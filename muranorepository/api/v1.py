@@ -226,10 +226,13 @@ def reset_caches():
 
 @v1_api.route('/admin/services/<service_name>', methods=['PUT'])
 def create_or_update_service(service_name):
+    if not request.data:
+        return make_response('JSON data expected', 400)
     try:
         service_data = json.loads(request.data)
     except:
-        return make_response('Unable to load json data', 500)
+        return make_response('Unable to load json data. Validate json object',
+                             400)
 
     service_id = service_data.get('full_service_name', service_name)
     #TODO: Pass service_name instead of service_id
