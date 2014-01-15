@@ -145,20 +145,28 @@ class ManifestParser(object):
                             '{0}-manifest.yaml'.format(service_name))
 
     def toggle_enabled(self, service_name):
+        """
+        :param service_name: string, name of the service
+        :return: Status code with operation result
+        """
         path_to_manifest = self._get_manifest_path(service_name)
-
-        if not path_to_manifest:
-            log.error(_("There is no manifest "
-                        "file for '{0}' service".format(service_name)))
-            return False
-        with open(path_to_manifest) as stream:
-            service_manifest_data = yaml.load(stream)
-        service_manifest_data['enabled'] = \
-            not service_manifest_data.get('enabled')
-        with open(path_to_manifest, 'w') as manifest_file:
-            manifest_file.write(yaml.dump(service_manifest_data,
-                                          default_flow_style=False))
-        return True
+        if not os.path.exists(path_to_manifest):
+            msg = _("There is no manifest "
+                    "file for '{0}' service".format(service_name))
+            log.exception(msg)
+            raise NameError(msg)
+        try:
+            with open(path_to_manifest) as stream:
+                service_manifest_data = yaml.load(stream)
+            enabled_value = not service_manifest_data.get('enabled')
+            service_manifest_data['enabled'] = enabled_value
+            with open(path_to_manifest, 'w') as manifest_file:
+                manifest_file.write(yaml.dump(service_manifest_data,
+                                              default_flow_style=False))
+        except IOError:
+            msg = _("Error during modifying '{0}'".format(path_to_manifest))
+            log.exception(msg)
+            raise Exception(msg)
 
     def update_service(self, service_name, data):
         path_to_manifest = self._get_manifest_path(service_name)

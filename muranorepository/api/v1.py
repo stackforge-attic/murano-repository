@@ -217,16 +217,17 @@ def delete_service(service_name):
 
 @v1_api.route('/admin/services/<service_name>/toggle_enabled',
               methods=['POST'])
-def toggleEnabled(service_name):
+def toggle_enabled(service_name):
     api_utils.check_service_name(service_name)
     parser = ManifestParser()
-    result = parser.toggle_enabled(service_name)
-    if result:
-        api_utils.reset_cache()
-        return jsonify(result='success')
-    else:
-        return make_response(_('Unable to toggle '
-                               'enable parameter for specified service'), 500)
+    try:
+        parser.toggle_enabled(service_name)
+    except NameError:
+        return make_response(_("'{0}' service is not "
+                               "defined".format(service_name)), 404)
+    except Exception:
+        return make_response(_('Error toggling service enabled'), 500)
+    return jsonify(result='success'),
 
 
 @v1_api.route('/admin/reset_caches', methods=['POST'])
