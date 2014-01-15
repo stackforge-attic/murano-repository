@@ -146,6 +146,7 @@ class ManifestParser(object):
 
     def toggle_enabled(self, service_name):
         path_to_manifest = self._get_manifest_path(service_name)
+
         if not path_to_manifest:
             log.error(_("There is no manifest "
                         "file for '{0}' service".format(service_name)))

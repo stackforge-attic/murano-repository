@@ -25,8 +25,9 @@ CONF = cfg.CONF
 def reset_cache():
     try:
         cache_dir = utils.get_cache_folder()
-        shutil.rmtree(cache_dir, ignore_errors=True)
-        os.mkdir(cache_dir)
+        if os.path.exists(cache_dir):
+            shutil.rmtree(cache_dir, ignore_errors=True)
+            os.mkdir(cache_dir)
     except:
         log.exception(_('Error while cleaning cache'))
         return make_response('Unable to reset cache', 500)
@@ -217,6 +218,9 @@ def save_archive(request):
 
 
 def create_or_update_service(service_id, data):
+    manifest_directory = utils.get_tenant_folder()
+    utils.check_tenant_dir_existence(manifest_directory)
+
     required = ['service_display_name']
     optional = {'enabled': True,
                 'version': 0.1,
@@ -232,7 +236,7 @@ def create_or_update_service(service_id, data):
         if not data.get(parameter):
             data[parameter] = optional[parameter]
 
-    path_to_manifest = os.path.join(utils.get_tenant_folder(),
+    path_to_manifest = os.path.join(manifest_directory,
                                     service_id + '-manifest.yaml')
 
     backup_done = False

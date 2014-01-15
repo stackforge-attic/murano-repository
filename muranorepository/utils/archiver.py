@@ -265,6 +265,7 @@ class Archiver(object):
         """
         try:
             root_folder = utils.get_tenant_folder()
+            utils.check_tenant_dir_existence(root_folder)
             path_to_extract = tempfile.mkdtemp()
             archive = tarfile.open(path_to_archive)
             try:
