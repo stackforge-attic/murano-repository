@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Approved+1: Timur Nurlygayanov <tnurlygayanov@mirantis.com>
+Code-Review+2: Timur Nurlygayanov <tnurlygayanov@mirantis.com>
+Code-Review+2: Ekaterina Fedorova <efedorova@mirantis.com>
+Verified+1: murano-ci
+Submitted-by: Jenkins
+Submitted-at: Mon, 20 Jan 2014 13:43:26 +0000
+Reviewed-on: https://review.openstack.org/67772
+Project: stackforge/murano-repository
+Branch: refs/heads/release-0.4
