@@ -48,6 +48,7 @@ LOG = log.getLogger(__name__)
 def main():
     dev_conf = os.path.join(possible_topdir,
                             'etc',
+                            'murano',
                             'murano-repository.conf')
     config_files = None
     if os.path.exists(dev_conf):
