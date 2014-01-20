@@ -66,11 +66,6 @@ forms:
           maxValue: 100
           initial: 2
           helpText: Enter an integer value between 2 and 100
-        - name: loadBalancerIp
-          type: clusterip
-          label: Load Balancer VIP
-          description: Specify IP number where Load Balancer will be running
-          helpText: Enter an free IP address from the subnet where instances will be created
         - name: loadBalancerPort
           type: integer
           label: Load Balancer port
