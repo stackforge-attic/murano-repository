@@ -52,6 +52,9 @@ def main():
     config_files = None
     if os.path.exists(dev_conf):
         config_files = [dev_conf]
+    else:
+        msg = 'Unable to locate config file for murano-repository'
+        raise RuntimeError(msg)
 
     cfg.parse_configs(sys.argv[1:], config_files)
     log.setup('muranorepository')
