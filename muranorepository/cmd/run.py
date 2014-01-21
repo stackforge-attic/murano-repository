@@ -53,6 +53,10 @@ def main():
     if os.path.exists(dev_conf):
         config_files = [dev_conf]
 
+    if not sys.argv[1:] and not config_files:
+        msg = 'Unable to locate paste config file for murano-repository.'
+        raise RuntimeError(msg)
+
     cfg.parse_configs(sys.argv[1:], config_files)
     log.setup('muranorepository')
 
