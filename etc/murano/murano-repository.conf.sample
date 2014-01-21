@@ -8,15 +8,15 @@ port = 8084
 # data_dir = /tmp/muranorepository-data
 
 # Show more verbose log output (sets INFO log level output)
-verbose = False
+verbose = True
 
 # Show debugging output in logs (sets DEBUG log level output)
-debug = False
+debug = True
 
-# Set up logging. Make sure the user has permissions to write to this file! To use syslog just set use_syslog parameter value to 'True'.
-log_file = /var/log/murano/murano-repository.log
-use_syslog=False
-syslog-log-facility=LOG_LOCAL0
+# Set up logging. To use syslog just set use_syslog parameter value to 'True'.
+log_file = /tmp/murano-repository.log
+use_syslog = False
+syslog-log-facility = LOG_LOCAL0
 
 # Provide information about data types
 # absolute or relative path to manifest location(root directory)
