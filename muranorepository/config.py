@@ -60,7 +60,7 @@ def parse_configs(argv=None, conf_files=None):
         global ARGV
         ARGV = argv
     try:
-        CONF(ARGV, project='murano_service', version="0.1",
+        CONF(ARGV, project='murano-repository', version='0.4.1',
              default_config_files=conf_files)
     except cfg.RequiredOptError as roe:
         raise RuntimeError("Option '%s' is required for config group "
