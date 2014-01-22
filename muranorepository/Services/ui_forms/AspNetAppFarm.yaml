@@ -74,6 +74,15 @@ forms:
           initial: 80
           description: Specify port number where Load Balancer will be running
           helpText: Enter an integer value from 1 to 65536
+        - name: assignFloatingIP
+          type: boolean
+          label: Assign Floating IP
+          description: >-
+             Select to true to assign floating IP automatically
+          initial: false
+          required: false
+          widgetMedia:
+            css: {all: [muranodashboard/css/checkbox.css]}
         - name: unitNamingPattern
           type: string
           label: Hostname template
