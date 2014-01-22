@@ -14,6 +14,9 @@
                     <set path="networking.routerId">
                         <select source="result" path="routerId"/>
                     </set>
+                    <set path="networking.floatingId">
+                        <select source="result" path="floatingId"/>
+                    </set>
 
                     <rule match="$[?(@.networking.routerId == 'NOT_FOUND')]"
                           desc="Router could not be found">
