@@ -64,6 +64,15 @@ forms:
           description: Set system administrator password for the MS SQL Server.
           helpText: SQL server System Administrator account
           required: {YAQL: $.serviceConfiguration.mixedModeAuth}
+        - name: assignFloatingIP
+          type: floatingip
+          label: Assign Floating IP
+          description: >-
+             Select to true to assign floating IP automatically
+          initial: false
+          required: false
+          widgetMedia:
+            css: {all: [muranodashboard/css/checkbox.css]}
         - name: unitNamingPattern
           type: string
           label: Hostname template

@@ -30,6 +30,7 @@ heat:
   - LinuxSecurity.template
   - TelnetSecurity.template
   - Keypair.template
+  - FloatingIP.template
 
 agent:
   - DeployTelnet.template
