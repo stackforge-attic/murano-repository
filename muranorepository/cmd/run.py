@@ -21,6 +21,7 @@ import eventlet
 import tempfile
 from eventlet import wsgi
 import gettext
+from muranorepository.openstack.common.gettextutils import _  # noqa
 # If ../murano_service/__init__.py exists, add ../ to Python search path,
 # so that it will override what happens to be installed in
 # /usr/(local/)lib/python...
@@ -52,6 +53,10 @@ def main():
     config_files = None
     if os.path.exists(dev_conf):
         config_files = [dev_conf]
+
+    if not sys.argv[1:] and not config_files:
+        msg = _('Unable to locate config file for murano-repository.')
+        raise RuntimeError(msg)
 
     cfg.parse_configs(sys.argv[1:], config_files)
     log.setup('muranorepository')
