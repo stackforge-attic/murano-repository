@@ -11,25 +11,25 @@
                         "CidrIp": "$cidr"
                     },
                     {
+                        "IpProtocol": "udp",
+                        "FromPort": "137",
+                        "ToPort": "137",
+                        "CidrIp": "$cidr"
+                    },
+                    {
                         "IpProtocol": "tcp",
-                        "FromPort": "1433",
-                        "ToPort": "1433",
-                        "CidrIp": "0.0.0.0/0"
+                        "FromPort": "3343",
+                        "ToPort": "3343",
+                        "CidrIp": "$cidr"
                     },
                     {
                         "IpProtocol": "udp",
-                        "FromPort": "1434",
-                        "ToPort": "1434",
+                        "FromPort": "3343",
+                        "ToPort": "3343",
                         "CidrIp": "$cidr"
                     },
                     {
-                        "IpProtocol": "tcp",
-                        "FromPort": "4022",
-                        "ToPort": "4022",
-                        "CidrIp": "$cidr"
-                    },
-                    {
-                        "IpProtocol": "tcp",
+                        "IpProtocol": "udp",
                         "FromPort": "49152",
                         "ToPort": "65535",
                         "CidrIp": "$cidr"
