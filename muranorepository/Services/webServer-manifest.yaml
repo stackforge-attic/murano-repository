@@ -30,6 +30,7 @@ heat:
   - DefaultSecurity.template
   - WindowsSecurity.template
   - WebServerSecurity.template
+  - FloatingIPwithoutLB.template
 
 agent:
   - SetPassword.template
