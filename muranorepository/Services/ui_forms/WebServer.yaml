@@ -44,6 +44,15 @@ forms:
             Service can be joined to the Active Directory domain. If you want to 
             create an AD domain create the AD Service first.
           helpText: Optional field for a domain to which service can be joined
+        - name: assignFloatingIP
+          type: boolean
+          label: Assign Floating IP
+          description: >-
+             Select to true to assign floating IP automatically
+          initial: false
+          required: false
+          widgetMedia:
+            css: {all: [muranodashboard/css/checkbox.css]}
         - name: unitNamingPattern
           type: string
           label: Hostname template
