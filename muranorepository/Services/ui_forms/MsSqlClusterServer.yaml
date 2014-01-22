@@ -94,6 +94,10 @@ forms:
           type: clusterip
           label: Cluster Static IP
           description: Specify a valid IPv4 fixed IP.
+          # temporaryHack
+          widgetMedia:
+            js: [muranodashboard/js/support_placeholder.js]
+            css: {all: [muranodashboard/css/support_placeholder.css]}
         - name: clusterName
           type: string
           label: Cluster Name
@@ -127,6 +131,10 @@ forms:
           errorMessages:
             invalid: Just letters, numbers, underscores and hyphens are allowed.
           description: User name that will be created to manage cluster instances.
+          # temporaryHack
+          widgetMedia:
+            js: [muranodashboard/js/support_placeholder.js]
+            css: {all: [muranodashboard/css/support_placeholder.css]}
         - name: sqlServicePassword
           type: password
           label: SQL User Password
