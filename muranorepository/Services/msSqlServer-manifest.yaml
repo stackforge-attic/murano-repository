@@ -31,6 +31,7 @@ heat:
   - DefaultSecurity.template
   - WindowsSecurity.template
   - SQL-security.template
+  - FloatingIP.template
 
 
 agent:

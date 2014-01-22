@@ -22,4 +22,36 @@
 		</rule>
 	</rule>
 
+    <rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type not in ('webServerFarm', 'aspNetAppFarm', 'msSqlClusterServer') and @.assignFloatingIP)].units[?(not @.temp.floatingIpAssigned)]"
+          desc="Units of non-farms services which have no floating assigned yet">
+        <report entity="unit">
+			<parameter name="id"><select path="id"/></parameter>
+			<parameter name="text">Assigning Floating IP to the application</parameter>
+		</report>
+		<update-cf-stack template="FloatingIP" result="outputs" error="exception">
+			<parameter name="mappings">
+				<map>
+                    <mapping name="instanceName"><select path="state.hostname"/></mapping>
+                    <mapping name="externalNetworkId"><select path="/networking.floatingId"/></mapping>
+                    <mapping name="instancePort">port-<select path="state.hostname"/></mapping>
+				</map>
+			</parameter>
+			<success>
+				<set path="temp.floatingIpAssigned"><true/></set>
+                 <set path="::floatingip"><select source="outputs"><parameter name="path"><select path="state.hostname"/>-FloatingIPaddress</parameter></select></set>
+				<report entity="unit">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Floating IP has been assigned to  <select path="state.hostname"/></parameter>
+				</report>
+			</success>
+            <failure>
+                <report entity="unit" level="error">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Unable to assign floating IP to instance <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/></parameter>
+				</report>
+                <stop/>
+            </failure>
+		</update-cf-stack>
+    </rule>
+
 </workflow>

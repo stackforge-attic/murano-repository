@@ -27,6 +27,15 @@ forms:
           hidden: true
           attributeNames: units
           initial: 1
+        - name: assignFloatingIP
+          type: boolean
+          label: Assign Floating IP
+          description: >-
+             Select to true to assign floating IP automatically
+          initial: false
+          required: false
+          widgetMedia:
+            css: {all: [muranodashboard/css/checkbox.css]}
         - name: unitNamingPattern
           type: string
           label: Hostname
