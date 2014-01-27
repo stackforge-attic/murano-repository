@@ -47,7 +47,7 @@
                         "CidrIp": "$cidr"
                     },
                     {
-                        "IpProtocol": "udo",
+                        "IpProtocol": "udp",
                         "FromPort": "137",
                         "ToPort": "137",
                         "CidrIp": "$cidr"
