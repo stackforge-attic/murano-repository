@@ -1,0 +1,17 @@
+{
+    "Resources": {
+        "$MuranoSecurityGroup-{envName}": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "5022",
+                        "ToPort": "5022",
+                        "CidrIp": "$cidr"
+                    }
+                ]
+            }
+        }
+    }
+}
