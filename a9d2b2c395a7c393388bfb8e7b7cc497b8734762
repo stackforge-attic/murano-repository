@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Approved+1: Dmitry Teselkin <dteselkin@mirantis.com>
+Code-Review+2: Dmitry Teselkin <dteselkin@mirantis.com>
+Verified+1: murano-ci
+Code-Review+2: Alexander Tivelkov <ativelkov@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Fri, 31 Jan 2014 08:11:00 +0000
+Reviewed-on: https://review.openstack.org/70159
+Project: stackforge/murano-repository
+Branch: refs/heads/release-0.4
