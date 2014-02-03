@@ -94,6 +94,10 @@ forms:
           type: clusterip
           label: Cluster Static IP
           description: Specify a valid IPv4 fixed IP.
+          # temporaryHack
+          widgetMedia:
+            js: [muranodashboard/js/support_placeholder.js]
+            css: {all: [muranodashboard/css/support_placeholder.css]}
         - name: clusterName
           type: string
           label: Cluster Name
@@ -127,6 +131,10 @@ forms:
           errorMessages:
             invalid: Just letters, numbers, underscores and hyphens are allowed.
           description: User name that will be created to manage cluster instances.
+          # temporaryHack
+          widgetMedia:
+            js: [muranodashboard/js/support_placeholder.js]
+            css: {all: [muranodashboard/css/support_placeholder.css]}
         - name: sqlServicePassword
           type: password
           label: SQL User Password
@@ -140,6 +148,15 @@ forms:
           attributeNames: false
           helpText: Enter an integer value between 2 and 5
           description: Microsoft SQL Failover Cluster includes up to 5 instances.
+        - name: assignFloatingIP
+          type: floatingip
+          label: Assign Floating IP
+          description: >-
+             Select to true to assign floating IP automatically
+          initial: false
+          required: false
+          widgetMedia:
+            css: {all: [muranodashboard/css/checkbox.css]}
         - name: unitNamingPattern
           type: string
           label: Hostname template

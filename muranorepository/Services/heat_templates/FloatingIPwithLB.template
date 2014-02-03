@@ -1,0 +1,23 @@
+{
+    "Resources": {
+       "${instanceName}-FloatingIP": {
+            "Type": "OS::Neutron::FloatingIP",
+            "Properties": {
+                "floating_network_id": "$externalNetworkId"
+            }
+        },
+        "${instanceName}-FloatingIpAssoc": {
+          "Type": "OS::Neutron::FloatingIPAssociation",
+          "Properties": {
+            "floatingip_id": { "Ref" : "${instanceName}-FloatingIP" },
+            "port_id": {"Fn::Select": ["port_id", {"Fn::GetAtt": ["${lbName}-Pool", "vip"]}]}
+          }
+        }
+    },
+    "Outputs": {
+        "${instanceName}-FloatingIPaddress": {
+            "Value":  {"Fn::GetAtt": ["${instanceName}-FloatingIP", "floating_ip_address"]},
+            "Description": "Floating IP assigned"
+        }
+    }
+}
