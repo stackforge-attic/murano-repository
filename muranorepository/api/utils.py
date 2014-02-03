@@ -228,7 +228,7 @@ def create_or_update_service(service_id, data):
                 'version': 0.1,
                 'description': '',
                 'author': '',
-                'service_version': ''}
+                'service_version': 1}
 
     for parameter in required:
         if not data.get(parameter):
