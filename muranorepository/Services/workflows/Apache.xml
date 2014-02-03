@@ -116,7 +116,7 @@
 				<select path="id"/>
 			</parameter>
 			<parameter name="text">
-				insatalling Apache on unit <select path="state.hostname"/> (<select path="name"/>)
+				Installing Apache on unit <select path="state.hostname"/> (<select path="name"/>)
 			</parameter>
 		</report>
 		<!-- Commands sequence -->
