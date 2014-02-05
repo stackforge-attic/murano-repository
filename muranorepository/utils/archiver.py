@@ -21,6 +21,7 @@ import yaml
 import logging as log
 from oslo.config import cfg
 from .parser import serialize
+from flask import make_response, jsonify
 from muranorepository.consts import DATA_TYPES, ARCHIVE_PKG_NAME
 from muranorepository.consts import UI, UI_FIELDS_IN_MANIFEST
 from muranorepository.utils import utils
@@ -261,7 +262,7 @@ class Archiver(object):
         """
         path_to_archive - path to archive to extract from
         ---
-        return value - True if succeeded , False otherwise
+        return value - response object
         """
         try:
             root_folder = utils.get_tenant_folder()
@@ -276,12 +277,14 @@ class Archiver(object):
             manifests = glob.glob(os.path.join(path_to_extract,
                                                '*-manifest.yaml'))
             if not manifests:
-                log.error(_('There is no manifest file in archive'))
-                return False
+                msg = _('There is no manifest file in archive')
+                log.error(msg)
+                return make_response(msg, 400)
             if len(manifests) != 1:
-                log.error(_('There are more then one manifest '
-                            'file in archive'))
-                return False
+                msg = _('There are more then one manifest '
+                        'file in archive')
+                log.error(msg)
+                return make_response(msg, 400)
 
             shutil.copy(manifests[0], root_folder)
             #Todo: Check manifest is valid
@@ -312,10 +315,14 @@ class Archiver(object):
                             _('Uploading archive contents folder {0} that does'
                               ' not correspond to supported data types: {1}. '
                               'It will be ignored'.format(item, DATA_TYPES)))
-            return True
+        except IOError as e:
+            log.exception(e)
+            return make_response(e.message, 403)
         except Exception:
-            log.exception(_('Unable to extract archive'))
-            return False
+            msg = _('Unable to extract archive')
+            log.exception(msg)
+            return make_response(msg, 500)
         finally:
             os.remove(path_to_archive)
             shutil.rmtree(path_to_extract, ignore_errors=True)
+        return jsonify(result='success')
