@@ -185,12 +185,9 @@ def upload_new_service():
         return make_response(_('Uploading file should be a tar.gz archive'),
                              400)
     archive_manager = Archiver()
-    result = archive_manager.extract(path_to_archive)
-    if result:
-        api_utils.reset_cache()
-        return jsonify(result='success')
-    else:
-        return make_response(_('Uploading file failed.'), 400)
+    resp = archive_manager.extract(path_to_archive)
+    api_utils.reset_cache()
+    return resp
 
 
 @v1_api.route('/admin/services/<service_name>', methods=['DELETE'])
