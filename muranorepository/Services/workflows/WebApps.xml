@@ -98,7 +98,7 @@
                 <set path="floatingip"><select source="outputs"><parameter name="path"><select path="name"/>-FloatingIPaddress</parameter></select></set>
 				<report entity="unit">
 					<parameter name="id"><select path="id"/></parameter>
-					<parameter name="text">Floating IP has been assigned to LB</parameter>
+					<parameter name="text">Assigning Floating IP to the to LB</parameter>
 				</report>
 			</success>
             <failure>
