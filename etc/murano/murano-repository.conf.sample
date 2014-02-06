@@ -16,7 +16,7 @@ debug = True
 # Set up logging. To use syslog just set use_syslog parameter value to 'True'.
 log_file = /tmp/murano-repository.log
 use_syslog = False
-syslog-log-facility = LOG_LOCAL0
+syslog_log_facility = LOG_LOCAL0
 
 # Provide information about data types
 # absolute or relative path to manifest location(root directory)
