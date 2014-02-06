@@ -85,7 +85,7 @@
           desc="Web-farms services which have no floating assigned yet">
         <report entity="unit">
 			<parameter name="id"><select path="id"/></parameter>
-			<parameter name="text">Floating IP is assigned to the LB</parameter>
+			<parameter name="text">Assigning Floating IP to the to LB</parameter>
 		</report>
 		<update-cf-stack template="FloatingIPwithLB" result="outputs" error="exception">
 			<parameter name="mappings">
@@ -98,7 +98,7 @@
                 <set path="floatingip"><select source="outputs"><parameter name="path"><select path="name"/>-FloatingIPaddress</parameter></select></set>
 				<report entity="unit">
 					<parameter name="id"><select path="id"/></parameter>
-					<parameter name="text">Floating IP has been assigned to LB</parameter>
+					<parameter name="text">Floating IP is assigned to the LB</parameter>
 				</report>
 			</success>
             <failure>
