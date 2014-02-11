@@ -50,3 +50,4 @@ auth_protocol = http
 admin_user = admin
 admin_password = swordfish
 admin_tenant_name = admin
+signing_dir = /tmp/keystone-signing-muranorepository
