@@ -1,0 +1,11 @@
+Verified+2: Jenkins
+Approved+1: Stan Lagun <slagun@mirantis.com>
+Code-Review+2: Stan Lagun <slagun@mirantis.com>
+Code-Review+1: Ekaterina Fedorova <efedorova@mirantis.com>
+Verified+1: murano-ci
+Code-Review+2: Alexander Tivelkov <ativelkov@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Fri, 14 Feb 2014 14:35:07 +0000
+Reviewed-on: https://review.openstack.org/72942
+Project: stackforge/murano-repository
+Branch: refs/heads/master
