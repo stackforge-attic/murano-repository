@@ -32,7 +32,7 @@ DESC="murano-repository"
 NAME=murano-repository
 DAEMON=$(which murano-repository)
 PIDFILE=/var/run/murano/$NAME.pid
-SCRIPTNAME=/etc/init.d/openstack-$NAME
+SCRIPTNAME=/etc/init.d/$NAME
 SYSTEM_USER=murano
 CONFIG_FILE=/etc/murano/murano-repository.conf
 LOCKFILE=/var/lock/subsys/$NAME
@@ -100,3 +100,4 @@ case "$1" in
         exit 2
 esac
 exit $?
+
