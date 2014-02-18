@@ -22,7 +22,7 @@
 		</rule>
 	</rule>
 
-    <rule match="$[?(@.networking.state.ready_for_cf and @.networking.topology == 'routed')].services[?(@.type not in ('webServerFarm', 'aspNetAppFarm') and @.assignFloatingIP)].units[?(not @.temp.floatingIpAssigned)]"
+    <rule match="$[?(@.networking.state.ready_for_cf and @.networking.topology == 'routed')].services[?(@.type not in ('webServerFarm', 'aspNetAppFarm', 'tomcat') and @.assignFloatingIP)].units[?(not @.temp.floatingIpAssigned)]"
           desc="Units of non-farms services which have no floating assigned yet">
         <report entity="unit">
 			<parameter name="id"><select path="id"/></parameter>

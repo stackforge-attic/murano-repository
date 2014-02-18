@@ -1,0 +1,44 @@
+version: 0.1
+service_display_name: Tomcat
+
+description: >-
+   <strong> Tomcat application
+
+full_service_name: tomcat
+author: Mirantis Inc.
+service_version: 1
+enabled: True
+
+ui:
+  - Tomcat.yaml
+
+workflows:
+  - Tomcat.xml
+  - Networking.xml
+
+heat:
+  - Linux.template
+  - LinuxSecurity.template
+  - TomcatSecurity.template
+  - InstancePort.template
+  - InstancePortWSubnet.template
+  - Network.template
+  - NNSecurity.template
+  - Param.template
+  - RouterInterface.template
+  - Subnet.template
+  - DefaultSecurity.template
+  - Keypair.template
+  - LoadBalancer.template
+  - FloatingIP.template
+  - FloatingIPwithLB.template
+
+agent:
+  - DeployTomcat.template
+  - DeployTomcatApp.template
+
+scripts:
+ - Linux/common.sh
+ - Linux/installer.sh
+ - Linux/deployTomcat.sh
+ - Linux/deployTomcatApp.sh
