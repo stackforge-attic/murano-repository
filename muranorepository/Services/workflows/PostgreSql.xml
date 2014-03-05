@@ -1,0 +1,269 @@
+<workflow>
+
+	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'postgreSql' and @.keyPair)].units[?(@.state.hostname and not @.temp.KeyPairMapping)]"
+		desc="This rule allows to set Key Pair for all VMs with this service">
+		<update-cf-stack template="Keypair" error="exception">
+			<parameter name="mappings">
+				<map>
+					<mapping name="instanceName"><select path="state.hostname"/></mapping>
+					<mapping name="keyName"><select path="::keyPair"/></mapping>
+				</map>
+			</parameter>
+			<success>
+				<set path="temp.KeyPairMapping"><true/></set>
+			</success>
+			<failure>
+				<report entity="unit" level="error">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Unable to assign Key Pair on unit <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/></parameter>
+				</report>
+				<stop/>
+			</failure>
+		</update-cf-stack>
+	</rule>
+
+	<!-- Provisioning rules -->
+    <rule match="$.services[?(@.type == 'postgreSql' and not @.securityTemplates)]">
+        <set path="securityTemplates">
+            <list>
+                <text>LinuxSecurity</text>
+                <text>PostgreSqlSecurity</text>
+            </list>
+        </set>
+    </rule>
+
+
+	<rule match="$[?(@.networking.state.ready_for_cf)].services[?(@.type == 'postgreSql')].units[?(@.state.hostname and not @.temp.instanceName)]"
+		desc="Units of PostgreSql service having hostname and image names assigned but without instances">
+		<report entity="unit">
+			<parameter name="id"><select path="id"/></parameter>
+			<parameter name="text">
+				Creating Linux instance <select path="state.hostname"/> (<select path="name"/>)
+			</parameter>
+		</report>
+		<!-- HEAT rules definitions -->
+		<!-- Rule #1 -->
+		<update-cf-stack template="Linux" error="exception">
+			<parameter name="mappings">
+				<map>
+					<mapping name="instanceName">
+						<select path="state.hostname"/>
+					</mapping>
+					<mapping name="userData">
+						<prepare-user-data template="Linux" initFile="linux_init.sh">
+							<parameter name="hostname">
+								<select path="state.hostname"/>
+							</parameter>
+							<parameter name="unit">
+								<select path="id"/>
+							</parameter>
+							<parameter name="service">
+								<select path="::id"/>
+							</parameter>
+						</prepare-user-data>
+					</mapping>
+					<mapping name="instanceType">
+						<select path="::flavor" default="m1.medium"/>
+					</mapping>
+					<mapping name="imageName">
+						<select path="::osImage.name"/>
+					</mapping>
+					<mapping name="availabilityZone">
+						<select path="::availabilityZone" default="nova"/>
+					</mapping>
+				</map>
+			</parameter>
+			<success>
+				<set path="temp.instanceName">
+					<select path="name"/>
+				</set>
+				<report entity="unit">
+					<parameter name="id">
+						<select path="id"/>
+					</parameter>
+					<parameter name="text">
+						Linux instance <select path="state.hostname"/> (<select path="name"/>) created
+					</parameter>
+				</report>
+			</success>
+		<failure>
+		<report entity="unit" level="error">
+			<parameter name="id">
+				<select path="id"/>
+			</parameter>
+			<parameter name="text">
+				Unable to deploy Linux instance <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/>
+			</parameter>
+		</report>
+		<stop/>
+		</failure>
+		</update-cf-stack>
+		<!-- Rule #2 -->
+		<report entity="unit">
+			<parameter name="id">
+				<select path="id"/>
+			</parameter>
+			<parameter name="text">
+				Configuring security groups on <select path="state.hostname"/> (<select path="name"/>)
+			</parameter>
+		</report>
+	</rule>
+	<!-- Agent rules -->
+	<rule match="$.services[?(@.type == 'postgreSql')].units[?(@.temp.instanceName and not @.state.PostgreSQLInstalled)]"
+			desc="Units of PostgreSql service which have got an instance deployed but have not got PostgreSQL service installed">
+		<report entity="unit">
+			<parameter name="id">
+				<select path="id"/>
+			</parameter>
+			<parameter name="text">
+				Installing PostgreSql on unit <select path="state.hostname"/> (<select path="name"/>)
+			</parameter>
+		</report>
+		<!-- Commands sequence -->
+		<!-- Command #1-->
+		<send-command template="DeployPostgreSql" error="exception">
+			<parameter name="unit">
+				<select path="id"/>
+			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
+			</parameter>
+			<success>
+				<set path="state.PostgreSQLInstalled"><true/></set>
+				<report entity="unit">
+					<parameter name="id">
+						<select path="id"/>
+					</parameter>
+					<parameter name="text">
+						PostgreSql deployed on <select path="state.hostname"/> (<select path="name"/>)
+					</parameter>
+				</report>
+			</success>
+			<failure>
+				<report entity="unit" level="error">
+					<parameter name="id">
+						<select path="id"/>
+					</parameter>
+					<parameter name="text">
+						Unable to deploy PostgreSql on <select path="state.hostname"/> (<select path="name"/>) due to <format-error error="exception"/>
+					</parameter>
+				</report>
+				<stop/>
+			</failure>
+		</send-command>
+	</rule>
+
+
+    <rule match="$.services[?(@.type == 'postgreSql')].units[?(@.state.PostgreSQLInstalled and not @.state.databaseConfigured)]"
+            desc="Units of PostgreSQL which have got PostgreSQL installed but database is not yet created">
+		<report entity="unit">
+			<parameter name="id"><select path="id"/></parameter>
+			<parameter name="text">Configuring database <select path="::database"/> on unit <select path="state.hostname"/> (<select path="name"/>)</parameter>
+		</report>
+		<send-command template="ConfigurePostgreSqlDatabase" error="exception">
+			<parameter name="unit">
+				<select path="id"/>
+			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
+			</parameter>
+            <parameter name="mappings">
+				<map>
+					<mapping name="database">
+						<select path="::database"/>
+					</mapping>
+                    <mapping name="username">
+						<select path="::username"/>
+					</mapping>
+                    <mapping name="password">
+						<select path="::password"/>
+					</mapping>
+				</map>
+			</parameter>
+			<success>
+				<set path="state.databaseConfigured"><true/></set>
+				<report entity="unit">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Database <select path="::database"/> has been configured on unit <select path="state.hostname"/> (<select path="name"/>)</parameter>
+				</report>
+			</success>
+            <failure>
+                <report entity="unit" level="error">
+					<parameter name="id"><select path="id"/></parameter>
+					<parameter name="text">Unable to configure database on <select path="state.hostname"/> (<select path="name"/>) <format-error error="exception"/></parameter>
+				</report>
+                <stop/>
+            </failure>
+		</send-command>
+	</rule>
+
+    <rule match="$.services[?(@.type == 'postgreSql')].units[?(@.temp.instanceName and not @.state.unitIp)]"
+			desc="Units of PostgreSql service which have got an instance deployed">
+		<send-command template="GetIP" result="ip" error="exception">
+			<parameter name="unit">
+				<select path="id"/>
+			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
+			</parameter>
+			<success>
+				<set path="state.unitIp"><select source="ip" path="0" /></set>
+				<set path="::databaseHost"><select source="ip" path="0" /></set>
+			</success>
+		</send-command>
+	</rule>
+
+    <rule match="$.services[?(@.type == 'tomcat' and @.psqlDatabase)].units[?(not @.database)]"
+          desc="Reinitialize units with database">
+		<set path="database">
+			<select path="::psqlDatabase"/>
+		</set>
+	</rule>
+
+	<rule match="$.services[?(@.type == 'postgreSql')].units[?(@.state.unitIp and @.state.PostgreSQLInstalled and @.state.databaseConfigured)]">
+		<set path="#currentDatabase">
+			<select path="::"/>
+		</set>
+		<rule>
+			<parameter name="match">/$.services[?(@.type == 'tomcat' and @.psqlDatabase == '<select path="id" source="currentDatabase"/>')].units[?(@.temp.instanceName and not @.state.database)]</parameter>
+			<send-command template="ConfigureAccessToPostgreSql" error="exception">
+				<parameter name="unit">
+					<select path="id"/>
+				</parameter>
+				<parameter name="service">
+					<select path="::id"/>
+				</parameter>
+				<parameter name="mappings">
+					<map>
+                        <mapping name="database">
+                            <select path="database" source="currentDatabase"/>
+                        </mapping>
+                        <mapping name="username">
+                            <select path="username" source="currentDatabase"/>
+                        </mapping>
+                        <mapping name="password">
+                            <select path="password" source="currentDatabase"/>
+                        </mapping>
+                        <mapping name="databaseHost">
+                            <select path="databaseHost" source="currentDatabase"/>
+                        </mapping>
+					</map>
+				</parameter>
+				<success>
+					<set path="state.database"><select path="database" source="currentDatabase"/></set>
+					<report entity="unit">
+						<parameter name="id"><select path="id"/></parameter>
+						<parameter name="text">Unit <select path="state.hostname"/> has been configured to work with database <select path="database"/></parameter>
+					</report>
+				</success>
+				<failure>
+					<report entity="unit" level="error">
+						<parameter name="id"><select path="id"/></parameter>
+						<parameter name="text">Unable to configure unit <select path="state.hostname"/> to work with database <select path="database"/> due to <format-error error="exception"/></parameter>
+					</report>
+					<stop/>
+				</failure>
+			</send-command>
+		</rule>
+	</rule>
+</workflow>
