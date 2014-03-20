@@ -22,6 +22,7 @@ server_opts = [
 ]
 
 cache_opt = cfg.StrOpt('data_dir')
+ha_opt = cfg.ListOpt('ha_nodes', default=None)
 
 keystone_opts = [
     cfg.StrOpt('auth_host', default='localhost'),
@@ -45,7 +46,11 @@ CONF.register_cli_opts(server_opts)
 CONF.register_opts(type_dirs_opts)
 CONF.register_opts(type_dirs_opts, group='output')
 CONF.register_opts(keystone_opts, group='keystone')
-CONF.register_opt(cache_opt)
+# Cache path is CLI opt so "data_dir" may be specified as command line arg
+# This is useful for HA-testing to run several instances localy on different
+# folders
+CONF.register_cli_opt(cache_opt)
+CONF.register_opt(ha_opt)
 
 ARGV = []
 
