@@ -19,6 +19,7 @@ from flask import Blueprint, send_file
 from flask import jsonify, request, abort
 from flask import make_response
 from muranorepository.api import utils as api_utils
+from muranorepository.api import ha_sync as ha
 from muranorepository.utils.parser import ManifestParser
 from muranorepository.utils.archiver import Archiver
 from muranorepository.consts import DATA_TYPES, MANIFEST
@@ -75,6 +76,7 @@ def get_data_type_locations(data_type):
 
 
 @v1_api.route('/admin/<data_type>', methods=['POST'])
+@ha.synchronized
 def upload_file(data_type):
     api_utils.check_data_type(data_type)
     filename = request.args.get('filename')
@@ -93,6 +95,7 @@ def get_locations_in_nested_path_or_get_file(data_type, path):
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['POST'])
+@ha.synchronized
 def upload_file_in_nested_path(data_type, path):
     api_utils.check_data_type(data_type)
 
@@ -103,6 +106,7 @@ def upload_file_in_nested_path(data_type, path):
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['PUT'])
+@ha.synchronized
 def create_dirs(data_type, path):
     api_utils.check_data_type(data_type)
     result_path = api_utils.compose_path(data_type, path)
@@ -121,6 +125,7 @@ def create_dirs(data_type, path):
 
 
 @v1_api.route('/admin/<data_type>/<path:path>', methods=['DELETE'])
+@ha.synchronized
 def delete_directory_or_file(data_type, path):
     api_utils.check_data_type(data_type)
     result_path = api_utils.compose_path(data_type, path)
@@ -179,6 +184,7 @@ def get_service_info(service_name):
 
 
 @v1_api.route('/admin/services', methods=['POST'])
+@ha.synchronized
 def upload_new_service():
     path_to_archive = api_utils.save_archive(request)
     if not tarfile.is_tarfile(path_to_archive):
@@ -194,6 +200,7 @@ def upload_new_service():
 
 
 @v1_api.route('/admin/services/<service_name>', methods=['DELETE'])
+@ha.synchronized
 def delete_service(service_name):
     api_utils.check_service_name(service_name)
     manifests = ManifestParser().parse()
@@ -218,6 +225,7 @@ def delete_service(service_name):
 
 @v1_api.route('/admin/services/<service_name>/toggle_enabled',
               methods=['POST'])
+@ha.synchronized
 def toggle_enabled(service_name):
     api_utils.check_service_name(service_name)
     parser = ManifestParser()
@@ -226,18 +234,20 @@ def toggle_enabled(service_name):
     except NameError:
         return make_response(_("'{0}' service is not "
                                "defined".format(service_name)), 404)
-    except Exception:
+    except Exception as e:
         return make_response(_('Error toggling service enabled'), 500)
     return jsonify(result='success'),
 
 
 @v1_api.route('/admin/reset_caches', methods=['POST'])
+@ha.synchronized
 def reset_caches():
     api_utils.reset_cache()
     return jsonify(result='success')
 
 
 @v1_api.route('/admin/services/<service_name>', methods=['PUT'])
+@ha.synchronized
 def create_or_update_service(service_name):
     if not request.data:
         return make_response(_('JSON data expected', 400))
