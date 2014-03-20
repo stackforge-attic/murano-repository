@@ -37,7 +37,7 @@ forms:
             register, a number and a special character. Password length should be 
             a minimum of 7 characters.
         - name: domain
-          type: domain
+          type: com.mirantis.windows.ActiveDirectory
           label: Domain
           required: false
           description: >-
@@ -47,8 +47,7 @@ forms:
         - name: assignFloatingIP
           type: floatingip
           label: Assign Floating IP
-          description: >-
-             Select to true to assign floating IP automatically
+          description: Toggle check to assign floating IP automatically.
           initial: false
           required: false
           widgetMedia:
