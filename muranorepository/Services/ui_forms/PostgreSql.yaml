@@ -33,8 +33,7 @@ forms:
         - name: assignFloatingIP
           type: floatingip
           label: Assign Floating IP
-          description: >-
-             Select to true to assign floating IP automatically
+          description: Toggle check to assign floating IP automatically.
           initial: false
           required: false
           widgetMedia:
