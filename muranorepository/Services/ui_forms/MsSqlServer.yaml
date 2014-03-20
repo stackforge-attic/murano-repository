@@ -68,7 +68,8 @@ forms:
           type: floatingip
           label: Assign Floating IP
           description: >-
-             Select to true to assign floating IP automatically
+             Toggle check to assign floating IP automatically. Works
+             only for routed network topology.
           initial: false
           required: false
           widgetMedia:
