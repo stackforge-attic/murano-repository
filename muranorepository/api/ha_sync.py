@@ -40,11 +40,8 @@ def synchronized(func):
 
 def _get_slave_nodes():
     slaves = []
-    if CONF.host != '0.0.0.0':
-        names_of_this = _get_local_ips()
-        names_of_this.append(socket.gethostname())
-    else:
-        names_of_this = []
+    names_of_this = _get_local_ips()
+    names_of_this.append(socket.gethostname())
     names_of_this.append('localhost')
     for node in CONF.ha_nodes:
         host, port = node.split(":")
@@ -72,7 +69,9 @@ class RequestData(object):
         self.data = copy.copy(req.data)
         request_data = getattr(req, "__uploaded_data", None)
         if request_data:
-            self.data = io.BytesIO(request_data)
+            self.file_data = copy.copy(request_data)
+        else:
+            self.file_data = None
 
 
 def _sync(request_data):
@@ -86,6 +85,10 @@ def _sync(request_data):
 
         for host, port in _get_slave_nodes():
             log.debug("Syncing with %s:%s", host, port)
+            if request_data.file_data:
+                data = io.BytesIO(request_data.file_data)
+            else:
+                data = request_data.data
             try:
                 client = http.HTTPClient(
                     endpoint="http://{0}:{1}".format(host, port),
@@ -93,7 +96,7 @@ def _sync(request_data):
                 client.raw_request(request_data.method,
                                    request_data.path,
                                    headers=request_data.headers,
-                                   body=request_data.data)
+                                   body=data)
             except Exception as e:
                 log.warn("Unable to sync")
                 log.exception(e)
