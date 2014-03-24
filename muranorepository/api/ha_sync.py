@@ -40,11 +40,8 @@ def synchronized(func):
 
 def _get_slave_nodes():
     slaves = []
-    if CONF.host != '0.0.0.0':
-        names_of_this = _get_local_ips()
-        names_of_this.append(socket.gethostname())
-    else:
-        names_of_this = []
+    names_of_this = _get_local_ips()
+    names_of_this.append(socket.gethostname())
     names_of_this.append('localhost')
     for node in CONF.ha_nodes:
         host, port = node.split(":")
