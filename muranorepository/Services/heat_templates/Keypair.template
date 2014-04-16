@@ -1,9 +1,0 @@
-{
-    "Resources": {
-        "$instanceName": {
-            "Properties": {
-                "KeyName": "$keyName"
-            }
-        }
-    }
-}
